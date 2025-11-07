@@ -1,0 +1,33 @@
+{
+  "dataset": "Barnes",
+  "instance": "mt10xyz.fjs",
+  "meta_heuristic": "HA(GA+TS)",
+  "execution_times": 20,
+  "max_iterations": 100,
+  "initialization_methods": {
+    "heuristic": {
+      "mean": 1052.5,
+      "std": 31.514282476363,
+      "min": 996,
+      "max": 1108,
+      "avg_convergence_generation": 20.95,
+      "convergence_generation_std": 10.929203996632141
+    },
+    "mixed": {
+      "mean": 1078.6,
+      "std": 21.303520835767966,
+      "min": 1049,
+      "max": 1131,
+      "avg_convergence_generation": 20.85,
+      "convergence_generation_std": 10.026340309405022
+    },
+    "random": {
+      "mean": 936.15,
+      "std": 22.985375785485868,
+      "min": 893,
+      "max": 981,
+      "avg_convergence_generation": 20.9,
+      "convergence_generation_std": 13.816294727603346
+    }
+  }
+}

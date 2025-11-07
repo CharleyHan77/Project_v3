@@ -1,0 +1,34 @@
+{
+  "dataset": "Kacem",
+  "sub_directory": null,
+  "instance": "Kacem5.fjs",
+  "meta_heuristic": "HA(GA+TS)",
+  "execution_times": 20,
+  "max_iterations": 100,
+  "initialization_methods": {
+    "heuristic": {
+      "mean": 20.75,
+      "std": 1.1779218989389746,
+      "min": 18,
+      "max": 22,
+      "avg_convergence_generation": 10.05,
+      "convergence_generation_std": 9.286953214052497
+    },
+    "mixed": {
+      "mean": 34.4,
+      "std": 2.8000000000000003,
+      "min": 29,
+      "max": 39,
+      "avg_convergence_generation": 18.9,
+      "convergence_generation_std": 13.412307780542466
+    },
+    "random": {
+      "mean": 30.0,
+      "std": 1.9235384061671346,
+      "min": 25,
+      "max": 33,
+      "avg_convergence_generation": 25.35,
+      "convergence_generation_std": 11.332585759657855
+    }
+  }
+}

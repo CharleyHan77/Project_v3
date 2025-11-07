@@ -1,0 +1,23 @@
+{
+    "fjs_root_path": "/workspace/Project/dataset",
+    "label_root_path": "/workspace/Project/init_validity_result",
+    "label_name": "mean",
+    "train_ratio": 0.8,
+    "model_name": "NNConv_Mean_Pooling",
+    "node_features": 4,
+    "edge_features": 2,
+    "hidden_dim": 64,
+    "num_classes": 3,
+    "epochs": 40,
+    "batch_size": 32,
+    "accumulation_steps": 32,
+    "lr": 0.0001,
+    "weight_decay": 0.0005,
+    "patience": 10,
+    "seed": 42,
+    "no_cuda": false,
+    "num_workers": 4,
+    "log_interval": 5,
+    "save_interval": 10,
+    "save_dir": "./checkpoints"
+}

@@ -1,0 +1,33 @@
+{
+  "dataset": "Brandimarte",
+  "instance": "Mk02.fjs",
+  "meta_heuristic": "HA(GA+TS)",
+  "execution_times": 20,
+  "max_iterations": 100,
+  "initialization_methods": {
+    "heuristic": {
+      "mean": 38.0,
+      "std": 2.0248456731316584,
+      "min": 34,
+      "max": 42,
+      "avg_convergence_generation": 21.6,
+      "convergence_generation_std": 7.8
+    },
+    "mixed": {
+      "mean": 43.3,
+      "std": 2.0760539492026697,
+      "min": 40,
+      "max": 49,
+      "avg_convergence_generation": 25.45,
+      "convergence_generation_std": 13.904945163502084
+    },
+    "random": {
+      "mean": 37.15,
+      "std": 2.1041625412500813,
+      "min": 35,
+      "max": 42,
+      "avg_convergence_generation": 27.15,
+      "convergence_generation_std": 14.15017667734223
+    }
+  }
+}

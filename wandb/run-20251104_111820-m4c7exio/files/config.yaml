@@ -1,0 +1,34 @@
+_wandb:
+    value:
+        cli_version: 0.22.3
+        e:
+            5z676hodlk26iyt514y7m615zk7xwsa9:
+                codePath: run_wandb.py
+                codePathLocal: run_wandb.py
+                email: disparity_han@163.com
+                executable: /opt/conda/envs/gnn-v3/bin/python
+                host: 9b5199c00c0e
+                os: Linux-3.10.0-1160.el7.x86_64-x86_64-with-glibc2.10
+                program: run_wandb.py
+                python: CPython 3.8.6
+                root: /workspace/Project_v3
+                startedAt: "2025-11-04T11:18:20.914588Z"
+                writerId: 5z676hodlk26iyt514y7m615zk7xwsa9
+        m: []
+        python_version: 3.8.6
+        t:
+            "3":
+                - 2
+                - 16
+            "4": 3.8.6
+            "5": 0.22.3
+            "12": 0.22.3
+            "13": linux-x86_64
+architecture:
+    value: CNN
+dataset:
+    value: CIFAR-100
+epochs:
+    value: 10
+learning_rate:
+    value: 0.02

@@ -1,0 +1,33 @@
+{
+  "dataset": "fattahi",
+  "instance": "Fattahi5.fjs",
+  "meta_heuristic": "HA(GA+TS)",
+  "execution_times": 20,
+  "max_iterations": 100,
+  "initialization_methods": {
+    "heuristic": {
+      "mean": 119.0,
+      "std": 0.0,
+      "min": 119,
+      "max": 119,
+      "avg_convergence_generation": 11.35,
+      "convergence_generation_std": 6.901267999433148
+    },
+    "mixed": {
+      "mean": 122.15,
+      "std": 4.2927264063762545,
+      "min": 119,
+      "max": 128,
+      "avg_convergence_generation": 11.25,
+      "convergence_generation_std": 8.836713189868732
+    },
+    "random": {
+      "mean": 119.0,
+      "std": 0.0,
+      "min": 119,
+      "max": 119,
+      "avg_convergence_generation": 8.75,
+      "convergence_generation_std": 6.984804936431654
+    }
+  }
+}

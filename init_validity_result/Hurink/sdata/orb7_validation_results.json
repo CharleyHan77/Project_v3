@@ -1,0 +1,34 @@
+{
+  "dataset": "Hurink",
+  "sub_directory": "sdata",
+  "instance": "orb7.fjs",
+  "meta_heuristic": "HA(GA+TS)",
+  "execution_times": 20,
+  "max_iterations": 100,
+  "initialization_methods": {
+    "heuristic": {
+      "mean": 508.35,
+      "std": 29.034935853209667,
+      "min": 458,
+      "max": 559,
+      "avg_convergence_generation": 20.05,
+      "convergence_generation_std": 9.052485846440192
+    },
+    "mixed": {
+      "mean": 513.0,
+      "std": 18.2208671582886,
+      "min": 482,
+      "max": 542,
+      "avg_convergence_generation": 23.35,
+      "convergence_generation_std": 10.016361614877928
+    },
+    "random": {
+      "mean": 440.9,
+      "std": 13.856045611934164,
+      "min": 421,
+      "max": 467,
+      "avg_convergence_generation": 17.9,
+      "convergence_generation_std": 7.712976079309464
+    }
+  }
+}

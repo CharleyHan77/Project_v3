@@ -1,0 +1,33 @@
+{
+  "dataset": "BehnkeGeiger",
+  "instance": "Behnke28.fjs",
+  "meta_heuristic": "HA(GA+TS)",
+  "execution_times": 20,
+  "max_iterations": 100,
+  "initialization_methods": {
+    "heuristic": {
+      "mean": 149.1,
+      "std": 6.28410693734599,
+      "min": 138,
+      "max": 162,
+      "avg_convergence_generation": 16.4,
+      "convergence_generation_std": 10.933434958877289
+    },
+    "mixed": {
+      "mean": 189.25,
+      "std": 7.320348352366846,
+      "min": 177,
+      "max": 206,
+      "avg_convergence_generation": 28.6,
+      "convergence_generation_std": 15.994999218505763
+    },
+    "random": {
+      "mean": 183.8,
+      "std": 6.185466837676845,
+      "min": 172,
+      "max": 193,
+      "avg_convergence_generation": 27.0,
+      "convergence_generation_std": 14.979986648859205
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "os":  "Linux-3.10.0-1160.el7.x86_64-x86_64-with-glibc2.10",
+  "python":  "CPython 3.8.6",
+  "startedAt":  "2025-11-04T11:18:20.914588Z",
+  "program":  "run_wandb.py",
+  "codePath":  "run_wandb.py",
+  "codePathLocal":  "run_wandb.py",
+  "email":  "disparity_han@163.com",
+  "root":  "/workspace/Project_v3",
+  "host":  "9b5199c00c0e",
+  "executable":  "/opt/conda/envs/gnn-v3/bin/python",
+  "writerId":  "5z676hodlk26iyt514y7m615zk7xwsa9"
+}

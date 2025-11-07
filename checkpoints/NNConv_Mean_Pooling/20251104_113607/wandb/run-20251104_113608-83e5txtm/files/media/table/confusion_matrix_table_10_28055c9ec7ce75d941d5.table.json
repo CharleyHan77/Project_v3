@@ -1,0 +1,1 @@
+{"columns": ["Actual", "Predicted", "nPredictions"], "data": [["heuristic", "heuristic", 0.0], ["heuristic", "mixed", 5.0], ["heuristic", "random", 5.0], ["mixed", "heuristic", 0.0], ["mixed", "mixed", 0.0], ["mixed", "random", 0.0], ["random", "heuristic", 10.0], ["random", "mixed", 3.0], ["random", "random", 57.0]]}

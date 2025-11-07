@@ -1,0 +1,34 @@
+{
+  "dataset": "Dauzere",
+  "sub_directory": null,
+  "instance": "16a.fjs",
+  "meta_heuristic": "HA(GA+TS)",
+  "execution_times": 20,
+  "max_iterations": 100,
+  "initialization_methods": {
+    "heuristic": {
+      "mean": 3499.0,
+      "std": 92.34121506672955,
+      "min": 3324,
+      "max": 3764,
+      "avg_convergence_generation": 16.55,
+      "convergence_generation_std": 7.317615731917056
+    },
+    "mixed": {
+      "mean": 3485.05,
+      "std": 87.11686116935113,
+      "min": 3340,
+      "max": 3646,
+      "avg_convergence_generation": 22.4,
+      "convergence_generation_std": 16.635504200354134
+    },
+    "random": {
+      "mean": 2718.5,
+      "std": 40.17275195950609,
+      "min": 2674,
+      "max": 2833,
+      "avg_convergence_generation": 34.05,
+      "convergence_generation_std": 15.454691844226465
+    }
+  }
+}
