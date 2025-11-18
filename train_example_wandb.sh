@@ -20,7 +20,7 @@ MODEL_NAME="NNConv_Mean_Pooling"
 # 训练参数
 EPOCHS=100
 ACCUMULATION_STEPS=32  # 梯度累积步数，模拟batch_size=32的效果
-LEARNING_RATE=0.01
+LEARNING_RATE=0.001
 HIDDEN_DIM=64
 
 # 运行训练
