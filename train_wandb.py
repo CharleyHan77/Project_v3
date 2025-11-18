@@ -67,6 +67,15 @@ class Trainer:
             },
             dir=self.save_path  # wandb 日志保存到相同目录
         )
+
+        if args.num_classes == 8:
+            self.class_names = ['FIFO_SPT', 'FIFO_EET', 'MOPNR_SPT', 'MOPNR_EET', 
+                               'LWKR_SPT', 'LWKR_EET', 'MWKR_SPT', 'MWKR_EET']
+        elif args.num_classes == 3:
+            self.class_names = ['heuristic', 'mixed', 'random']
+        else:
+            # 对于其他类别数，使用通用名称
+            self.class_names = [f'class_{i}' for i in range(args.num_classes)]
         
         # 加载数据集
         print(f"正在加载数据集...")
@@ -201,8 +210,8 @@ class Trainer:
             ############################ 分类/回归 标签转换 ############################
             
             # 将性能值标签转换为分类标签（选择性能最小的方法）
-            # label shape: [3] -> [heuristic性能, mixed性能, random性能]
-            # 性能值越小越好，所以用argmin得到最优方法的索引
+            # output shape: [1, num_classes] -> [1, 8]（8种初始化方法的概率分布）
+            # label shape: [8] -> [FIFO_SPT, FIFO_EET, MOPNR_SPT, MOPNR_EET, LWKR_SPT, LWKR_EET, MWKR_SPT, MWKR_EET的性能]
             # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
             class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
             
@@ -431,12 +440,20 @@ class Trainer:
     
     def plot_confusion_matrix(self, conf_matrix, epoch):
         """绘制混淆矩阵热力图"""
-        class_names = ['heuristic', 'mixed', 'random']
+        # 修改：使用实例变量
+        class_names = self.class_names
         
-        plt.figure(figsize=(10, 8))
+        # 根据类别数量动态调整图表大小
+        fig_size = max(10, len(class_names) * 1.5)
+        plt.figure(figsize=(fig_size, fig_size * 0.8))
+        
+        # 使用更小的字体以适应更多类别
+        annot_fontsize = 10 if len(class_names) <= 3 else 8
+    
         sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', 
                     xticklabels=class_names, yticklabels=class_names,
-                    cbar_kws={'label': 'Count'})
+                    cbar_kws={'label': 'Count'},
+                    annot_kws={'size': annot_fontsize})
         
         # 根据epoch参数设置标题和文件名
         if epoch == 'final':
@@ -448,24 +465,33 @@ class Trainer:
         
         plt.ylabel('True Label', fontsize=14)
         plt.xlabel('Predicted Label', fontsize=14)
+    
+        # 旋转x轴标签以避免重叠
+        plt.xticks(rotation=45, ha='right')
+        plt.yticks(rotation=0)
+
         plt.tight_layout()
-        
-        # 保存图表
         plt.savefig(cm_path, dpi=300, bbox_inches='tight')
         plt.close()
-        
-        return cm_path
     
-    def plot_roc_curves(self, all_labels, all_probs, epoch):
+        print(f"  混淆矩阵已保存到: {cm_path}")
+    
+    def plot_roc_curves(self, all_labels, all_probs, n_classes, epoch=None):
         """绘制ROC曲线（One-vs-Rest）"""
         from sklearn.preprocessing import label_binarize
         from sklearn.metrics import roc_curve, auc
         
-        class_names = ['heuristic', 'mixed', 'random']
+        # 修改：使用实例变量
+        class_names = self.class_names
         n_classes = len(class_names)
         
-        # 将标签二值化 - 明确指定所有3个类别，即使验证集中某些类别缺失
-        y_true_bin = label_binarize(all_labels, classes=[0, 1, 2])
+        # 将标签二值化 - 使用实际的类别数量
+        classes_list = list(range(n_classes))
+        y_true_bin = label_binarize(all_labels, classes=classes_list)
+        
+        # 如果只有两个类别，label_binarize 返回 (n_samples,) 而不是 (n_samples, 1)
+        if n_classes == 2:
+            y_true_bin = np.hstack([1 - y_true_bin.reshape(-1, 1), y_true_bin.reshape(-1, 1)])
         
         # 检查验证集中实际存在的类别
         unique_labels = np.unique(all_labels)
@@ -475,8 +501,16 @@ class Trainer:
         tpr = dict()
         roc_auc = dict()
         
-        plt.figure(figsize=(10, 8))
-        colors = ['blue', 'red', 'green']
+        # 根据类别数量调整图表大小
+        fig_size = max(10, 8)
+        plt.figure(figsize=(fig_size, fig_size * 0.8))
+        
+        # 为不同数量的类别定义颜色
+        if n_classes <= 3:
+            colors = ['blue', 'red', 'green']
+        else:
+            # 使用色彩映射生成更多颜色
+            colors = plt.cm.tab10(np.linspace(0, 1, n_classes))
         
         for i in range(n_classes):
             try:
@@ -492,43 +526,46 @@ class Trainer:
                     plt.plot([], [], color=colors[i], lw=2, linestyle='--', alpha=0.3,
                             label=f'{class_names[i]} (无数据)')
             except Exception as e:
-                # 如果某个类别的ROC曲线计算失败，跳过
-                print(f"  ⚠ 警告: 类别 {class_names[i]} 的ROC曲线计算失败: {e}")
+                print(f"  警告: 绘制类别 {class_names[i]} 的ROC曲线时出错: {e}")
                 continue
         
-        # 绘制对角线
-        plt.plot([0, 1], [0, 1], 'k--', lw=2, label='Random Classifier')
+        # 绘制对角线（随机猜测的基准）
+        plt.plot([0, 1], [0, 1], 'k--', lw=2, label='Random Guess (AUC = 0.5)')
         
         plt.xlim([0.0, 1.0])
         plt.ylim([0.0, 1.05])
         plt.xlabel('False Positive Rate', fontsize=14)
         plt.ylabel('True Positive Rate', fontsize=14)
         
-        # 根据epoch参数设置标题和文件名
         if epoch == 'final':
-            plt.title(f'ROC Curves (One-vs-Rest, Final - Best Model)', fontsize=16, fontweight='bold')
-            roc_path = os.path.join(self.save_path, f'roc_curves_final.png')
+            plt.title('ROC Curves (Final - Best Model)', fontsize=16, fontweight='bold')
+            roc_path = os.path.join(self.save_path, 'roc_curve_final.png')
         else:
-            plt.title(f'ROC Curves (One-vs-Rest, Epoch {epoch})', fontsize=16, fontweight='bold')
-            roc_path = os.path.join(self.save_path, f'roc_curves_epoch{epoch}.png')
+            plt.title(f'ROC Curves (Epoch {epoch})', fontsize=16, fontweight='bold')
+            roc_path = os.path.join(self.save_path, f'roc_curve_epoch{epoch}.png')
         
-        plt.legend(loc="lower right", fontsize=12)
+        # 根据类别数量调整图例位置和字体大小
+        legend_fontsize = 10 if n_classes <= 3 else 8
+        plt.legend(loc="lower right", fontsize=legend_fontsize)
         plt.grid(True, alpha=0.3)
-        plt.tight_layout()
         
-        # 保存图表
+        plt.tight_layout()
         plt.savefig(roc_path, dpi=300, bbox_inches='tight')
         plt.close()
         
-        return roc_path
+        print(f"  ROC曲线已保存到: {roc_path}")
     
     def save_classification_report(self, all_labels, all_preds):
         """保存详细的分类报告"""
-        class_names = ['heuristic', 'mixed', 'random']
+        # 修改：使用实例变量
+        class_names = self.class_names
+        n_classes = len(class_names)
         
         # 生成sklearn的分类报告
+        # 使用实际的类别数量
+        labels_list = list(range(n_classes))
         report = classification_report(all_labels, all_preds, 
-                                       labels=[0, 1, 2],
+                                       labels=labels_list,
                                        target_names=class_names, 
                                        digits=4,
                                        zero_division=0)
@@ -539,33 +576,12 @@ class Trainer:
             f.write("="*60 + "\n")
             f.write("模型评估 - 详细分类报告\n")
             f.write("="*60 + "\n\n")
+            f.write(f"类别数量: {n_classes}\n")
+            f.write(f"类别名称: {', '.join(class_names)}\n\n")
             f.write("分类报告:\n")
             f.write(report)
-            f.write("\n\n" + "="*60 + "\n")
-            f.write("指标说明:\n")
-            f.write("="*60 + "\n")
-            f.write("1. Precision (精确率): 预测为正类的样本中真正为正类的比例\n")
-            f.write("   - 衡量模型预测的可靠性\n")
-            f.write("   - Precision = TP / (TP + FP)\n\n")
-            f.write("2. Recall (召回率): 真正的正类样本中被正确预测的比例\n")
-            f.write("   - 衡量模型找出正类的能力\n")
-            f.write("   - Recall = TP / (TP + FN)\n\n")
-            f.write("3. F1-Score: 精确率和召回率的调和平均\n")
-            f.write("   - 综合考虑精确率和召回率\n")
-            f.write("   - F1 = 2 * (Precision * Recall) / (Precision + Recall)\n\n")
-            f.write("4. Macro Average: 每个类别的指标简单算术平均\n")
-            f.write("   - 平等对待每个类别，适合类别不平衡的情况\n\n")
-            f.write("5. Weighted Average: 按每个类别样本数加权平均\n")
-            f.write("   - 考虑类别不平衡，反映模型对多数类的性能\n\n")
-            f.write("="*60 + "\n")
         
-        print(f"✓ 分类报告已保存至: {report_path}")
-        
-        # 同时打印到控制台
-        print("\n" + "="*60)
-        print("详细分类报告:")
-        print("="*60)
-        print(report)
+        print(f"  分类报告已保存到: {report_path}")
     
     def plot_training_history(self):
         """绘制训练历史图表"""
@@ -884,23 +900,30 @@ class Trainer:
                     probs=None,
                     y_true=metrics['all_labels'],
                     preds=metrics['all_preds'],
-                    class_names=['heuristic', 'mixed', 'random']
+                    class_names=self.class_names
                 )
             }, step=epoch)
             
             # 打印混淆矩阵
             print(f"\n  混淆矩阵:")
-            class_names = ['heuristic', 'mixed    ', 'random   ']
+            # 修改：使用实例变量并动态调整格式
+            class_names = self.class_names
             n_classes = min(len(class_names), conf_matrix.shape[0])
             
+            # 计算最大类别名称长度，用于对齐
+            max_name_len = max(len(name) for name in class_names[:n_classes])
+            padding = max(max_name_len, 12)
+            
             # 打印表头
-            header = "               预测: " + "  ".join([name.strip()[:9].ljust(9) for name in class_names[:n_classes]])
+            header_names = [name[:9].ljust(9) for name in class_names[:n_classes]]
+            header = " " * (padding + 10) + "预测: " + "  ".join(header_names)
             print(header)
             
             # 打印每一行
             for i in range(n_classes):
-                row_str = "    真实: " + class_names[i] + "  " + "  ".join([f"{conf_matrix[i, j]:6d}" for j in range(n_classes)])
-                print(row_str)
+                row_label = f"真实: {class_names[i]}".ljust(padding + 10)
+                row_values = "  ".join([f"{conf_matrix[i, j]:6d}" for j in range(n_classes)])
+                print(row_label + row_values)
             
             # 保存检查点
             is_best = val_loss < self.best_val_loss
@@ -1029,8 +1052,8 @@ def main():
                         help='边特征维度 (默认: 2)')
     parser.add_argument('--hidden_dim', type=int, default=64,
                         help='隐藏层维度 (默认: 64)')
-    parser.add_argument('--num_classes', type=int, default=3,
-                        help='分类类别数 (默认: 3)')
+    parser.add_argument('--num_classes', type=int, default=8,
+                        help='分类类别数 (默认: 8)')
     
     # 训练相关参数
     parser.add_argument('--epochs', type=int, default=100,

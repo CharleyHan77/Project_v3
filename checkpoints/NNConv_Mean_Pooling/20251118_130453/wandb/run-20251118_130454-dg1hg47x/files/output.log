@@ -1,0 +1,172 @@
+正在加载数据集...
+
+数据集划分统计:
+  总样本数: 1000
+  训练集: 800 样本
+  验证集: 200 样本
+
+训练集类别分布:
+  heuristic: 8 (1.0%)
+  mixed: 0 (0.0%)
+  random: 300 (37.5%)
+
+验证集类别分布:
+  heuristic: 4 (2.0%)
+  mixed: 0 (0.0%)
+  random: 75 (37.5%)
+
+训练集节点数统计: min=28, max=300, mean=148.0
+验证集节点数统计: min=42, max=292, mean=143.3
+
+训练模式: 单图训练 + 梯度累积(32步)
+等效批次大小: 32
+配置已保存至: ./checkpoints/NNConv_Mean_Pooling/20251118_130453/config.json
+使用模型: NNConv_Mean_Pooling
+模型已初始化，使用设备: cuda
+
+============================================================
+开始训练
+============================================================
+Epoch 1/40 [训练]: 100%|██████████| 800/800 [00:03<00:00, 201.07it/s, loss=0.7952, avg_loss=4.5359]
+Epoch 1/40 [验证]: 100%|███████████████| 200/200 [00:00<00:00, 457.51it/s, loss=0.4892, acc=37.50%]
+
+
+  [调试] 验证集标签分布: {0: 4, 2: 75, 3: 1, 6: 117, 7: 3}
+  [调试] all_probs shape: (200, 8), all_labels shape: (200,)
+
+Epoch 1/40 总结:
+  训练损失: 4.5159
+  验证损失: 0.4441
+  验证准确率: 37.50%
+  宏平均 F1-Score: 18.18%
+  加权平均 F1-Score: 51.78%
+  ROC-AUC (OvR): 48.96%
+  学习率: 0.000100
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT               0       0       4
+真实: FIFO_EET               0       0       0
+真实: MOPNR_SPT              0       0      75
+✓ 最佳模型已保存 (验证损失: 0.4441)
+------------------------------------------------------------
+Epoch 2/40 [训练]: 100%|██████████| 800/800 [00:03<00:00, 238.02it/s, loss=0.0642, avg_loss=0.2457]
+Epoch 2/40 [验证]: 100%|████████████████| 200/200 [00:00<00:00, 414.74it/s, loss=0.0155, acc=6.50%]
+
+Epoch 2/40 总结:
+  训练损失: 0.2446
+  验证损失: 0.0153
+  验证准确率: 6.50%
+  宏平均 F1-Score: 7.60%
+  加权平均 F1-Score: 17.66%
+  ROC-AUC (OvR): 57.92%
+  学习率: 0.000100
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT               4       0       0
+真实: FIFO_EET               0       0       0
+真实: MOPNR_SPT             66       0       9
+✓ 最佳模型已保存 (验证损失: 0.0153)
+------------------------------------------------------------
+Epoch 3/40 [训练]: 100%|██████████| 800/800 [00:02<00:00, 289.64it/s, loss=0.0040, avg_loss=0.0112]
+Epoch 3/40 [验证]: 100%|████████████████| 200/200 [00:00<00:00, 439.12it/s, loss=0.0032, acc=5.50%]
+
+Epoch 3/40 总结:
+  训练损失: 0.0112
+  验证损失: 0.0052
+  验证准确率: 5.50%
+  宏平均 F1-Score: 6.36%
+  加权平均 F1-Score: 14.21%
+  ROC-AUC (OvR): 57.95%
+  学习率: 0.000100
+Traceback (most recent call last):
+  File "train_wandb.py", line 1094, in <module>
+    main()
+  File "train_wandb.py", line 1090, in main
+    trainer.train()
+  File "train_wandb.py", line 898, in train
+    wandb.log({
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 397, in wrapper
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 455, in wrapper_fn
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 442, in wrapper
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 2025, in log
+    self._log(data=data, step=step, commit=commit)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 1736, in _log
+    self._partial_history_callback(data, step, commit)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 397, in wrapper
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 1564, in _partial_history_callback
+    self._backend.interface.publish_partial_history(
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/interface/interface.py", line 704, in publish_partial_history
+    data = history_dict_to_json(run, data, step=user_step, ignore_copy_err=True)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/data_types/utils.py", line 54, in history_dict_to_json
+    payload[key] = val_to_json(
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/data_types/utils.py", line 151, in val_to_json
+    _log_table_artifact(val, key, run)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/data_types/utils.py", line 202, in _log_table_artifact
+    run.log_artifact(art)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 397, in wrapper
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 455, in wrapper_fn
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 442, in wrapper
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 3138, in log_artifact
+    return self._log_artifact(
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 3289, in _log_artifact
+    self._assert_can_log_artifact(artifact)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 3337, in _assert_can_log_artifact
+    public_api = self._public_api()
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 3330, in _public_api
+    return public.Api(overrides)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/apis/public/api.py", line 360, in __init__
+    self._configure_sentry()
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/apis/public/api.py", line 404, in _configure_sentry
+    viewer = self.viewer
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/apis/public/api.py", line 814, in viewer
+    viewer = self._client.execute(self.VIEWER_QUERY).get("viewer")
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/lib/retry.py", line 319, in wrapped_fn
+    return retrier(*args, **kargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/lib/retry.py", line 159, in __call__
+    result = self._call_fn(*args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/apis/public/api.py", line 124, in execute
+    return self._client.execute(*args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 52, in execute
+    result = self._get_result(document, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 60, in _get_result
+    return self.transport.execute(document, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/lib/gql_request.py", line 69, in execute
+    request = self.session.post(self.url, **post_args)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/requests/sessions.py", line 637, in post
+    return self.request("POST", url, data=data, json=json, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/urllib3/connectionpool.py", line 789, in urlopen
+    response = self._make_request(
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/urllib3/connectionpool.py", line 466, in _make_request
+    self._validate_conn(conn)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/urllib3/connectionpool.py", line 1095, in _validate_conn
+    conn.connect()
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/urllib3/connection.py", line 730, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/urllib3/connection.py", line 909, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 469, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 513, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/ssl.py", line 500, in wrap_socket
+    return self.sslsocket_class._create(
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/ssl.py", line 1040, in _create
+    self.do_handshake()
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/ssl.py", line 1309, in do_handshake
+    self._sslobj.do_handshake()
+KeyboardInterrupt

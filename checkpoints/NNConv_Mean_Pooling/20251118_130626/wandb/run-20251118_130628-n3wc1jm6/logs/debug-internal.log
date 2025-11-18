@@ -1,0 +1,20 @@
+{"time":"2025-11-18T13:06:28.767413677Z","level":"INFO","msg":"stream: starting","core version":"0.22.3"}
+{"time":"2025-11-18T13:06:30.165996068Z","level":"INFO","msg":"stream: created new stream","id":"n3wc1jm6"}
+{"time":"2025-11-18T13:06:30.166163292Z","level":"INFO","msg":"handler: started","stream_id":"n3wc1jm6"}
+{"time":"2025-11-18T13:06:30.166418212Z","level":"INFO","msg":"stream: started","id":"n3wc1jm6"}
+{"time":"2025-11-18T13:06:30.166464891Z","level":"INFO","msg":"sender: started","stream_id":"n3wc1jm6"}
+{"time":"2025-11-18T13:06:30.166475318Z","level":"INFO","msg":"writer: started","stream_id":"n3wc1jm6"}
+{"time":"2025-11-18T13:08:01.46463044Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":3712}
+{"time":"2025-11-18T13:08:01.546382793Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":7}
+{"time":"2025-11-18T13:09:31.533120524Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":7079}
+{"time":"2025-11-18T13:09:32.879062323Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":86}
+{"time":"2025-11-18T13:10:01.450478196Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":8422}
+{"time":"2025-11-18T13:10:01.502833413Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":4}
+{"time":"2025-11-18T13:12:01.125499645Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":13303}
+{"time":"2025-11-18T13:12:01.531157672Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":202}
+{"time":"2025-11-18T13:13:45.589163936Z","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-11-18T13:13:46.659763135Z","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-11-18T13:13:46.671044815Z","level":"INFO","msg":"stream: closing","id":"n3wc1jm6"}
+{"time":"2025-11-18T13:13:46.671071465Z","level":"INFO","msg":"handler: closed","stream_id":"n3wc1jm6"}
+{"time":"2025-11-18T13:13:46.671148903Z","level":"INFO","msg":"sender: closed","stream_id":"n3wc1jm6"}
+{"time":"2025-11-18T13:13:46.671193296Z","level":"INFO","msg":"stream: closed","id":"n3wc1jm6"}

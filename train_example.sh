@@ -4,8 +4,8 @@
 # 使用方法: bash train_example.sh
 
 # 设置数据路径（请根据实际情况修改）
-FJS_ROOT_PATH="/workspace/Project/dataset"
-LABEL_ROOT_PATH="/workspace/Project/init_validity_result"
+FJS_ROOT_PATH="/workspace/Project_v3/dataset_new"
+LABEL_ROOT_PATH="/workspace/Project_v3/init_validity_result_new"
 
 # 选择模型（可手动指定模型名称）
 MODEL_NAME="NNConv_Mean_Pooling"

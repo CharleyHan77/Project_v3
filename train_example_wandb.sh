@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # 图神经网络训练示例脚本
-# 使用方法: bash train_example.sh
+# 使用方法: bash train_example_wandb.sh
 
 # 设置数据路径（请根据实际情况修改）
-FJS_ROOT_PATH="/workspace/Project/dataset"
-LABEL_ROOT_PATH="/workspace/Project/init_validity_result"
+FJS_ROOT_PATH="/workspace/Project_v3/dataset_new"
+LABEL_ROOT_PATH="/workspace/Project_v3/init_validity_result_new"
 
 # 选择模型（可手动指定模型名称）
 MODEL_NAME="NNConv_Mean_Pooling"
@@ -18,9 +18,9 @@ MODEL_NAME="NNConv_Mean_Pooling"
 
 
 # 训练参数
-EPOCHS=40
+EPOCHS=100
 ACCUMULATION_STEPS=32  # 梯度累积步数，模拟batch_size=32的效果
-LEARNING_RATE=0.0001
+LEARNING_RATE=0.01
 HIDDEN_DIM=64
 
 # 运行训练

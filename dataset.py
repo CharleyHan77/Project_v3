@@ -22,15 +22,37 @@ class Dataset(dataset.Dataset):
         for label_path in labels:
             with open(label_path, "r") as f:
                 label = json.load(f)
-            if label.get("sub_directory"):
-                fjs_path = os.path.join(self.fjs_root_path, label["dataset"], label["sub_directory"], label["instance"])
+        
+            # 兼容新旧两种格式
+            if "instance_info" in label:
+                # 新格式：dataset_new 和 init_validity_result_new
+                # FJS文件直接在根目录，通过 instance_info.file_name 获取文件名
+                instance_name = label["instance_info"]["file_name"]
+                fjs_path = os.path.join(self.fjs_root_path, instance_name)
             else:
-                fjs_path = os.path.join(self.fjs_root_path, label["dataset"], label["instance"])
-            
+                # 旧格式：dataset 和 init_validity_result
+                # FJS文件有子目录结构（如 Barnes/mt10c1.fjs）
+                if label.get("sub_directory"):
+                    fjs_path = os.path.join(self.fjs_root_path, label["dataset"], label["sub_directory"], label["instance"])
+                else:
+                    fjs_path = os.path.join(self.fjs_root_path, label["dataset"], label["instance"])
+        
             label_info = label["initialization_methods"]
-
+            
             g = self._convert_fjs(fjs_path)
-            g.y = torch.log(torch.tensor([label_info["heuristic"][self.label_name], label_info["mixed"][self.label_name], label_info["random"][self.label_name]]) + 1)
+            g.y = torch.log(
+                torch.tensor(
+                    [
+                        label_info["FIFO_SPT"]["makespan"]["values"][self.label_name], 
+                        label_info["FIFO_EET"]["makespan"]["values"][self.label_name], 
+                        label_info["MOPNR_SPT"]["makespan"]["values"][self.label_name], 
+                        label_info["MOPNR_EET"]["makespan"]["values"][self.label_name], 
+                        label_info["LWKR_SPT"]["makespan"]["values"][self.label_name], 
+                        label_info["LWKR_EET"]["makespan"]["values"][self.label_name], 
+                        label_info["MWKR_SPT"]["makespan"]["values"][self.label_name], 
+                        label_info["MWKR_EET"]["makespan"]["values"][self.label_name]
+                    ]
+                ) + 1)
             if self.device is not None:
                 g.to(self.device)
             self.data.append(g)
@@ -102,7 +124,13 @@ class Dataset(dataset.Dataset):
         with open(fjs_path, "r") as f:
             fjs_lines = f.readlines()
 
-        job_num, machine_num, _ = list(fjs_lines[0].split())
+        # 兼容两种格式（新的 .fjs 文件格式第一行只有 2个值）
+        first_line_values = list(fjs_lines[0].split())
+        if len(first_line_values) == 3:
+            job_num, machine_num, _ = first_line_values
+        else:
+            job_num, machine_num = first_line_values
+
         job_num = int(job_num)
         machine_num = int(machine_num)
 
