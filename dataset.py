@@ -6,15 +6,19 @@ import json
 from torch_geometric.data import Data as Graph
 import torch
 from torch.utils.data.dataset import random_split
+from pareto_label import ParetoLabelGenerator
+
 
 
 class Dataset(dataset.Dataset):
-    def __init__(self, fjs_root_path, label_root_path, *, label_name = "mean", device = None, train_ratio = 0.8):
+    def __init__(self, fjs_root_path, label_root_path, *, label_name = "mean", device = None, train_ratio = 0.8, pareto_strategy = 'distance', use_log_transform = False):
         self.fjs_root_path = fjs_root_path
         self.label_root_path = label_root_path
         self.label_name = label_name
         self.device = device
         self.train_ratio = train_ratio
+        self.pareto_strategy = pareto_strategy
+        self.use_log_transform = use_log_transform
 
         labels = self._get_files(self.label_root_path)
         self.data = []
@@ -36,23 +40,21 @@ class Dataset(dataset.Dataset):
                     fjs_path = os.path.join(self.fjs_root_path, label["dataset"], label["sub_directory"], label["instance"])
                 else:
                     fjs_path = os.path.join(self.fjs_root_path, label["dataset"], label["instance"])
+
         
             label_info = label["initialization_methods"]
             
             g = self._convert_fjs(fjs_path)
-            g.y = torch.log(
-                torch.tensor(
-                    [
-                        label_info["FIFO_SPT"]["makespan"]["values"][self.label_name], 
-                        label_info["FIFO_EET"]["makespan"]["values"][self.label_name], 
-                        label_info["MOPNR_SPT"]["makespan"]["values"][self.label_name], 
-                        label_info["MOPNR_EET"]["makespan"]["values"][self.label_name], 
-                        label_info["LWKR_SPT"]["makespan"]["values"][self.label_name], 
-                        label_info["LWKR_EET"]["makespan"]["values"][self.label_name], 
-                        label_info["MWKR_SPT"]["makespan"]["values"][self.label_name], 
-                        label_info["MWKR_EET"]["makespan"]["values"][self.label_name]
-                    ]
-                ) + 1)
+            # 使用Pareto多目标标签（替代原有的单目标makespan标签）
+            pareto_labels = self._calculate_pareto_labels(label_info, self.label_name)
+            
+            if self.use_log_transform:
+                # 对数变换（注意：Pareto标签可能包含0，需要加1）
+                g.y = torch.log(pareto_labels + 1)
+            else:
+                g.y = pareto_labels
+
+
             if self.device is not None:
                 g.to(self.device)
             self.data.append(g)
@@ -167,4 +169,51 @@ class Dataset(dataset.Dataset):
             edge_attr=torch.tensor(edge_attr, dtype=torch.float))
 
         return graph
+
+    def _calculate_pareto_labels(self, label_info, label_name='mean'):
+        """
+        基于Pareto支配关系计算标签
+        
+        Args:
+            label_info: initialization_methods字典
+            label_name: 使用哪个统计值（mean, min, max, median）
+            
+        Returns:
+            torch.Tensor: 标签向量
+        """
+        
+        # 构建methods_objectives字典
+        methods = ['FIFO_SPT', 'FIFO_EET', 'MOPNR_SPT', 'MOPNR_EET', 
+                   'LWKR_SPT', 'LWKR_EET', 'MWKR_SPT', 'MWKR_EET']
+        
+        methods_objectives = {}
+        for method in methods:
+            try:
+                methods_objectives[method] = {
+                    'makespan': label_info[method]['makespan']['values'][label_name],
+                    'mean_flow_time': label_info[method]['mean_flow_time']['values'][label_name],
+                    'max_machine_load': label_info[method]['max_machine_load']['values'][label_name],
+                    'total_machine_load': label_info[method]['total_machine_load']['values'][label_name]
+                }
+            except KeyError as e:
+                print(f"warning: {method} 缺少目标数据: {e}")
+                # 使用默认值（较差的性能）
+                methods_objectives[method] = {
+                    'makespan': 1e6,
+                    'mean_flow_time': 1e6,
+                    'max_machine_load': 1e6,
+                    'total_machine_load': 1e6
+                }
+        
+        # 生成Pareto标签（可以选择不同策略）
+        generator = ParetoLabelGenerator()
+        pareto_labels = generator.generate_labels(
+            methods_objectives, 
+            strategy=self.pareto_strategy,  # 'pareto_rank', 'domination_count', 'hypervolume', 'distance'
+            inverse_for_label=False  # 根据您的需求调整
+        )
+        
+        # 转换为torch.Tensor
+        label_values = [pareto_labels[method] for method in methods]
+        return torch.tensor(label_values, dtype=torch.float)
         

@@ -1,0 +1,19 @@
+{"time":"2025-11-18T15:22:16.981421581Z","level":"INFO","msg":"stream: starting","core version":"0.22.3"}
+{"time":"2025-11-18T15:22:17.930062554Z","level":"INFO","msg":"stream: created new stream","id":"x04serjx"}
+{"time":"2025-11-18T15:22:17.930228338Z","level":"INFO","msg":"handler: started","stream_id":"x04serjx"}
+{"time":"2025-11-18T15:22:17.930618655Z","level":"INFO","msg":"stream: started","id":"x04serjx"}
+{"time":"2025-11-18T15:22:17.930672176Z","level":"INFO","msg":"sender: started","stream_id":"x04serjx"}
+{"time":"2025-11-18T15:22:17.930668905Z","level":"INFO","msg":"writer: started","stream_id":"x04serjx"}
+{"time":"2025-11-18T15:23:19.652247995Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":2505}
+{"time":"2025-11-18T15:23:19.934476299Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":19}
+{"time":"2025-11-18T15:26:04.475885948Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":10322}
+{"time":"2025-11-18T15:26:04.63827972Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":13}
+{"time":"2025-11-18T15:26:19.582754134Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":11286}
+{"time":"2025-11-18T15:26:20.038332785Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":35}
+{"time":"2025-11-18T15:26:49.533555484Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":12704}
+{"time":"2025-11-18T15:26:49.576976855Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":19}
+{"time":"2025-11-18T15:27:37.063033024Z","level":"INFO","msg":"stream: closing","id":"x04serjx"}
+{"time":"2025-11-18T15:27:38.957839721Z","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-11-18T15:27:40.687738434Z","level":"INFO","msg":"handler: closed","stream_id":"x04serjx"}
+{"time":"2025-11-18T15:27:40.687928063Z","level":"INFO","msg":"sender: closed","stream_id":"x04serjx"}
+{"time":"2025-11-18T15:27:40.687947886Z","level":"INFO","msg":"stream: closed","id":"x04serjx"}

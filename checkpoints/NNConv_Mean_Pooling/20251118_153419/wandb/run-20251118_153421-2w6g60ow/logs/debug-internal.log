@@ -1,0 +1,19 @@
+{"time":"2025-11-18T15:34:21.306777251Z","level":"INFO","msg":"stream: starting","core version":"0.22.3"}
+{"time":"2025-11-18T15:34:22.308341433Z","level":"INFO","msg":"stream: created new stream","id":"2w6g60ow"}
+{"time":"2025-11-18T15:34:22.308531184Z","level":"INFO","msg":"handler: started","stream_id":"2w6g60ow"}
+{"time":"2025-11-18T15:34:22.308762464Z","level":"INFO","msg":"stream: started","id":"2w6g60ow"}
+{"time":"2025-11-18T15:34:22.308808599Z","level":"INFO","msg":"sender: started","stream_id":"2w6g60ow"}
+{"time":"2025-11-18T15:34:22.308821555Z","level":"INFO","msg":"writer: started","stream_id":"2w6g60ow"}
+{"time":"2025-11-18T15:34:53.6095371Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":1161}
+{"time":"2025-11-18T15:34:53.644298253Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":3}
+{"time":"2025-11-18T15:35:08.677195961Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":1908}
+{"time":"2025-11-18T15:35:08.771173227Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":5}
+{"time":"2025-11-18T15:35:38.194755846Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":3598}
+{"time":"2025-11-18T15:35:38.644687292Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":49}
+{"time":"2025-11-18T15:36:24.028746488Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":5474}
+{"time":"2025-11-18T15:36:24.030084581Z","level":"INFO","msg":"stream: closing","id":"2w6g60ow"}
+{"time":"2025-11-18T15:36:24.032945783Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":37}
+{"time":"2025-11-18T15:36:25.451164738Z","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-11-18T15:36:27.235456499Z","level":"INFO","msg":"handler: closed","stream_id":"2w6g60ow"}
+{"time":"2025-11-18T15:36:27.23555701Z","level":"INFO","msg":"sender: closed","stream_id":"2w6g60ow"}
+{"time":"2025-11-18T15:36:27.235597482Z","level":"INFO","msg":"stream: closed","id":"2w6g60ow"}

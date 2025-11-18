@@ -1,0 +1,293 @@
+正在加载数据集...
+
+完整数据集类别分布:
+  类别 0 (FIFO_SPT): 965 (96.5%)
+  类别 1 (FIFO_EET): 4 (0.4%)
+  类别 2 (MOPNR_SPT): 21 (2.1%)
+  类别 4 (LWKR_SPT): 3 (0.3%)
+  类别 6 (MWKR_SPT): 7 (0.7%)
+
+数据集划分统计:
+  总样本数: 1000
+  训练集: 800 样本
+  验证集: 200 样本
+
+训练集类别分布:
+  FIFO_SPT: 772 (96.5%)
+  FIFO_EET: 3 (0.4%)
+  MOPNR_SPT: 17 (2.1%)
+  LWKR_SPT: 2 (0.2%)
+  MWKR_SPT: 6 (0.8%)
+
+验证集类别分布:
+  FIFO_SPT: 193 (96.5%)
+  FIFO_EET: 1 (0.5%)
+  MOPNR_SPT: 4 (2.0%)
+  LWKR_SPT: 1 (0.5%)
+  MWKR_SPT: 1 (0.5%)
+
+训练集节点数统计: min=28, max=300, mean=146.7
+验证集节点数统计: min=42, max=292, mean=148.1
+
+数据集划分统计:
+  总样本数: 1000
+  训练集: 800 样本
+  验证集: 200 样本
+
+训练集类别分布:
+  heuristic: 772 (96.5%)
+  mixed: 3 (0.4%)
+  random: 17 (2.1%)
+
+验证集类别分布:
+  heuristic: 193 (96.5%)
+  mixed: 1 (0.5%)
+  random: 4 (2.0%)
+
+训练集节点数统计: min=28, max=300, mean=146.7
+验证集节点数统计: min=42, max=292, mean=148.1
+
+训练模式: 单图训练 + 梯度累积(32步)
+等效批次大小: 32
+配置已保存至: ./checkpoints/NNConv_Mean_Pooling/20251118_144005/config.json
+使用模型: NNConv_Mean_Pooling
+模型已初始化，使用设备: cuda
+
+============================================================
+开始训练
+============================================================
+Epoch 1/40 [训练]: 100%|████████| 800/800 [00:03<00:00, 205.94it/s, loss=0.0487, avg_loss=5.0852]
+Epoch 1/40 [验证]: 100%|█████████████| 200/200 [00:00<00:00, 437.91it/s, loss=0.0741, acc=96.50%]
+
+
+  [调试] 验证集标签分布: {0: 193, 1: 1, 2: 4, 4: 1, 6: 1}
+  [调试] all_probs shape: (200, 8), all_labels shape: (200,)
+
+Epoch 1/40 总结:
+  训练损失: 5.0601
+  验证损失: 0.0548
+  验证准确率: 96.50%
+  宏平均 F1-Score: 32.74%
+  加权平均 F1-Score: 95.74%
+  ROC-AUC (OvR): 50.00%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT             193       0       0
+真实: FIFO_EET               1       0       0
+真实: MOPNR_SPT              4       0       0
+✓ 最佳模型已保存 (验证损失: 0.0548)
+------------------------------------------------------------
+Epoch 2/40 [训练]: 100%|████████| 800/800 [00:02<00:00, 306.43it/s, loss=0.0124, avg_loss=0.0412]
+Epoch 2/40 [验证]: 100%|█████████████| 200/200 [00:00<00:00, 458.51it/s, loss=0.0508, acc=96.50%]
+
+Epoch 2/40 总结:
+  训练损失: 0.0412
+  验证损失: 0.0364
+  验证准确率: 96.50%
+  宏平均 F1-Score: 32.74%
+  加权平均 F1-Score: 95.74%
+  ROC-AUC (OvR): 50.00%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT             193       0       0
+真实: FIFO_EET               1       0       0
+真实: MOPNR_SPT              4       0       0
+✓ 最佳模型已保存 (验证损失: 0.0364)
+------------------------------------------------------------
+Epoch 3/40 [训练]: 100%|████████| 800/800 [00:02<00:00, 309.01it/s, loss=0.0476, avg_loss=0.0292]
+Epoch 3/40 [验证]: 100%|█████████████| 200/200 [00:00<00:00, 463.16it/s, loss=0.0389, acc=96.50%]
+
+Epoch 3/40 总结:
+  训练损失: 0.0292
+  验证损失: 0.0287
+  验证准确率: 96.50%
+  宏平均 F1-Score: 32.74%
+  加权平均 F1-Score: 95.74%
+  ROC-AUC (OvR): 50.00%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT             193       0       0
+真实: FIFO_EET               1       0       0
+真实: MOPNR_SPT              4       0       0
+✓ 最佳模型已保存 (验证损失: 0.0287)
+------------------------------------------------------------
+Epoch 4/40 [训练]: 100%|████████| 800/800 [00:02<00:00, 309.45it/s, loss=0.0016, avg_loss=0.0252]
+Epoch 4/40 [验证]: 100%|█████████████| 200/200 [00:00<00:00, 454.23it/s, loss=0.0343, acc=96.50%]
+
+Epoch 4/40 总结:
+  训练损失: 0.0251
+  验证损失: 0.0265
+  验证准确率: 96.50%
+  宏平均 F1-Score: 32.74%
+  加权平均 F1-Score: 95.74%
+  ROC-AUC (OvR): 50.00%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT             193       0       0
+真实: FIFO_EET               1       0       0
+真实: MOPNR_SPT              4       0       0
+✓ 最佳模型已保存 (验证损失: 0.0265)
+------------------------------------------------------------
+Epoch 5/40 [训练]: 100%|████████| 800/800 [00:02<00:00, 310.44it/s, loss=0.0009, avg_loss=0.0242]
+Epoch 5/40 [验证]: 100%|█████████████| 200/200 [00:00<00:00, 457.11it/s, loss=0.0323, acc=96.50%]
+
+Epoch 5/40 总结:
+  训练损失: 0.0242
+  验证损失: 0.0259
+  验证准确率: 96.50%
+  宏平均 F1-Score: 32.74%
+  加权平均 F1-Score: 95.74%
+  ROC-AUC (OvR): 50.00%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT             193       0       0
+真实: FIFO_EET               1       0       0
+真实: MOPNR_SPT              4       0       0
+✓ 最佳模型已保存 (验证损失: 0.0259)
+------------------------------------------------------------
+Epoch 6/40 [训练]: 100%|████████| 800/800 [00:02<00:00, 306.06it/s, loss=0.0008, avg_loss=0.0240]
+Epoch 6/40 [验证]: 100%|█████████████| 200/200 [00:00<00:00, 448.06it/s, loss=0.0314, acc=96.50%]
+
+Epoch 6/40 总结:
+  训练损失: 0.0240
+  验证损失: 0.0257
+  验证准确率: 96.50%
+  宏平均 F1-Score: 32.74%
+  加权平均 F1-Score: 95.74%
+  ROC-AUC (OvR): 50.00%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT             193       0       0
+真实: FIFO_EET               1       0       0
+真实: MOPNR_SPT              4       0       0
+✓ 最佳模型已保存 (验证损失: 0.0257)
+------------------------------------------------------------
+Epoch 7/40 [训练]: 100%|████████| 800/800 [00:02<00:00, 272.25it/s, loss=0.0008, avg_loss=0.0240]
+Epoch 7/40 [验证]: 100%|█████████████| 200/200 [00:00<00:00, 461.27it/s, loss=0.0322, acc=96.50%]
+
+Epoch 7/40 总结:
+  训练损失: 0.0240
+  验证损失: 0.0257
+  验证准确率: 96.50%
+  宏平均 F1-Score: 32.74%
+  加权平均 F1-Score: 95.74%
+  ROC-AUC (OvR): 50.00%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT             193       0       0
+真实: FIFO_EET               1       0       0
+真实: MOPNR_SPT              4       0       0
+------------------------------------------------------------
+Epoch 8/40 [训练]: 100%|████████| 800/800 [00:02<00:00, 296.43it/s, loss=0.0007, avg_loss=0.0239]
+Epoch 8/40 [验证]: 100%|█████████████| 200/200 [00:00<00:00, 457.13it/s, loss=0.0319, acc=96.50%]
+
+Epoch 8/40 总结:
+  训练损失: 0.0239
+  验证损失: 0.0257
+  验证准确率: 96.50%
+  宏平均 F1-Score: 32.74%
+  加权平均 F1-Score: 95.74%
+  ROC-AUC (OvR): 50.00%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT             193       0       0
+真实: FIFO_EET               1       0       0
+真实: MOPNR_SPT              4       0       0
+✓ 最佳模型已保存 (验证损失: 0.0257)
+------------------------------------------------------------
+Epoch 9/40 [训练]: 100%|████████| 800/800 [00:02<00:00, 300.16it/s, loss=0.0328, avg_loss=0.0240]
+Epoch 9/40 [验证]: 100%|█████████████| 200/200 [00:00<00:00, 427.22it/s, loss=0.0316, acc=96.50%]
+
+Epoch 9/40 总结:
+  训练损失: 0.0240
+  验证损失: 0.0257
+  验证准确率: 96.50%
+  宏平均 F1-Score: 32.74%
+  加权平均 F1-Score: 95.74%
+  ROC-AUC (OvR): 50.00%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT             193       0       0
+真实: FIFO_EET               1       0       0
+真实: MOPNR_SPT              4       0       0
+✓ 最佳模型已保存 (验证损失: 0.0257)
+------------------------------------------------------------
+Epoch 10/40 [训练]: 100%|███████| 800/800 [00:02<00:00, 300.94it/s, loss=0.0061, avg_loss=0.0240]
+Epoch 10/40 [验证]: 100%|████████████| 200/200 [00:00<00:00, 454.78it/s, loss=0.0321, acc=96.50%]
+
+Epoch 10/40 总结:
+  训练损失: 0.0240
+  验证损失: 0.0257
+  验证准确率: 96.50%
+  宏平均 F1-Score: 32.74%
+  加权平均 F1-Score: 95.74%
+  ROC-AUC (OvR): 50.00%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT             193       0       0
+真实: FIFO_EET               1       0       0
+真实: MOPNR_SPT              4       0       0
+------------------------------------------------------------
+Epoch 11/40 [训练]: 100%|███████| 800/800 [00:02<00:00, 315.27it/s, loss=0.0251, avg_loss=0.0240]
+Epoch 11/40 [验证]: 100%|████████████| 200/200 [00:00<00:00, 462.26it/s, loss=0.0320, acc=96.50%]
+
+Epoch 11/40 总结:
+  训练损失: 0.0240
+  验证损失: 0.0257
+  验证准确率: 96.50%
+  宏平均 F1-Score: 32.74%
+  加权平均 F1-Score: 95.74%
+  ROC-AUC (OvR): 50.00%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT
+真实: FIFO_SPT             193       0       0
+真实: FIFO_EET               1       0       0
+真实: MOPNR_SPT              4       0       0
+------------------------------------------------------------
+Epoch 12/40 [训练]:   1%|         | 6/800 [00:00<00:04, 186.88it/s, loss=0.0072, avg_loss=0.0117]
+Traceback (most recent call last):
+  File "train_wandb.py", line 1165, in <module>
+    main()
+  File "train_wandb.py", line 1161, in main
+    trainer.train()
+  File "train_wandb.py", line 903, in train
+    train_loss, train_loss_std, train_loss_min, train_loss_max = self.train_epoch(epoch)
+  File "train_wandb.py", line 277, in train_epoch
+    for batch_idx, data in enumerate(pbar):
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/tqdm/std.py", line 1181, in __iter__
+    for obj in iterable:
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 435, in __next__
+    data = self._next_data()
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 475, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 47, in fetch
+    return self.collate_fn(data)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/torch_geometric/data/dataloader.py", line 34, in __call__
+    return self.collate(batch)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/torch_geometric/data/dataloader.py", line 15, in collate
+    return Batch.from_data_list(batch, self.follow_batch)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/torch_geometric/data/batch.py", line 141, in from_data_list
+    batch[key] = torch.cat(items, ref_data.__cat_dim__(key, item))
+KeyboardInterrupt

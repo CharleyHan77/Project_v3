@@ -1,0 +1,13 @@
+{"time":"2025-11-18T14:40:07.477714948Z","level":"INFO","msg":"stream: starting","core version":"0.22.3"}
+{"time":"2025-11-18T14:40:09.103882169Z","level":"INFO","msg":"stream: created new stream","id":"vz8mheta"}
+{"time":"2025-11-18T14:40:09.104036673Z","level":"INFO","msg":"handler: started","stream_id":"vz8mheta"}
+{"time":"2025-11-18T14:40:09.104301796Z","level":"INFO","msg":"stream: started","id":"vz8mheta"}
+{"time":"2025-11-18T14:40:09.104346153Z","level":"INFO","msg":"writer: started","stream_id":"vz8mheta"}
+{"time":"2025-11-18T14:40:09.104372117Z","level":"INFO","msg":"sender: started","stream_id":"vz8mheta"}
+{"time":"2025-11-18T14:41:25.598750691Z","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":3160}
+{"time":"2025-11-18T14:41:25.848657379Z","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":19}
+{"time":"2025-11-18T14:42:00.489654792Z","level":"INFO","msg":"stream: closing","id":"vz8mheta"}
+{"time":"2025-11-18T14:42:01.500372663Z","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-11-18T14:42:03.273855963Z","level":"INFO","msg":"handler: closed","stream_id":"vz8mheta"}
+{"time":"2025-11-18T14:42:03.274029426Z","level":"INFO","msg":"sender: closed","stream_id":"vz8mheta"}
+{"time":"2025-11-18T14:42:03.274069927Z","level":"INFO","msg":"stream: closed","id":"vz8mheta"}

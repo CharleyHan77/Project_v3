@@ -160,10 +160,15 @@ class Trainer:
         
         print(f"\n训练集节点数统计: min={min(train_nodes)}, max={max(train_nodes)}, mean={np.mean(train_nodes):.1f}")
         print(f"验证集节点数统计: min={min(val_nodes)}, max={max(val_nodes)}, mean={np.mean(val_nodes):.1f}")
-        
-        # 统计训练集和验证集的类别分布
-        train_methods = [data.y.argmin().item() for data in self.train_dataset]
-        val_methods = [data.y.argmin().item() for data in self.val_dataset]
+       
+        use_argmax = False # ✅ 如果是hypervolume策略，设为True；其他策略设为False
+
+        if use_argmax:
+            train_methods = [data.y.argmax().item() for data in self.train_dataset]
+            val_methods = [data.y.argmax().item() for data in self.val_dataset]
+        else:
+            train_methods = [data.y.argmin().item() for data in self.train_dataset]
+            val_methods = [data.y.argmin().item() for data in self.val_dataset]
         
         train_nodes = [data.x.shape[0] for data in self.train_dataset]
         val_nodes = [data.x.shape[0] for data in self.val_dataset]
@@ -174,14 +179,20 @@ class Trainer:
         print(f"  验证集: {len(self.val_dataset)} 样本")
         
         print(f"\n训练集类别分布:")
-        for method_id, method_name in enumerate(['heuristic', 'mixed', 'random']):
+        # ✅ 使用self.class_names和动态的类别数
+        for method_id in range(self.args.num_classes):
+            method_name = self.class_names[method_id]
             count = train_methods.count(method_id)
-            print(f"  {method_name}: {count} ({100*count/len(train_methods):.1f}%)")
+            percentage = 100 * count / len(train_methods) if len(train_methods) > 0 else 0
+            print(f"  {method_name}: {count} ({percentage:.1f}%)")
         
         print(f"\n验证集类别分布:")
-        for method_id, method_name in enumerate(['heuristic', 'mixed', 'random']):
+        # ✅ 使用self.class_names和动态的类别数
+        for method_id in range(self.args.num_classes):
+            method_name = self.class_names[method_id]
             count = val_methods.count(method_id)
-            print(f"  {method_name}: {count} ({100*count/len(val_methods):.1f}%)")
+            percentage = 100 * count / len(val_methods) if len(val_methods) > 0 else 0
+            print(f"  {method_name}: {count} ({percentage:.1f}%)")
         
         print(f"\n训练集节点数统计: min={min(train_nodes)}, max={max(train_nodes)}, mean={np.mean(train_nodes):.1f}")
         print(f"验证集节点数统计: min={min(val_nodes)}, max={max(val_nodes)}, mean={np.mean(val_nodes):.1f}")
@@ -284,7 +295,10 @@ class Trainer:
             # output shape: [1, num_classes] -> [1, 8]（8种初始化方法的概率分布）
             # label shape: [8] -> [FIFO_SPT, FIFO_EET, MOPNR_SPT, MOPNR_EET, LWKR_SPT, LWKR_EET, MWKR_SPT, MWKR_EET的性能]
             # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
-            class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
+            # class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
+
+            temperature = 0.2  # 温度参数，控制概率分布的平滑程度
+            class_label = F.softmax(-data.y / temperature, dim=0).unsqueeze(0)  # hypervolume策略下 值越大越好
             
             # 计算分类损失 - 使用NLLLoss（配合模型的log_softmax输出）
             loss = F.kl_div(output, class_label, reduction='batchmean')
@@ -353,7 +367,10 @@ class Trainer:
                 # 将性能值标签转换为分类标签（选择性能最小的方法）
                 # label shape: [3] -> [heuristic性能, mixed性能, random性能]
                 # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
-                class_label = F.softmax(-data.y, dim=0).unsqueeze(0) 
+                # class_label = F.softmax(-data.y, dim=0).unsqueeze(0) 
+                temperature = 0.2  # 温度参数，控制概率分布的平滑程度
+                class_label = F.softmax(-data.y / temperature, dim=0).unsqueeze(0) 
+
 
                 # 计算分类损失
                 # loss = F.nll_loss(output, class_label)
@@ -400,10 +417,10 @@ class Trainer:
         
         # 计算其他评估指标
         # 1. 宏平均 F1-Score - 指定labels确保考虑所有类别
-        macro_f1 = f1_score(all_labels, all_preds, labels=[0, 1, 2], average='macro', zero_division=0) * 100
+        macro_f1 = f1_score(all_labels, all_preds, labels=list(range(self.args.num_classes)), average='macro', zero_division=0) * 100
         
         # 2. 加权平均 F1-Score - 指定labels确保考虑所有类别
-        weighted_f1 = f1_score(all_labels, all_preds, labels=[0, 1, 2], average='weighted', zero_division=0) * 100
+        weighted_f1 = f1_score(all_labels, all_preds, labels=list(range(self.args.num_classes)), average='weighted', zero_division=0) * 100
         
         # 3. ROC-AUC (OvR - One-vs-Rest)
         try:
@@ -420,18 +437,18 @@ class Trainer:
             
             # 关键修复：将标签二值化为3个类别（即使验证集中某些类别没有样本）
             # 这样可以确保与 all_probs 的列数匹配
-            y_true_binarized = label_binarize(all_labels, classes=[0, 1, 2])
+            y_true_binarized = label_binarize(all_labels, classes=list(range(self.args.num_classes)))
             
             # 如果验证集中缺少某些类别，给出警告
-            if len(unique_labels) < 3:
-                missing_classes = set([0, 1, 2]) - set(unique_labels)
+            if len(unique_labels) < 8:
+                missing_classes = set(range(self.args.num_classes)) - set(unique_labels)
                 if epoch == 1:
                     print(f"  ⚠ 警告: 验证集中缺少类别 {missing_classes}，ROC-AUC可能不够准确")
             
             # 手动计算每个类别的AUC，然后取平均
             from sklearn.metrics import roc_auc_score as roc_score
             auc_scores = []
-            for i in range(3):  # 3个类别
+            for i in range(self.args.num_classes):  # num_classes个类别
                 # 只有当该类别在验证集中存在时才计算AUC
                 if i in unique_labels:
                     try:
@@ -457,7 +474,7 @@ class Trainer:
             roc_auc = 0.0
         
         # 4. 混淆矩阵 - 指定labels参数确保始终生成3x3矩阵
-        conf_matrix = confusion_matrix(all_labels, all_preds, labels=[0, 1, 2])
+        conf_matrix = confusion_matrix(all_labels, all_preds, labels=[0, 1, 2, 3, 4, 5, 6, 7])
         
         # 返回所有指标
         metrics = {

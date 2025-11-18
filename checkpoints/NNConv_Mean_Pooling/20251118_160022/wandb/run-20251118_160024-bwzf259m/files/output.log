@@ -1,0 +1,228 @@
+正在加载数据集...
+
+完整数据集类别分布:
+  类别 0 (FIFO_SPT): 965 (96.5%)
+  类别 1 (FIFO_EET): 4 (0.4%)
+  类别 2 (MOPNR_SPT): 21 (2.1%)
+  类别 4 (LWKR_SPT): 3 (0.3%)
+  类别 6 (MWKR_SPT): 7 (0.7%)
+
+数据集划分统计:
+  总样本数: 1000
+  训练集: 800 样本
+  验证集: 200 样本
+
+训练集类别分布:
+  FIFO_SPT: 772 (96.5%)
+  FIFO_EET: 3 (0.4%)
+  MOPNR_SPT: 17 (2.1%)
+  LWKR_SPT: 2 (0.2%)
+  MWKR_SPT: 6 (0.8%)
+
+验证集类别分布:
+  FIFO_SPT: 193 (96.5%)
+  FIFO_EET: 1 (0.5%)
+  MOPNR_SPT: 4 (2.0%)
+  LWKR_SPT: 1 (0.5%)
+  MWKR_SPT: 1 (0.5%)
+
+训练集节点数统计: min=28, max=300, mean=146.7
+验证集节点数统计: min=42, max=292, mean=148.1
+
+数据集划分统计:
+  总样本数: 1000
+  训练集: 800 样本
+  验证集: 200 样本
+
+训练集类别分布:
+  FIFO_SPT: 7 (0.9%)
+  FIFO_EET: 437 (54.6%)
+  MOPNR_SPT: 7 (0.9%)
+  MOPNR_EET: 171 (21.4%)
+  LWKR_SPT: 12 (1.5%)
+  LWKR_EET: 96 (12.0%)
+  MWKR_SPT: 4 (0.5%)
+  MWKR_EET: 66 (8.2%)
+
+验证集类别分布:
+  FIFO_SPT: 2 (1.0%)
+  FIFO_EET: 107 (53.5%)
+  MOPNR_SPT: 2 (1.0%)
+  MOPNR_EET: 45 (22.5%)
+  LWKR_SPT: 0 (0.0%)
+  LWKR_EET: 28 (14.0%)
+  MWKR_SPT: 0 (0.0%)
+  MWKR_EET: 16 (8.0%)
+
+训练集节点数统计: min=28, max=300, mean=146.7
+验证集节点数统计: min=42, max=292, mean=148.1
+
+训练模式: 单图训练 + 梯度累积(32步)
+等效批次大小: 32
+配置已保存至: ./checkpoints/NNConv_Mean_Pooling/20251118_160022/config.json
+使用模型: NNConv_Mean_Pooling
+模型已初始化，使用设备: cuda
+
+============================================================
+开始训练
+============================================================
+Epoch 1/40 [训练]: 100%|█████| 800/800 [00:03<00:00, 212.05it/s, loss=1.1453, avg_loss=4.8902]
+Epoch 1/40 [验证]: 100%|██████████| 200/200 [00:00<00:00, 430.82it/s, loss=0.2786, acc=22.50%]
+
+
+  [调试] 验证集标签分布: {0: 2, 1: 107, 2: 2, 3: 45, 5: 28, 7: 16}
+  [调试] all_probs shape: (200, 8), all_labels shape: (200,)
+  ⚠ 警告: 验证集中缺少类别 {4, 6}，ROC-AUC可能不够准确
+
+Epoch 1/40 总结:
+  训练损失: 4.8673
+  验证损失: 0.4489
+  验证准确率: 22.50%
+  宏平均 F1-Score: 4.59%
+  加权平均 F1-Score: 8.27%
+  ROC-AUC (OvR): 53.76%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT  MOPNR_EET  LWKR_SPT   LWKR_EET   MWKR_SPT   MWKR_EET
+真实: FIFO_SPT               0       0       0       2       0       0       0       0
+真实: FIFO_EET               0       0       0     107       0       0       0       0
+真实: MOPNR_SPT              0       0       0       2       0       0       0       0
+真实: MOPNR_EET              0       0       0      45       0       0       0       0
+真实: LWKR_SPT               0       0       0       0       0       0       0       0
+真实: LWKR_EET               0       0       0      28       0       0       0       0
+真实: MWKR_SPT               0       0       0       0       0       0       0       0
+真实: MWKR_EET               0       0       0      16       0       0       0       0
+✓ 最佳模型已保存 (验证损失: 0.4489)
+------------------------------------------------------------
+Epoch 2/40 [训练]: 100%|█████| 800/800 [00:02<00:00, 311.42it/s, loss=0.0274, avg_loss=0.5336]
+Epoch 2/40 [验证]: 100%|██████████| 200/200 [00:00<00:00, 458.94it/s, loss=0.2331, acc=22.50%]
+
+Epoch 2/40 总结:
+  训练损失: 0.5335
+  验证损失: 0.3511
+  验证准确率: 22.50%
+  宏平均 F1-Score: 4.59%
+  加权平均 F1-Score: 8.27%
+  ROC-AUC (OvR): 51.06%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT  MOPNR_EET  LWKR_SPT   LWKR_EET   MWKR_SPT   MWKR_EET
+真实: FIFO_SPT               0       0       0       2       0       0       0       0
+真实: FIFO_EET               0       0       0     107       0       0       0       0
+真实: MOPNR_SPT              0       0       0       2       0       0       0       0
+真实: MOPNR_EET              0       0       0      45       0       0       0       0
+真实: LWKR_SPT               0       0       0       0       0       0       0       0
+真实: LWKR_EET               0       0       0      28       0       0       0       0
+真实: MWKR_SPT               0       0       0       0       0       0       0       0
+真实: MWKR_EET               0       0       0      16       0       0       0       0
+✓ 最佳模型已保存 (验证损失: 0.3511)
+------------------------------------------------------------
+Epoch 3/40 [训练]: 100%|█████| 800/800 [00:02<00:00, 305.36it/s, loss=0.2988, avg_loss=0.4747]
+Epoch 3/40 [验证]: 100%|██████████| 200/200 [00:00<00:00, 441.82it/s, loss=0.3102, acc=20.50%]
+
+Epoch 3/40 总结:
+  训练损失: 0.4754
+  验证损失: 0.4005
+  验证准确率: 20.50%
+  宏平均 F1-Score: 5.99%
+  加权平均 F1-Score: 9.86%
+  ROC-AUC (OvR): 51.09%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT  MOPNR_EET  LWKR_SPT   LWKR_EET   MWKR_SPT   MWKR_EET
+真实: FIFO_SPT               0       0       0       1       0       1       0       0
+真实: FIFO_EET               0       0       0      78       0      29       0       0
+真实: MOPNR_SPT              0       0       0       2       0       0       0       0
+真实: MOPNR_EET              0       0       0      37       0       8       0       0
+真实: LWKR_SPT               0       0       0       0       0       0       0       0
+真实: LWKR_EET               0       0       0      24       0       4       0       0
+真实: MWKR_SPT               0       0       0       0       0       0       0       0
+真实: MWKR_EET               0       0       0      13       0       3       0       0
+------------------------------------------------------------
+Epoch 4/40 [训练]: 100%|█████| 800/800 [00:03<00:00, 261.35it/s, loss=0.2138, avg_loss=0.4281]
+Epoch 4/40 [验证]: 100%|██████████| 200/200 [00:00<00:00, 457.67it/s, loss=0.2383, acc=17.00%]
+
+Epoch 4/40 总结:
+  训练损失: 0.4280
+  验证损失: 0.3440
+  验证准确率: 17.00%
+  宏平均 F1-Score: 6.18%
+  加权平均 F1-Score: 8.98%
+  ROC-AUC (OvR): 52.39%
+  学习率: 0.010000
+
+  混淆矩阵:
+                      预测: FIFO_SPT   FIFO_EET   MOPNR_SPT  MOPNR_EET  LWKR_SPT   LWKR_EET   MWKR_SPT   MWKR_EET
+真实: FIFO_SPT               0       0       0       0       0       2       0       0
+真实: FIFO_EET               0       0       0      23       0      84       0       0
+真实: MOPNR_SPT              0       0       0       1       0       1       0       0
+真实: MOPNR_EET              0       0       0      11       0      34       0       0
+真实: LWKR_SPT               0       0       0       0       0       0       0       0
+真实: LWKR_EET               0       0       0       5       0      23       0       0
+真实: MWKR_SPT               0       0       0       0       0       0       0       0
+真实: MWKR_EET               0       0       0       6       0      10       0       0
+✓ 最佳模型已保存 (验证损失: 0.3440)
+------------------------------------------------------------
+Epoch 5/40 [训练]: 100%|█████| 800/800 [00:03<00:00, 224.56it/s, loss=0.1722, avg_loss=0.3986]
+Epoch 5/40 [验证]: 100%|██████████| 200/200 [00:00<00:00, 430.77it/s, loss=0.2859, acc=22.50%]
+
+Epoch 5/40 总结:
+  训练损失: 0.3996
+  验证损失: 0.3755
+  验证准确率: 22.50%
+  宏平均 F1-Score: 4.59%
+  加权平均 F1-Score: 8.27%
+  ROC-AUC (OvR): 51.09%
+  学习率: 0.010000
+[34m[1mwandb[0m: [32m[41mERROR[0m Unable to connect to server to verify API token.
+Traceback (most recent call last):
+  File "train_wandb.py", line 1182, in <module>
+    main()
+  File "train_wandb.py", line 1178, in main
+    trainer.train()
+  File "train_wandb.py", line 986, in train
+    wandb.log({
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 397, in wrapper
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 455, in wrapper_fn
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 442, in wrapper
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 2025, in log
+    self._log(data=data, step=step, commit=commit)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 1736, in _log
+    self._partial_history_callback(data, step, commit)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 397, in wrapper
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 1564, in _partial_history_callback
+    self._backend.interface.publish_partial_history(
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/interface/interface.py", line 704, in publish_partial_history
+    data = history_dict_to_json(run, data, step=user_step, ignore_copy_err=True)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/data_types/utils.py", line 54, in history_dict_to_json
+    payload[key] = val_to_json(
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/data_types/utils.py", line 151, in val_to_json
+    _log_table_artifact(val, key, run)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/data_types/utils.py", line 202, in _log_table_artifact
+    run.log_artifact(art)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 397, in wrapper
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 455, in wrapper_fn
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 442, in wrapper
+    return func(self, *args, **kwargs)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 3138, in log_artifact
+    return self._log_artifact(
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 3289, in _log_artifact
+    self._assert_can_log_artifact(artifact)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 3337, in _assert_can_log_artifact
+    public_api = self._public_api()
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 3330, in _public_api
+    return public.Api(overrides)
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/apis/public/api.py", line 323, in __init__
+    wandb_login._verify_login(
+  File "/opt/conda/envs/gnn-v3/lib/python3.8/site-packages/wandb/sdk/wandb_login.py", line 346, in _verify_login
+    raise AuthenticationError(
+wandb.errors.errors.AuthenticationError: Unable to connect to server to verify API token.
