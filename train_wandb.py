@@ -81,14 +81,85 @@ class Trainer:
         print(f"正在加载数据集...")
         full_dataset = Dataset(args.fjs_root_path, args.label_root_path, device="cuda")
         
-        # 划分训练集和验证集
-        train_size = int(args.train_ratio * len(full_dataset))
-        val_size = len(full_dataset) - train_size
-        self.train_dataset, self.val_dataset = random_split(
-            full_dataset, 
-            [train_size, val_size],
-            generator=torch.Generator().manual_seed(args.seed)
-        )
+        # ========== 修改：使用分层采样划分训练集和验证集 ==========
+        from sklearn.model_selection import train_test_split
+        
+        # 提取所有样本的标签（最优方法的索引）
+        all_labels = [data.y.argmin().item() for data in full_dataset]
+        
+        # 检查类别分布
+        from collections import Counter
+        label_counts = Counter(all_labels)
+        print(f"\n完整数据集类别分布:")
+        for class_idx in sorted(label_counts.keys()):
+            count = label_counts[class_idx]
+            print(f"  类别 {class_idx} ({self.class_names[class_idx]}): {count} ({count/len(full_dataset)*100:.1f}%)")
+        
+        # 检查是否有类别样本数太少
+        min_samples_per_class = 2  # 至少需要2个样本才能分层
+        problematic_classes = [cls for cls, count in label_counts.items() if count < min_samples_per_class]
+        
+        if problematic_classes:
+            print(f"\n警告：以下类别样本数不足{min_samples_per_class}，无法进行完美的分层采样:")
+            for cls in problematic_classes:
+                print(f"  类别 {cls} ({self.class_names[cls]}): {label_counts[cls]}个样本")
+            print("  建议：增加数据集规模或合并相似类别")
+            
+            # 对于样本数不足的类别，使用简单随机划分
+            train_size = int(args.train_ratio * len(full_dataset))
+            val_size = len(full_dataset) - train_size
+            self.train_dataset, self.val_dataset = random_split(
+                full_dataset, 
+                [train_size, val_size],
+                generator=torch.Generator().manual_seed(args.seed)
+            )
+        else:
+            # 使用分层采样
+            indices = list(range(len(full_dataset)))
+            train_indices, val_indices = train_test_split(
+                indices,
+                test_size=1-args.train_ratio,
+                stratify=all_labels,  # 关键：根据标签分层
+                random_state=args.seed
+            )
+            
+            # 创建子集
+            from torch.utils.data import Subset
+            self.train_dataset = Subset(full_dataset, train_indices)
+            self.val_dataset = Subset(full_dataset, val_indices)
+        # ============================================================
+        
+        # 统计训练集和验证集的类别分布
+        train_labels = [full_dataset[i].y.argmin().item() for i in 
+                        (train_indices if not problematic_classes else range(len(self.train_dataset)))]
+        val_labels = [full_dataset[i].y.argmin().item() for i in 
+                      (val_indices if not problematic_classes else range(len(self.train_dataset), len(full_dataset)))]
+        
+        train_label_counts = Counter(train_labels)
+        val_label_counts = Counter(val_labels)
+        
+        train_nodes = [full_dataset[i].x.shape[0] for i in 
+                       (train_indices if not problematic_classes else range(len(self.train_dataset)))]
+        val_nodes = [full_dataset[i].x.shape[0] for i in 
+                     (val_indices if not problematic_classes else range(len(self.train_dataset), len(full_dataset)))]
+        
+        print(f"\n数据集划分统计:")
+        print(f"  总样本数: {len(full_dataset)}")
+        print(f"  训练集: {len(self.train_dataset)} 样本")
+        print(f"  验证集: {len(self.val_dataset)} 样本")
+        
+        print(f"\n训练集类别分布:")
+        for class_idx in sorted(set(all_labels)):
+            count = train_label_counts.get(class_idx, 0)
+            print(f"  {self.class_names[class_idx]}: {count} ({count/len(train_labels)*100:.1f}%)")
+        
+        print(f"\n验证集类别分布:")
+        for class_idx in sorted(set(all_labels)):
+            count = val_label_counts.get(class_idx, 0)
+            print(f"  {self.class_names[class_idx]}: {count} ({count/len(val_labels)*100:.1f}%)")
+        
+        print(f"\n训练集节点数统计: min={min(train_nodes)}, max={max(train_nodes)}, mean={np.mean(train_nodes):.1f}")
+        print(f"验证集节点数统计: min={min(val_nodes)}, max={max(val_nodes)}, mean={np.mean(val_nodes):.1f}")
         
         # 统计训练集和验证集的类别分布
         train_methods = [data.y.argmin().item() for data in self.train_dataset]
