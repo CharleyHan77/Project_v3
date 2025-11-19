@@ -8,9 +8,9 @@ FJS_ROOT_PATH="/workspace/Project_v3/dataset_new"
 LABEL_ROOT_PATH="/workspace/Project_v3/init_validity_result_new"
 
 # 选择模型（可手动指定模型名称）
-MODEL_NAME="NNConv_Mean_Pooling"
+# MODEL_NAME="NNConv_Mean_Pooling"
 # MODEL_NAME="NNConv_Multi_Scale_Pooling"
-# MODEL_NAME="NNConv_Attention_Pooling"
+MODEL_NAME="NNConv_Attention_Pooling"
 # MODEL_NAME="NNConv_Set2Set_Pooling"
 # MODEL_NAME="NNConv_Max_Pooling"
 # MODEL_NAME="GINE_Mean_Pooling"

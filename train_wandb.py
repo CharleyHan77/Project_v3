@@ -1,7 +1,9 @@
 import torch
 import torch.nn.functional as F
+import torch.nn as nn
 from torch_geometric.data import DataLoader
 from torch.utils.data.dataset import random_split
+from torch.utils.data import Subset
 import argparse
 import os
 import json
@@ -15,8 +17,9 @@ from sklearn.metrics import (
     confusion_matrix, 
     f1_score, 
     roc_auc_score,
-    classification_report
+    classification_report,
 )
+from sklearn.model_selection import train_test_split
 import seaborn as sns
 import wandb
 
@@ -27,11 +30,54 @@ from dataset import Dataset
 """
 训练说明：
 - 任务类型：分类任务（选择最佳的初始化方法）
-- 标签格式：[heuristic性能, mixed性能, random性能]
+- 标签格式：
 - 标签转换：将性能值转为类别（argmin，因为性能值越小越好）
-- 损失函数：NLLLoss（配合模型的log_softmax输出）
+- 损失函数：
 - 评估指标：分类准确率
 """
+
+class FocalLoss(nn.Module):
+    """
+    Focal Loss: 专门设计用于处理类别极度不平衡的问题
+    论文: https://arxiv.org/abs/1708.02002
+    """
+    def __init__(self, alpha=None, gamma=2.0, reduction='mean'):
+        super(FocalLoss, self).__init__()
+        self.alpha = alpha  # 类别权重
+        self.gamma = gamma  # 聚焦参数（2-5之间，越大越关注难分类样本）
+        self.reduction = reduction
+    
+    def forward(self, log_probs, targets):
+        """
+        Args:
+            log_probs: [batch_size, num_classes] log概率（log_softmax输出）
+            targets: [batch_size] 类别索引
+        """
+        # 转换为概率
+        probs = torch.exp(log_probs)
+        
+        # 获取目标类别的概率和log概率
+        targets = targets.view(-1)
+        pt = probs.gather(1, targets.view(-1, 1)).view(-1)  # 正确类别的概率
+        log_pt = log_probs.gather(1, targets.view(-1, 1)).view(-1)
+        
+        # Focal weight: (1-pt)^gamma
+        # 难分类样本的pt小，focal_weight大，权重高
+        focal_weight = (1 - pt) ** self.gamma
+        
+        # 应用类别权重
+        if self.alpha is not None:
+            alpha_t = self.alpha.gather(0, targets)
+            focal_weight = alpha_t * focal_weight
+        
+        loss = -focal_weight * log_pt
+        
+        if self.reduction == 'mean':
+            return loss.mean()
+        elif self.reduction == 'sum':
+            return loss.sum()
+        else:
+            return loss
 
 
 class Trainer:
@@ -68,31 +114,63 @@ class Trainer:
             dir=self.save_path  # wandb 日志保存到相同目录
         )
 
-        if args.num_classes == 8:
-            self.class_names = ['FIFO_SPT', 'FIFO_EET', 'MOPNR_SPT', 'MOPNR_EET', 
-                               'LWKR_SPT', 'LWKR_EET', 'MWKR_SPT', 'MWKR_EET']
-        elif args.num_classes == 3:
-            self.class_names = ['heuristic', 'mixed', 'random']
-        else:
-            # 对于其他类别数，使用通用名称
-            self.class_names = [f'class_{i}' for i in range(args.num_classes)]
+        # if args.num_classes == 8:
+        #     self.class_names = ['FIFO_SPT', 'FIFO_EET', 'MOPNR_SPT', 'MOPNR_EET', 
+        #                        'LWKR_SPT', 'LWKR_EET', 'MWKR_SPT', 'MWKR_EET']
+        # elif args.num_classes == 3:
+        #     self.class_names = ['heuristic', 'mixed', 'random']
+        # else:
+        #     # 对于其他类别数，使用通用名称
+        #     self.class_names = [f'class_{i}' for i in range(args.num_classes)]
+        
+        self.class_names = ['FIFO_SPT', 'MOPNR_SPT', 'MOPNR_EET', 'MWKR_SPT', 'MWKR_EET']
+
         
         # 加载数据集
         print(f"正在加载数据集...")
         full_dataset = Dataset(args.fjs_root_path, args.label_root_path, device="cuda")
         
-        # 划分训练集和验证集
-        train_size = int(args.train_ratio * len(full_dataset))
-        val_size = len(full_dataset) - train_size
-        self.train_dataset, self.val_dataset = random_split(
-            full_dataset, 
-            [train_size, val_size],
-            generator=torch.Generator().manual_seed(args.seed)
+        # 分层采样验证集
+        # 先提取所有样本的标签
+        all_labels = [data.y.argmin().item() for data in full_dataset]
+        
+        # 使用sklearn的train_test_split进行分层采样
+        indices = list(range(len(full_dataset)))
+
+        train_indices, val_indices = train_test_split(
+            indices,
+            test_size=1 - args.train_ratio,
+            stratify=all_labels,  # 关键参数：按标签分层
+            random_state=args.seed
         )
         
+        # 使用Subset创建训练集和验证集
+        self.train_dataset = Subset(full_dataset, train_indices)
+        self.val_dataset = Subset(full_dataset, val_indices)
+                
+        # 计算类别权重以处理类别不平衡问题
+        print(f"\n正在计算类别权重...")
+        train_labels = [full_dataset[i].y.argmin().item() for i in train_indices]
+        
+        # 统计每个类别的样本数
+        unique_classes, class_counts = np.unique(train_labels, return_counts=True)
+        print(f"训练集各类别样本数: {dict(zip(unique_classes, class_counts))}")
+        
+        # 计算反比例权重：样本越少的类别权重越高
+        total_samples = len(train_labels)
+        class_weights = np.zeros(args.num_classes)
+        for cls, count in zip(unique_classes, class_counts):
+            class_weights[cls] = total_samples / (args.num_classes * count)
+        
+        # 如果某个类别没有样本，权重设为0
+        class_weights[class_weights == np.inf] = 0
+        
+        self.class_weights = torch.FloatTensor(class_weights).to(self.device)
+        print(f"类别权重: {class_weights}")
+        
         # 统计训练集和验证集的类别分布
-        train_methods = [data.y.argmin().item() for data in self.train_dataset]
-        val_methods = [data.y.argmin().item() for data in self.val_dataset]
+        train_methods = [full_dataset[i].y.argmin().item() for i in train_indices]
+        val_methods = [full_dataset[i].y.argmin().item() for i in val_indices]
         
         train_nodes = [data.x.shape[0] for data in self.train_dataset]
         val_nodes = [data.x.shape[0] for data in self.val_dataset]
@@ -117,6 +195,14 @@ class Trainer:
         
         print(f"\n训练模式: 单图训练 + 梯度累积({args.accumulation_steps}步)")
         print(f"等效批次大小: {args.accumulation_steps}")
+
+        # 使用Focal Loss替代普通NLLLoss
+        self.criterion = FocalLoss(
+            alpha=self.class_weights,
+            gamma=2.0  # 增大gamma更关注难样本，8分类建议3-4
+        )
+        print(f"使用 Focal Loss (gamma=2.0) 处理类别不平衡")
+
         
         # 创建数据加载器 - 由于图大小不一致，每次加载一个图
         self.train_loader = DataLoader(
@@ -169,6 +255,11 @@ class Trainer:
             'val_loss_min': [],    # 新增：验证集每个batch损失的最小值
             'val_loss_max': []     # 新增：验证集每个batch损失的最大值
         }
+
+        # 添加梯度和激活监测
+        self.train_history['grad_norm'] = []           # 每个epoch的平均梯度范数
+        self.train_history['grad_norm_std'] = []       # 梯度范数标准差
+        self.train_history['layer_activations'] = []   # 中间层激活统计
         
         self.best_val_loss = float('inf')
         
@@ -184,6 +275,58 @@ class Trainer:
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
         np.random.seed(seed)
+    
+    def compute_grad_norm(self):
+        """计算所有参数的梯度范数"""
+        total_norm = 0.0
+        grad_norms = []
+        for p in self.model.parameters():
+            if p.grad is not None:
+                param_norm = p.grad.data.norm(2).item()
+                grad_norms.append(param_norm)
+                total_norm += param_norm ** 2
+        total_norm = total_norm ** 0.5
+        return total_norm, grad_norms
+    
+    def get_layer_activations(self, data):
+        """获取中间层的激活统计信息"""
+        self.model.eval()
+        activations = {}
+        
+        # 钩子函数来捕获激活
+        def hook_fn(name):
+            def hook(module, input, output):
+                if isinstance(output, torch.Tensor):
+                    activations[name] = {
+                        'mean': output.mean().item(),
+                        'std': output.std().item(),
+                        'min': output.min().item(),
+                        'max': output.max().item(),
+                        'zero_ratio': (output.abs() < 1e-6).float().mean().item()  # 接近0的比例
+                    }
+            return hook
+        
+        # 注册钩子
+        hooks = []
+        if hasattr(self.model, 'conv1'):
+            hooks.append(self.model.conv1.register_forward_hook(hook_fn('conv1')))
+        if hasattr(self.model, 'conv2'):
+            hooks.append(self.model.conv2.register_forward_hook(hook_fn('conv2')))
+        if hasattr(self.model, 'fc1'):
+            hooks.append(self.model.fc1.register_forward_hook(hook_fn('fc1')))
+        
+        # 前向传播
+        with torch.no_grad():
+            _ = self.model(data.x, data.edge_index, data.edge_attr, data.batch)
+        
+        # 移除钩子
+        for hook in hooks:
+            hook.remove()
+        
+        self.model.train()
+        return activations
+
+    
     
     def save_config(self):
         """保存训练配置"""
@@ -201,6 +344,10 @@ class Trainer:
 
         # 新增：记录每个batch的损失
         batch_losses = []
+        batch_grad_norms = []
+
+        # 熵正则化系数（可通过args传入）
+        entropy_weight = getattr(self.args, 'entropy_weight', 0.05)  # 默认0.01
         
         pbar = tqdm(self.train_loader, desc=f'Epoch {epoch}/{self.args.epochs} [训练]')
         for batch_idx, data in enumerate(pbar):
@@ -213,11 +360,38 @@ class Trainer:
             # output shape: [1, num_classes] -> [1, 8]（8种初始化方法的概率分布）
             # label shape: [8] -> [FIFO_SPT, FIFO_EET, MOPNR_SPT, MOPNR_EET, LWKR_SPT, LWKR_EET, MWKR_SPT, MWKR_EET的性能]
             # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
-            class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
-            
-            # 计算分类损失 - 使用NLLLoss（配合模型的log_softmax输出）
-            loss = F.kl_div(output, class_label, reduction='batchmean')
 
+            ############原有软标签 + 熵正则 ############
+            # class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
+            
+            # # loss = F.kl_div(output, class_label, reduction='batchmean') # 加权kl散度
+            # loss = F.kl_div(output, class_label, reduction='none')
+            # true_class_idx = class_label.argmax(dim=1)  # 提取真实类别索引
+            # weight = self.class_weights[true_class_idx]  # 获取对应的权重
+            # loss = (loss.sum(dim=1) * weight).mean()
+
+            # 下方是熵正则 建议先禁用，等模型收敛后再考虑
+            # pred_probs = torch.exp(output)  # shape: [1, num_classes]
+            # entropy = -(pred_probs * output).sum(dim=1).mean()
+            # loss = main_loss - entropy_weight * entropy
+            ############原有软标签 + 熵正则 ############
+
+            ################Focal Loss###############
+            class_label = data.y.argmin().unsqueeze(0)
+            loss = self.criterion(output, class_label)
+            ################Focal Loss###############
+
+            ############################ 硬标签 + 交叉熵 ############################
+            # 将性能值转为硬标签（选择最优方法）
+            # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
+            
+            # # 使用标准交叉熵损失（模型输出已经是log_softmax）
+            # loss = F.nll_loss(output, class_label, weight=self.class_weights)
+
+            # 如果要保留熵正则化（可选，建议先不加）
+            # pred_probs = torch.exp(output)
+            # entropy = -(pred_probs * output).sum(dim=1).mean()
+            # loss = loss - entropy_weight * entropy
             ############################ 分类/回归 标签转换 ############################
 
             # 记录原始损失值（在梯度累积之前）
@@ -226,6 +400,10 @@ class Trainer:
             # 梯度累积
             loss = loss / accumulation_steps
             loss.backward()
+
+            # 【新增】在backward之后计算梯度范数
+            grad_norm, _ = self.compute_grad_norm()
+            batch_grad_norms.append(grad_norm)
             
             # 每accumulation_steps步更新一次权重
             if (batch_idx + 1) % accumulation_steps == 0:
@@ -237,7 +415,8 @@ class Trainer:
             if batch_idx % self.args.log_interval == 0:
                 pbar.set_postfix({
                     'loss': f'{loss.item() * accumulation_steps:.4f}',
-                    'avg_loss': f'{total_loss / (batch_idx + 1):.4f}'
+                    'avg_loss': f'{total_loss / (batch_idx + 1):.4f}',
+                    'grad_norm': f'{grad_norm:.4f}'  # 显示梯度范数
                 })
         
         # 处理最后剩余的梯度
@@ -249,11 +428,15 @@ class Trainer:
 
         # 新增：计算batch损失的统计信息
         batch_losses_array = np.array(batch_losses)
+        batch_grad_norms_array = np.array(batch_grad_norms)
         loss_std = np.std(batch_losses_array)
         loss_min = np.min(batch_losses_array)
         loss_max = np.max(batch_losses_array)
 
-        return avg_loss, loss_std, loss_min, loss_max
+        grad_norm_mean = np.mean(batch_grad_norms_array)
+        grad_norm_std = np.std(batch_grad_norms_array)
+
+        return avg_loss, loss_std, loss_min, loss_max, grad_norm_mean, grad_norm_std
     
     def validate(self, epoch):
         """验证模型 - 计算完整的评估指标"""
@@ -269,10 +452,16 @@ class Trainer:
 
         # 新增：记录每个batch的验证损失
         batch_val_losses = []
+
+        # 【新增】在第一个batch上收集激活统计（用于诊断）
+        first_batch_activations = None
         
         with torch.no_grad():
             pbar = tqdm(self.val_loader, desc=f'Epoch {epoch}/{self.args.epochs} [验证]')
-            for data in pbar:
+            for idx, data in enumerate(pbar):
+                # 【新增】只在第一个batch收集激活统计
+                if idx == 0 and epoch % 5 == 0:  # 每5个epoch收集一次
+                    first_batch_activations = self.get_layer_activations(data)
 
                 # 前向传播
                 output = self.model(data.x, data.edge_index, data.edge_attr, data.batch)
@@ -282,11 +471,28 @@ class Trainer:
                 # 将性能值标签转换为分类标签（选择性能最小的方法）
                 # label shape: [3] -> [heuristic性能, mixed性能, random性能]
                 # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
-                class_label = F.softmax(-data.y, dim=0).unsqueeze(0) 
 
-                # 计算分类损失
-                # loss = F.nll_loss(output, class_label)
-                loss = F.kl_div(output, class_label, reduction='batchmean')
+                ############原有软标签############
+                # class_label = F.softmax(-data.y, dim=0).unsqueeze(0) 
+
+                # # 计算分类损失
+                # # loss = F.kl_div(output, class_label, reduction='batchmean')
+                # # 加权kl散度
+                # loss = F.kl_div(output, class_label, reduction='none')
+                # true_class_idx = class_label.argmax(dim=1)  # 提取真实类别索引
+                # weight = self.class_weights[true_class_idx]  # 获取对应的权重
+                # loss = (loss.sum(dim=1) * weight).mean()
+                ############原有软标签############
+
+                ################Focal Loss###############
+                class_label = data.y.argmin().unsqueeze(0)
+                loss = self.criterion(output, class_label)
+                ################Focal Loss###############
+
+                ############ 硬标签 ##############  
+                # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
+                # loss = F.nll_loss(output, class_label, weight=self.class_weights)
+                ############ 硬标签 ##############
                 total_loss += loss.item()
 
                 # 新增：记录每个batch的损失
@@ -294,7 +500,7 @@ class Trainer:
 
                 # 计算准确率
                 pred = output.argmax(dim=1)  # 预测的最佳方法索引, shape: [1]
-                true_label = class_label.argmax(dim=1)  # 真实的最佳方法索引, shape: [1]
+                true_label = class_label
                 # true_label = data.y.argmin()
                 correct += (pred == true_label).sum().item()
                 total += 1  # 每次处理一个图
@@ -593,7 +799,7 @@ class Trainer:
         epochs = range(1, len(self.train_history['train_loss']) + 1)
         
         # 创建3x2的子图布局（增加新指标）
-        fig, axes = plt.subplots(3, 2, figsize=(18, 18))
+        fig, axes = plt.subplots(4, 2, figsize=(18, 24))
         fig.suptitle('Training Process Monitor', fontsize=18, fontweight='bold')
         
         # 子图1: 训练损失和验证损失
@@ -689,6 +895,27 @@ class Trainer:
         axes[2, 1].legend(loc='lower right', fontsize=9)
         axes[2, 1].grid(True, alpha=0.3)
         axes[2, 1].set_ylim([0, 105])
+
+         # 【新增】子图7: 梯度范数变化（诊断梯度消失/爆炸）
+        if 'grad_norm' in self.train_history and len(self.train_history['grad_norm']) > 0:
+            grad_norm_array = np.array(self.train_history['grad_norm'])
+            grad_norm_std_array = np.array(self.train_history['grad_norm_std'])
+            
+            axes[3, 0].plot(epochs, grad_norm_array, 'orange', linewidth=2.5, marker='o', markersize=4)
+            axes[3, 0].fill_between(epochs, 
+                                    grad_norm_array - grad_norm_std_array,
+                                    grad_norm_array + grad_norm_std_array,
+                                    color='orange', alpha=0.3)
+            axes[3, 0].set_xlabel('Epoch', fontsize=12)
+            axes[3, 0].set_ylabel('Gradient Norm', fontsize=12)
+            axes[3, 0].set_title('Gradient Norm (Vanishing/Exploding Detection)', fontsize=14, fontweight='bold')
+            axes[3, 0].set_yscale('log')  # 使用对数刻度
+            axes[3, 0].grid(True, alpha=0.3)
+            
+            # 添加参考线（正常范围：1e-3到1e3）
+            axes[3, 0].axhline(y=1e-3, color='r', linestyle='--', alpha=0.5, label='Vanishing threshold')
+            axes[3, 0].axhline(y=1e3, color='r', linestyle='--', alpha=0.5, label='Exploding threshold')
+            axes[3, 0].legend(fontsize=9)
         
         # 调整子图之间的间距
         plt.tight_layout()
@@ -829,7 +1056,7 @@ class Trainer:
         for epoch in range(1, self.args.epochs + 1):
             # 训练
             # train_loss = self.train_epoch(epoch)
-            train_loss, train_loss_std, train_loss_min, train_loss_max = self.train_epoch(epoch)
+            train_loss, train_loss_std, train_loss_min, train_loss_max, grad_norm_mean, grad_norm_std = self.train_epoch(epoch)
 
             
             # 验证 - 现在返回完整的metrics字典
@@ -855,6 +1082,8 @@ class Trainer:
             self.train_history['train_loss_std'].append(train_loss_std)
             self.train_history['train_loss_min'].append(train_loss_min)
             self.train_history['train_loss_max'].append(train_loss_max)
+            self.train_history['grad_norm'].append(grad_norm_mean)        # 【新增】
+            self.train_history['grad_norm_std'].append(grad_norm_std)     # 【新增】
             self.train_history['val_loss'].append(val_loss)
             self.train_history['val_loss_std'].append(val_loss_std)      # 新增
             self.train_history['val_loss_min'].append(val_loss_min)      # 新增
@@ -868,6 +1097,7 @@ class Trainer:
             # 打印统计信息
             print(f"\nEpoch {epoch}/{self.args.epochs} 总结:")
             print(f"  训练损失: {train_loss:.4f}")
+            print(f"  梯度范数: {grad_norm_mean:.4f} ± {grad_norm_std:.4f}")  # 【新增】
             print(f"  验证损失: {val_loss:.4f}")
             print(f"  验证准确率: {val_accuracy:.2f}%")
             print(f"  宏平均 F1-Score: {val_macro_f1:.2f}%")
@@ -885,7 +1115,9 @@ class Trainer:
                 "val/loss": val_loss,
                 "val/loss_std": val_loss_std,
                 "val/loss_min": val_loss_min,
-                "val/loss_max": val_loss_max,
+                "val/loss_max": val_loss_max, 
+                "train/grad_norm_mean": grad_norm_mean,      # 【新增】
+                "train/grad_norm_std": grad_norm_std,        # 【新增】
                 "val/accuracy": val_accuracy,
                 "val/macro_f1": val_macro_f1,
                 "val/weighted_f1": val_weighted_f1,
@@ -1052,7 +1284,7 @@ def main():
                         help='边特征维度 (默认: 2)')
     parser.add_argument('--hidden_dim', type=int, default=64,
                         help='隐藏层维度 (默认: 64)')
-    parser.add_argument('--num_classes', type=int, default=8,
+    parser.add_argument('--num_classes', type=int, default=5,
                         help='分类类别数 (默认: 8)')
     
     # 训练相关参数
@@ -1066,8 +1298,8 @@ def main():
                         help='初始学习率 (默认: 0.001)')
     parser.add_argument('--weight_decay', type=float, default=5e-4,
                         help='L2正则化系数 (默认: 5e-4)')
-    parser.add_argument('--patience', type=int, default=10,
-                        help='学习率衰减的耐心值 (默认: 10)')
+    parser.add_argument('--patience', type=int, default=15,
+                        help='学习率衰减的耐心值 (默认: 15)')
     
     # 其他参数
     parser.add_argument('--seed', type=int, default=42,

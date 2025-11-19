@@ -16,10 +16,13 @@ MODEL_NAME="NNConv_Mean_Pooling"
 # MODEL_NAME="GINE_Mean_Pooling"
 # MODEL_NAME="Transformer_Mean_Pooling"
 
+# wandb离线模型
+# export WANDB_MODE=offline
+# wandb sync wandb/离线运行目录
 
 # 训练参数
-EPOCHS=100
-ACCUMULATION_STEPS=32  # 梯度累积步数，模拟batch_size=32的效果
+EPOCHS=40
+ACCUMULATION_STEPS=32  # 梯度累积步数，模                                                              拟batch_size=32的效果
 LEARNING_RATE=0.001
 HIDDEN_DIM=64
 
@@ -33,7 +36,7 @@ python train_wandb.py \
     --accumulation_steps ${ACCUMULATION_STEPS} \
     --lr ${LEARNING_RATE} \
     --hidden_dim ${HIDDEN_DIM} \
-    --train_ratio 0.8 \
+    --train_ratio 0.7 \
     --save_interval 10 \
     --log_interval 5 \
     --save_dir ./checkpoints

@@ -40,19 +40,35 @@ class Dataset(dataset.Dataset):
             label_info = label["initialization_methods"]
             
             g = self._convert_fjs(fjs_path)
+            # g.y = torch.log(
+            #     torch.tensor(
+            #         [
+            #             label_info["FIFO_SPT"]["makespan"]["values"][self.label_name], 
+            #             label_info["FIFO_EET"]["makespan"]["values"][self.label_name], 
+            #             label_info["MOPNR_SPT"]["makespan"]["values"][self.label_name], 
+            #             label_info["MOPNR_EET"]["makespan"]["values"][self.label_name], 
+            #             label_info["LWKR_SPT"]["makespan"]["values"][self.label_name], 
+            #             label_info["LWKR_EET"]["makespan"]["values"][self.label_name], 
+            #             label_info["MWKR_SPT"]["makespan"]["values"][self.label_name], 
+            #             label_info["MWKR_EET"]["makespan"]["values"][self.label_name]
+            #         ]
+            #     ) + 1)
+
+            # 目标makespan：优化掉样本较少的初始化方法 --- 5分类
             g.y = torch.log(
                 torch.tensor(
                     [
                         label_info["FIFO_SPT"]["makespan"]["values"][self.label_name], 
-                        label_info["FIFO_EET"]["makespan"]["values"][self.label_name], 
+                        #label_info["FIFO_EET"]["makespan"]["values"][self.label_name], 
                         label_info["MOPNR_SPT"]["makespan"]["values"][self.label_name], 
                         label_info["MOPNR_EET"]["makespan"]["values"][self.label_name], 
-                        label_info["LWKR_SPT"]["makespan"]["values"][self.label_name], 
-                        label_info["LWKR_EET"]["makespan"]["values"][self.label_name], 
+                        #label_info["LWKR_SPT"]["makespan"]["values"][self.label_name], 
+                        #label_info["LWKR_EET"]["makespan"]["values"][self.label_name], 
                         label_info["MWKR_SPT"]["makespan"]["values"][self.label_name], 
                         label_info["MWKR_EET"]["makespan"]["values"][self.label_name]
                     ]
                 ) + 1)
+
             if self.device is not None:
                 g.to(self.device)
             self.data.append(g)
