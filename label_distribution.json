@@ -1,0 +1,5047 @@
+{
+  "FIFO_SPT": {
+    "label_index": 0,
+    "count": 12,
+    "instances": [
+      {
+        "instance_name": "instance_0007_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 576.8
+      },
+      {
+        "instance_name": "instance_0030_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 546.3
+      },
+      {
+        "instance_name": "instance_0037_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 528.45
+      },
+      {
+        "instance_name": "instance_0074_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 554.0
+      },
+      {
+        "instance_name": "instance_0093_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 435.85
+      },
+      {
+        "instance_name": "instance_0104_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 319.0
+      },
+      {
+        "instance_name": "instance_0431_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 376.0
+      },
+      {
+        "instance_name": "instance_0528_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1034.6
+      },
+      {
+        "instance_name": "instance_0536_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 747.8
+      },
+      {
+        "instance_name": "instance_0544_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 346.2
+      },
+      {
+        "instance_name": "instance_0671_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 324.0
+      },
+      {
+        "instance_name": "instance_0931_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 348.55
+      }
+    ]
+  },
+  "FIFO_EET": {
+    "label_index": 1,
+    "count": 0,
+    "instances": []
+  },
+  "MOPNR_SPT": {
+    "label_index": 2,
+    "count": 375,
+    "instances": [
+      {
+        "instance_name": "instance_0009_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 500.85
+      },
+      {
+        "instance_name": "instance_0013_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 785.0
+      },
+      {
+        "instance_name": "instance_0016_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 923.85
+      },
+      {
+        "instance_name": "instance_0018_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 953.65
+      },
+      {
+        "instance_name": "instance_0019_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1276.8
+      },
+      {
+        "instance_name": "instance_0021_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 465.95
+      },
+      {
+        "instance_name": "instance_0022_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 990.1
+      },
+      {
+        "instance_name": "instance_0025_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 752.9
+      },
+      {
+        "instance_name": "instance_0028_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 281.0
+      },
+      {
+        "instance_name": "instance_0033_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 464.0
+      },
+      {
+        "instance_name": "instance_0035_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1001.65
+      },
+      {
+        "instance_name": "instance_0036_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 511.75
+      },
+      {
+        "instance_name": "instance_0038_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2349.4
+      },
+      {
+        "instance_name": "instance_0039_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1302.55
+      },
+      {
+        "instance_name": "instance_0042_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 453.0
+      },
+      {
+        "instance_name": "instance_0043_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 434.85
+      },
+      {
+        "instance_name": "instance_0047_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1051.25
+      },
+      {
+        "instance_name": "instance_0052_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1285.3
+      },
+      {
+        "instance_name": "instance_0054_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 702.6
+      },
+      {
+        "instance_name": "instance_0056_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1546.1
+      },
+      {
+        "instance_name": "instance_0059_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 873.7
+      },
+      {
+        "instance_name": "instance_0060_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 374.45
+      },
+      {
+        "instance_name": "instance_0064_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 380.8
+      },
+      {
+        "instance_name": "instance_0065_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2452.5
+      },
+      {
+        "instance_name": "instance_0068_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 716.3
+      },
+      {
+        "instance_name": "instance_0069_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 521.95
+      },
+      {
+        "instance_name": "instance_0070_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 553.3
+      },
+      {
+        "instance_name": "instance_0072_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2469.45
+      },
+      {
+        "instance_name": "instance_0073_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1459.5
+      },
+      {
+        "instance_name": "instance_0085_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 833.4
+      },
+      {
+        "instance_name": "instance_0092_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 766.8
+      },
+      {
+        "instance_name": "instance_0094_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1698.2
+      },
+      {
+        "instance_name": "instance_0095_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 852.0
+      },
+      {
+        "instance_name": "instance_0097_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 694.15
+      },
+      {
+        "instance_name": "instance_0098_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2292.7
+      },
+      {
+        "instance_name": "instance_0101_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 502.65
+      },
+      {
+        "instance_name": "instance_0102_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 493.0
+      },
+      {
+        "instance_name": "instance_0107_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 939.95
+      },
+      {
+        "instance_name": "instance_0108_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 544.3
+      },
+      {
+        "instance_name": "instance_0110_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 941.05
+      },
+      {
+        "instance_name": "instance_0111_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 536.65
+      },
+      {
+        "instance_name": "instance_0113_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 538.85
+      },
+      {
+        "instance_name": "instance_0115_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 405.9
+      },
+      {
+        "instance_name": "instance_0119_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1413.4
+      },
+      {
+        "instance_name": "instance_0122_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 879.85
+      },
+      {
+        "instance_name": "instance_0126_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 261.6
+      },
+      {
+        "instance_name": "instance_0127_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 567.1
+      },
+      {
+        "instance_name": "instance_0128_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 501.95
+      },
+      {
+        "instance_name": "instance_0131_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2263.85
+      },
+      {
+        "instance_name": "instance_0132_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2098.75
+      },
+      {
+        "instance_name": "instance_0133_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 480.2
+      },
+      {
+        "instance_name": "instance_0139_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1294.4
+      },
+      {
+        "instance_name": "instance_0140_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 591.15
+      },
+      {
+        "instance_name": "instance_0142_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 507.0
+      },
+      {
+        "instance_name": "instance_0143_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1460.3
+      },
+      {
+        "instance_name": "instance_0144_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 434.0
+      },
+      {
+        "instance_name": "instance_0146_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 462.0
+      },
+      {
+        "instance_name": "instance_0149_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 434.0
+      },
+      {
+        "instance_name": "instance_0156_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 461.1
+      },
+      {
+        "instance_name": "instance_0160_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 915.05
+      },
+      {
+        "instance_name": "instance_0161_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1461.0
+      },
+      {
+        "instance_name": "instance_0162_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2034.5
+      },
+      {
+        "instance_name": "instance_0169_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 331.0
+      },
+      {
+        "instance_name": "instance_0172_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1065.1
+      },
+      {
+        "instance_name": "instance_0176_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 666.65
+      },
+      {
+        "instance_name": "instance_0180_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 575.3
+      },
+      {
+        "instance_name": "instance_0183_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1174.0
+      },
+      {
+        "instance_name": "instance_0184_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1566.45
+      },
+      {
+        "instance_name": "instance_0185_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1698.4
+      },
+      {
+        "instance_name": "instance_0186_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 434.75
+      },
+      {
+        "instance_name": "instance_0188_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 465.3
+      },
+      {
+        "instance_name": "instance_0192_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 746.8
+      },
+      {
+        "instance_name": "instance_0195_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 368.0
+      },
+      {
+        "instance_name": "instance_0199_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 471.3
+      },
+      {
+        "instance_name": "instance_0201_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 636.0
+      },
+      {
+        "instance_name": "instance_0204_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 405.3
+      },
+      {
+        "instance_name": "instance_0205_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 384.0
+      },
+      {
+        "instance_name": "instance_0206_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1617.75
+      },
+      {
+        "instance_name": "instance_0212_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 368.65
+      },
+      {
+        "instance_name": "instance_0213_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1250.7
+      },
+      {
+        "instance_name": "instance_0216_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1828.9
+      },
+      {
+        "instance_name": "instance_0223_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 605.6
+      },
+      {
+        "instance_name": "instance_0224_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 812.8
+      },
+      {
+        "instance_name": "instance_0227_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 512.25
+      },
+      {
+        "instance_name": "instance_0230_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 438.45
+      },
+      {
+        "instance_name": "instance_0232_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 301.9
+      },
+      {
+        "instance_name": "instance_0233_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 499.0
+      },
+      {
+        "instance_name": "instance_0240_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1287.2
+      },
+      {
+        "instance_name": "instance_0242_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 683.25
+      },
+      {
+        "instance_name": "instance_0243_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1491.55
+      },
+      {
+        "instance_name": "instance_0255_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 807.9
+      },
+      {
+        "instance_name": "instance_0259_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 548.75
+      },
+      {
+        "instance_name": "instance_0263_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2407.75
+      },
+      {
+        "instance_name": "instance_0264_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 355.0
+      },
+      {
+        "instance_name": "instance_0265_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 484.2
+      },
+      {
+        "instance_name": "instance_0269_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 707.0
+      },
+      {
+        "instance_name": "instance_0270_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1186.25
+      },
+      {
+        "instance_name": "instance_0276_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 879.65
+      },
+      {
+        "instance_name": "instance_0279_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 746.1
+      },
+      {
+        "instance_name": "instance_0280_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 874.5
+      },
+      {
+        "instance_name": "instance_0284_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 640.35
+      },
+      {
+        "instance_name": "instance_0286_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 361.7
+      },
+      {
+        "instance_name": "instance_0287_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1334.9
+      },
+      {
+        "instance_name": "instance_0288_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1992.7
+      },
+      {
+        "instance_name": "instance_0291_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 194.0
+      },
+      {
+        "instance_name": "instance_0293_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1762.75
+      },
+      {
+        "instance_name": "instance_0295_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 529.8
+      },
+      {
+        "instance_name": "instance_0300_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 903.85
+      },
+      {
+        "instance_name": "instance_0305_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1992.15
+      },
+      {
+        "instance_name": "instance_0306_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 386.85
+      },
+      {
+        "instance_name": "instance_0307_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2452.1
+      },
+      {
+        "instance_name": "instance_0308_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 568.8
+      },
+      {
+        "instance_name": "instance_0309_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 446.85
+      },
+      {
+        "instance_name": "instance_0313_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 422.0
+      },
+      {
+        "instance_name": "instance_0316_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 967.8
+      },
+      {
+        "instance_name": "instance_0318_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 557.85
+      },
+      {
+        "instance_name": "instance_0319_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1111.65
+      },
+      {
+        "instance_name": "instance_0320_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 543.7
+      },
+      {
+        "instance_name": "instance_0322_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 244.0
+      },
+      {
+        "instance_name": "instance_0323_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1097.45
+      },
+      {
+        "instance_name": "instance_0325_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 534.25
+      },
+      {
+        "instance_name": "instance_0328_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 606.45
+      },
+      {
+        "instance_name": "instance_0329_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1626.25
+      },
+      {
+        "instance_name": "instance_0333_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 821.35
+      },
+      {
+        "instance_name": "instance_0335_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1159.95
+      },
+      {
+        "instance_name": "instance_0336_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 386.9
+      },
+      {
+        "instance_name": "instance_0338_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 412.0
+      },
+      {
+        "instance_name": "instance_0342_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 596.9
+      },
+      {
+        "instance_name": "instance_0343_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2144.45
+      },
+      {
+        "instance_name": "instance_0344_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 800.3
+      },
+      {
+        "instance_name": "instance_0345_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 531.2
+      },
+      {
+        "instance_name": "instance_0346_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1772.65
+      },
+      {
+        "instance_name": "instance_0350_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1872.55
+      },
+      {
+        "instance_name": "instance_0354_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1408.65
+      },
+      {
+        "instance_name": "instance_0355_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 940.45
+      },
+      {
+        "instance_name": "instance_0360_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2533.25
+      },
+      {
+        "instance_name": "instance_0371_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 570.9
+      },
+      {
+        "instance_name": "instance_0372_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 969.65
+      },
+      {
+        "instance_name": "instance_0375_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 375.85
+      },
+      {
+        "instance_name": "instance_0380_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 426.0
+      },
+      {
+        "instance_name": "instance_0384_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 653.05
+      },
+      {
+        "instance_name": "instance_0385_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2303.85
+      },
+      {
+        "instance_name": "instance_0386_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2154.45
+      },
+      {
+        "instance_name": "instance_0388_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 589.6
+      },
+      {
+        "instance_name": "instance_0390_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 403.0
+      },
+      {
+        "instance_name": "instance_0392_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 629.3
+      },
+      {
+        "instance_name": "instance_0393_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 403.65
+      },
+      {
+        "instance_name": "instance_0394_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 484.05
+      },
+      {
+        "instance_name": "instance_0396_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 439.0
+      },
+      {
+        "instance_name": "instance_0398_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 564.75
+      },
+      {
+        "instance_name": "instance_0399_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 796.3
+      },
+      {
+        "instance_name": "instance_0400_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 294.0
+      },
+      {
+        "instance_name": "instance_0402_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 638.45
+      },
+      {
+        "instance_name": "instance_0405_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 296.0
+      },
+      {
+        "instance_name": "instance_0407_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 466.2
+      },
+      {
+        "instance_name": "instance_0408_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 753.65
+      },
+      {
+        "instance_name": "instance_0410_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 471.05
+      },
+      {
+        "instance_name": "instance_0411_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 630.55
+      },
+      {
+        "instance_name": "instance_0412_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 851.4
+      },
+      {
+        "instance_name": "instance_0415_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 749.1
+      },
+      {
+        "instance_name": "instance_0417_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1343.75
+      },
+      {
+        "instance_name": "instance_0425_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 540.0
+      },
+      {
+        "instance_name": "instance_0426_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 482.4
+      },
+      {
+        "instance_name": "instance_0430_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 947.85
+      },
+      {
+        "instance_name": "instance_0434_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 829.95
+      },
+      {
+        "instance_name": "instance_0436_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 411.9
+      },
+      {
+        "instance_name": "instance_0437_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 738.9
+      },
+      {
+        "instance_name": "instance_0438_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2243.95
+      },
+      {
+        "instance_name": "instance_0439_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 353.65
+      },
+      {
+        "instance_name": "instance_0443_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2491.7
+      },
+      {
+        "instance_name": "instance_0447_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1621.25
+      },
+      {
+        "instance_name": "instance_0450_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 492.0
+      },
+      {
+        "instance_name": "instance_0451_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 913.2
+      },
+      {
+        "instance_name": "instance_0452_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 791.2
+      },
+      {
+        "instance_name": "instance_0457_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 587.3
+      },
+      {
+        "instance_name": "instance_0459_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 335.0
+      },
+      {
+        "instance_name": "instance_0462_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 623.15
+      },
+      {
+        "instance_name": "instance_0465_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 567.1
+      },
+      {
+        "instance_name": "instance_0466_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 615.45
+      },
+      {
+        "instance_name": "instance_0469_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 423.0
+      },
+      {
+        "instance_name": "instance_0474_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 359.0
+      },
+      {
+        "instance_name": "instance_0476_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 892.2
+      },
+      {
+        "instance_name": "instance_0485_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 668.05
+      },
+      {
+        "instance_name": "instance_0488_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 820.15
+      },
+      {
+        "instance_name": "instance_0490_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 801.25
+      },
+      {
+        "instance_name": "instance_0491_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 963.75
+      },
+      {
+        "instance_name": "instance_0493_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 674.0
+      },
+      {
+        "instance_name": "instance_0498_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 844.0
+      },
+      {
+        "instance_name": "instance_0501_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1234.2
+      },
+      {
+        "instance_name": "instance_0502_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 812.75
+      },
+      {
+        "instance_name": "instance_0508_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2073.6
+      },
+      {
+        "instance_name": "instance_0512_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 765.5
+      },
+      {
+        "instance_name": "instance_0513_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1150.0
+      },
+      {
+        "instance_name": "instance_0515_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 537.1
+      },
+      {
+        "instance_name": "instance_0517_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1041.55
+      },
+      {
+        "instance_name": "instance_0518_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1149.3
+      },
+      {
+        "instance_name": "instance_0520_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 312.0
+      },
+      {
+        "instance_name": "instance_0523_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 562.65
+      },
+      {
+        "instance_name": "instance_0530_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 669.05
+      },
+      {
+        "instance_name": "instance_0533_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 498.0
+      },
+      {
+        "instance_name": "instance_0534_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1978.7
+      },
+      {
+        "instance_name": "instance_0535_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 727.3
+      },
+      {
+        "instance_name": "instance_0537_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 539.85
+      },
+      {
+        "instance_name": "instance_0539_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 541.3
+      },
+      {
+        "instance_name": "instance_0546_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 723.65
+      },
+      {
+        "instance_name": "instance_0547_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 312.0
+      },
+      {
+        "instance_name": "instance_0548_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 421.65
+      },
+      {
+        "instance_name": "instance_0551_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 498.0
+      },
+      {
+        "instance_name": "instance_0556_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 487.8
+      },
+      {
+        "instance_name": "instance_0557_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2106.75
+      },
+      {
+        "instance_name": "instance_0560_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 765.0
+      },
+      {
+        "instance_name": "instance_0561_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1147.3
+      },
+      {
+        "instance_name": "instance_0564_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1037.55
+      },
+      {
+        "instance_name": "instance_0565_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1775.6
+      },
+      {
+        "instance_name": "instance_0567_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 692.25
+      },
+      {
+        "instance_name": "instance_0568_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 454.1
+      },
+      {
+        "instance_name": "instance_0569_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 480.85
+      },
+      {
+        "instance_name": "instance_0571_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2153.55
+      },
+      {
+        "instance_name": "instance_0573_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1994.1
+      },
+      {
+        "instance_name": "instance_0576_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1170.0
+      },
+      {
+        "instance_name": "instance_0579_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1140.75
+      },
+      {
+        "instance_name": "instance_0583_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 801.55
+      },
+      {
+        "instance_name": "instance_0585_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 161.0
+      },
+      {
+        "instance_name": "instance_0587_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 347.0
+      },
+      {
+        "instance_name": "instance_0588_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 314.7
+      },
+      {
+        "instance_name": "instance_0590_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1765.45
+      },
+      {
+        "instance_name": "instance_0593_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 764.75
+      },
+      {
+        "instance_name": "instance_0594_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2360.55
+      },
+      {
+        "instance_name": "instance_0595_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 501.6
+      },
+      {
+        "instance_name": "instance_0598_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 958.95
+      },
+      {
+        "instance_name": "instance_0599_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1307.15
+      },
+      {
+        "instance_name": "instance_0602_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 719.55
+      },
+      {
+        "instance_name": "instance_0603_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 578.55
+      },
+      {
+        "instance_name": "instance_0604_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2216.55
+      },
+      {
+        "instance_name": "instance_0606_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 566.0
+      },
+      {
+        "instance_name": "instance_0607_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 618.0
+      },
+      {
+        "instance_name": "instance_0610_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1984.15
+      },
+      {
+        "instance_name": "instance_0611_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 348.0
+      },
+      {
+        "instance_name": "instance_0614_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 349.0
+      },
+      {
+        "instance_name": "instance_0616_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 675.6
+      },
+      {
+        "instance_name": "instance_0617_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 382.0
+      },
+      {
+        "instance_name": "instance_0618_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 792.6
+      },
+      {
+        "instance_name": "instance_0620_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 702.5
+      },
+      {
+        "instance_name": "instance_0621_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1681.95
+      },
+      {
+        "instance_name": "instance_0625_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1243.55
+      },
+      {
+        "instance_name": "instance_0626_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 294.0
+      },
+      {
+        "instance_name": "instance_0627_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2030.35
+      },
+      {
+        "instance_name": "instance_0630_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 848.25
+      },
+      {
+        "instance_name": "instance_0633_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 467.7
+      },
+      {
+        "instance_name": "instance_0636_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 442.05
+      },
+      {
+        "instance_name": "instance_0641_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 731.85
+      },
+      {
+        "instance_name": "instance_0642_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 514.15
+      },
+      {
+        "instance_name": "instance_0643_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 405.0
+      },
+      {
+        "instance_name": "instance_0645_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2194.4
+      },
+      {
+        "instance_name": "instance_0647_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 357.0
+      },
+      {
+        "instance_name": "instance_0657_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 869.85
+      },
+      {
+        "instance_name": "instance_0660_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 371.65
+      },
+      {
+        "instance_name": "instance_0665_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 453.0
+      },
+      {
+        "instance_name": "instance_0666_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 757.3
+      },
+      {
+        "instance_name": "instance_0670_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 602.1
+      },
+      {
+        "instance_name": "instance_0673_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 736.25
+      },
+      {
+        "instance_name": "instance_0679_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 984.3
+      },
+      {
+        "instance_name": "instance_0680_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 544.5
+      },
+      {
+        "instance_name": "instance_0685_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1631.85
+      },
+      {
+        "instance_name": "instance_0688_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 526.4
+      },
+      {
+        "instance_name": "instance_0691_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1070.65
+      },
+      {
+        "instance_name": "instance_0692_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 323.0
+      },
+      {
+        "instance_name": "instance_0693_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1101.85
+      },
+      {
+        "instance_name": "instance_0698_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 697.2
+      },
+      {
+        "instance_name": "instance_0699_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 469.2
+      },
+      {
+        "instance_name": "instance_0702_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 517.2
+      },
+      {
+        "instance_name": "instance_0703_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2134.1
+      },
+      {
+        "instance_name": "instance_0705_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1239.05
+      },
+      {
+        "instance_name": "instance_0706_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 472.55
+      },
+      {
+        "instance_name": "instance_0709_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 769.35
+      },
+      {
+        "instance_name": "instance_0712_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 283.0
+      },
+      {
+        "instance_name": "instance_0714_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 824.95
+      },
+      {
+        "instance_name": "instance_0718_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1915.05
+      },
+      {
+        "instance_name": "instance_0726_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 738.4
+      },
+      {
+        "instance_name": "instance_0727_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 895.85
+      },
+      {
+        "instance_name": "instance_0730_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 435.0
+      },
+      {
+        "instance_name": "instance_0738_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 406.0
+      },
+      {
+        "instance_name": "instance_0741_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2019.05
+      },
+      {
+        "instance_name": "instance_0742_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 856.9
+      },
+      {
+        "instance_name": "instance_0743_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1320.45
+      },
+      {
+        "instance_name": "instance_0745_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 622.05
+      },
+      {
+        "instance_name": "instance_0747_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 356.75
+      },
+      {
+        "instance_name": "instance_0748_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 463.35
+      },
+      {
+        "instance_name": "instance_0750_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 454.0
+      },
+      {
+        "instance_name": "instance_0751_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1935.9
+      },
+      {
+        "instance_name": "instance_0752_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 435.9
+      },
+      {
+        "instance_name": "instance_0754_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 554.25
+      },
+      {
+        "instance_name": "instance_0761_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 416.0
+      },
+      {
+        "instance_name": "instance_0762_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 362.65
+      },
+      {
+        "instance_name": "instance_0765_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1654.35
+      },
+      {
+        "instance_name": "instance_0776_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 520.35
+      },
+      {
+        "instance_name": "instance_0779_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 967.45
+      },
+      {
+        "instance_name": "instance_0787_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 554.55
+      },
+      {
+        "instance_name": "instance_0790_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1021.1
+      },
+      {
+        "instance_name": "instance_0792_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 467.8
+      },
+      {
+        "instance_name": "instance_0793_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2347.35
+      },
+      {
+        "instance_name": "instance_0794_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 415.0
+      },
+      {
+        "instance_name": "instance_0795_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1818.0
+      },
+      {
+        "instance_name": "instance_0798_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1284.15
+      },
+      {
+        "instance_name": "instance_0799_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2006.9
+      },
+      {
+        "instance_name": "instance_0801_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 591.35
+      },
+      {
+        "instance_name": "instance_0808_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1711.55
+      },
+      {
+        "instance_name": "instance_0810_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1724.4
+      },
+      {
+        "instance_name": "instance_0815_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 423.45
+      },
+      {
+        "instance_name": "instance_0818_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 577.85
+      },
+      {
+        "instance_name": "instance_0820_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 594.15
+      },
+      {
+        "instance_name": "instance_0821_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 672.15
+      },
+      {
+        "instance_name": "instance_0823_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 462.85
+      },
+      {
+        "instance_name": "instance_0825_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 841.7
+      },
+      {
+        "instance_name": "instance_0826_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1300.15
+      },
+      {
+        "instance_name": "instance_0828_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1266.65
+      },
+      {
+        "instance_name": "instance_0844_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1902.75
+      },
+      {
+        "instance_name": "instance_0846_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2105.65
+      },
+      {
+        "instance_name": "instance_0849_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 612.35
+      },
+      {
+        "instance_name": "instance_0851_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2069.8
+      },
+      {
+        "instance_name": "instance_0855_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 707.9
+      },
+      {
+        "instance_name": "instance_0856_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 827.1
+      },
+      {
+        "instance_name": "instance_0859_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 381.0
+      },
+      {
+        "instance_name": "instance_0860_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 671.85
+      },
+      {
+        "instance_name": "instance_0861_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 985.25
+      },
+      {
+        "instance_name": "instance_0865_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 656.2
+      },
+      {
+        "instance_name": "instance_0869_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 928.25
+      },
+      {
+        "instance_name": "instance_0874_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2254.3
+      },
+      {
+        "instance_name": "instance_0877_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1765.05
+      },
+      {
+        "instance_name": "instance_0878_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 535.4
+      },
+      {
+        "instance_name": "instance_0880_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 859.7
+      },
+      {
+        "instance_name": "instance_0881_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 278.0
+      },
+      {
+        "instance_name": "instance_0886_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1262.6
+      },
+      {
+        "instance_name": "instance_0888_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 248.75
+      },
+      {
+        "instance_name": "instance_0893_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2034.45
+      },
+      {
+        "instance_name": "instance_0895_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 527.0
+      },
+      {
+        "instance_name": "instance_0896_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 397.0
+      },
+      {
+        "instance_name": "instance_0903_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 840.0
+      },
+      {
+        "instance_name": "instance_0907_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 468.6
+      },
+      {
+        "instance_name": "instance_0909_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2271.55
+      },
+      {
+        "instance_name": "instance_0911_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1067.65
+      },
+      {
+        "instance_name": "instance_0913_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 525.0
+      },
+      {
+        "instance_name": "instance_0918_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1526.95
+      },
+      {
+        "instance_name": "instance_0919_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1329.15
+      },
+      {
+        "instance_name": "instance_0921_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 546.6
+      },
+      {
+        "instance_name": "instance_0924_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1501.55
+      },
+      {
+        "instance_name": "instance_0928_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1623.35
+      },
+      {
+        "instance_name": "instance_0932_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 632.2
+      },
+      {
+        "instance_name": "instance_0935_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 417.55
+      },
+      {
+        "instance_name": "instance_0937_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 792.85
+      },
+      {
+        "instance_name": "instance_0940_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1059.6
+      },
+      {
+        "instance_name": "instance_0941_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 739.0
+      },
+      {
+        "instance_name": "instance_0944_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 361.0
+      },
+      {
+        "instance_name": "instance_0946_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 972.2
+      },
+      {
+        "instance_name": "instance_0953_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 548.65
+      },
+      {
+        "instance_name": "instance_0954_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 737.45
+      },
+      {
+        "instance_name": "instance_0957_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1788.35
+      },
+      {
+        "instance_name": "instance_0958_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2588.25
+      },
+      {
+        "instance_name": "instance_0965_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 665.4
+      },
+      {
+        "instance_name": "instance_0967_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 381.65
+      },
+      {
+        "instance_name": "instance_0970_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 680.0
+      },
+      {
+        "instance_name": "instance_0972_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1037.55
+      },
+      {
+        "instance_name": "instance_0974_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 314.0
+      },
+      {
+        "instance_name": "instance_0977_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1237.7
+      },
+      {
+        "instance_name": "instance_0978_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 956.3
+      },
+      {
+        "instance_name": "instance_0980_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 630.05
+      },
+      {
+        "instance_name": "instance_0981_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1358.75
+      },
+      {
+        "instance_name": "instance_0984_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 328.6
+      },
+      {
+        "instance_name": "instance_0988_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 998.25
+      },
+      {
+        "instance_name": "instance_0990_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 901.55
+      },
+      {
+        "instance_name": "instance_0991_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 900.05
+      },
+      {
+        "instance_name": "instance_0992_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1007.6
+      },
+      {
+        "instance_name": "instance_0993_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1013.55
+      },
+      {
+        "instance_name": "instance_0996_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 946.3
+      },
+      {
+        "instance_name": "instance_0998_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1895.75
+      }
+    ]
+  },
+  "MOPNR_EET": {
+    "label_index": 3,
+    "count": 10,
+    "instances": [
+      {
+        "instance_name": "instance_0015_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 527.0
+      },
+      {
+        "instance_name": "instance_0071_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 740.65
+      },
+      {
+        "instance_name": "instance_0403_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1721.55
+      },
+      {
+        "instance_name": "instance_0596_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1387.45
+      },
+      {
+        "instance_name": "instance_0728_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1732.2
+      },
+      {
+        "instance_name": "instance_0760_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 702.0
+      },
+      {
+        "instance_name": "instance_0901_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1337.5
+      },
+      {
+        "instance_name": "instance_0943_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 449.95
+      },
+      {
+        "instance_name": "instance_0964_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1053.65
+      },
+      {
+        "instance_name": "instance_0997_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 742.7
+      }
+    ]
+  },
+  "LWKR_SPT": {
+    "label_index": 4,
+    "count": 0,
+    "instances": []
+  },
+  "LWKR_EET": {
+    "label_index": 5,
+    "count": 0,
+    "instances": []
+  },
+  "MWKR_SPT": {
+    "label_index": 6,
+    "count": 588,
+    "instances": [
+      {
+        "instance_name": "instance_0000_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 718.7
+      },
+      {
+        "instance_name": "instance_0001_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 803.45
+      },
+      {
+        "instance_name": "instance_0002_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1018.1
+      },
+      {
+        "instance_name": "instance_0003_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 444.45
+      },
+      {
+        "instance_name": "instance_0004_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1396.75
+      },
+      {
+        "instance_name": "instance_0005_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1011.6
+      },
+      {
+        "instance_name": "instance_0006_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 558.6
+      },
+      {
+        "instance_name": "instance_0008_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 383.0
+      },
+      {
+        "instance_name": "instance_0010_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1213.5
+      },
+      {
+        "instance_name": "instance_0011_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1046.35
+      },
+      {
+        "instance_name": "instance_0012_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 726.85
+      },
+      {
+        "instance_name": "instance_0014_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 382.3
+      },
+      {
+        "instance_name": "instance_0017_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 650.5
+      },
+      {
+        "instance_name": "instance_0020_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 709.55
+      },
+      {
+        "instance_name": "instance_0023_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1111.35
+      },
+      {
+        "instance_name": "instance_0024_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 411.9
+      },
+      {
+        "instance_name": "instance_0026_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 777.35
+      },
+      {
+        "instance_name": "instance_0027_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 619.8
+      },
+      {
+        "instance_name": "instance_0029_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2075.85
+      },
+      {
+        "instance_name": "instance_0031_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1074.9
+      },
+      {
+        "instance_name": "instance_0032_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 917.6
+      },
+      {
+        "instance_name": "instance_0034_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 702.8
+      },
+      {
+        "instance_name": "instance_0040_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 611.45
+      },
+      {
+        "instance_name": "instance_0041_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1917.9
+      },
+      {
+        "instance_name": "instance_0044_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 467.15
+      },
+      {
+        "instance_name": "instance_0045_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2349.55
+      },
+      {
+        "instance_name": "instance_0046_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1135.5
+      },
+      {
+        "instance_name": "instance_0048_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 676.35
+      },
+      {
+        "instance_name": "instance_0049_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 831.75
+      },
+      {
+        "instance_name": "instance_0050_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 746.7
+      },
+      {
+        "instance_name": "instance_0051_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2721.35
+      },
+      {
+        "instance_name": "instance_0053_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 606.9
+      },
+      {
+        "instance_name": "instance_0055_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 561.05
+      },
+      {
+        "instance_name": "instance_0058_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 511.55
+      },
+      {
+        "instance_name": "instance_0061_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 536.9
+      },
+      {
+        "instance_name": "instance_0062_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1272.2
+      },
+      {
+        "instance_name": "instance_0063_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 827.65
+      },
+      {
+        "instance_name": "instance_0066_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 766.0
+      },
+      {
+        "instance_name": "instance_0067_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 547.8
+      },
+      {
+        "instance_name": "instance_0075_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 639.0
+      },
+      {
+        "instance_name": "instance_0076_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 590.15
+      },
+      {
+        "instance_name": "instance_0077_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 610.8
+      },
+      {
+        "instance_name": "instance_0078_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 734.75
+      },
+      {
+        "instance_name": "instance_0079_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 510.8
+      },
+      {
+        "instance_name": "instance_0080_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 356.8
+      },
+      {
+        "instance_name": "instance_0081_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 515.6
+      },
+      {
+        "instance_name": "instance_0083_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1977.15
+      },
+      {
+        "instance_name": "instance_0084_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 366.3
+      },
+      {
+        "instance_name": "instance_0086_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 451.8
+      },
+      {
+        "instance_name": "instance_0087_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1930.0
+      },
+      {
+        "instance_name": "instance_0088_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 648.95
+      },
+      {
+        "instance_name": "instance_0089_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 537.25
+      },
+      {
+        "instance_name": "instance_0090_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 847.65
+      },
+      {
+        "instance_name": "instance_0091_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 413.0
+      },
+      {
+        "instance_name": "instance_0096_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 496.6
+      },
+      {
+        "instance_name": "instance_0100_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 406.35
+      },
+      {
+        "instance_name": "instance_0103_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 840.2
+      },
+      {
+        "instance_name": "instance_0105_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 636.2
+      },
+      {
+        "instance_name": "instance_0109_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 896.65
+      },
+      {
+        "instance_name": "instance_0112_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 374.3
+      },
+      {
+        "instance_name": "instance_0114_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1228.1
+      },
+      {
+        "instance_name": "instance_0116_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 457.1
+      },
+      {
+        "instance_name": "instance_0117_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 871.5
+      },
+      {
+        "instance_name": "instance_0118_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1033.5
+      },
+      {
+        "instance_name": "instance_0120_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 940.7
+      },
+      {
+        "instance_name": "instance_0121_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 514.45
+      },
+      {
+        "instance_name": "instance_0123_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1172.45
+      },
+      {
+        "instance_name": "instance_0124_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 996.45
+      },
+      {
+        "instance_name": "instance_0125_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 577.35
+      },
+      {
+        "instance_name": "instance_0129_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 367.0
+      },
+      {
+        "instance_name": "instance_0130_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1154.55
+      },
+      {
+        "instance_name": "instance_0134_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 444.7
+      },
+      {
+        "instance_name": "instance_0135_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 602.4
+      },
+      {
+        "instance_name": "instance_0136_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2012.45
+      },
+      {
+        "instance_name": "instance_0137_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 440.6
+      },
+      {
+        "instance_name": "instance_0138_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1463.2
+      },
+      {
+        "instance_name": "instance_0141_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 838.0
+      },
+      {
+        "instance_name": "instance_0145_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 531.25
+      },
+      {
+        "instance_name": "instance_0147_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 831.1
+      },
+      {
+        "instance_name": "instance_0148_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 745.45
+      },
+      {
+        "instance_name": "instance_0150_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 543.5
+      },
+      {
+        "instance_name": "instance_0151_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 317.2
+      },
+      {
+        "instance_name": "instance_0152_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 164.0
+      },
+      {
+        "instance_name": "instance_0153_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 542.0
+      },
+      {
+        "instance_name": "instance_0154_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 497.15
+      },
+      {
+        "instance_name": "instance_0155_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 488.4
+      },
+      {
+        "instance_name": "instance_0157_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1022.6
+      },
+      {
+        "instance_name": "instance_0158_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 438.25
+      },
+      {
+        "instance_name": "instance_0159_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 539.75
+      },
+      {
+        "instance_name": "instance_0163_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 672.85
+      },
+      {
+        "instance_name": "instance_0164_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 604.8
+      },
+      {
+        "instance_name": "instance_0165_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 711.6
+      },
+      {
+        "instance_name": "instance_0166_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 611.65
+      },
+      {
+        "instance_name": "instance_0168_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1031.65
+      },
+      {
+        "instance_name": "instance_0171_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1146.9
+      },
+      {
+        "instance_name": "instance_0173_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 441.15
+      },
+      {
+        "instance_name": "instance_0174_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 735.5
+      },
+      {
+        "instance_name": "instance_0175_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 270.65
+      },
+      {
+        "instance_name": "instance_0177_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1951.1
+      },
+      {
+        "instance_name": "instance_0178_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 517.1
+      },
+      {
+        "instance_name": "instance_0179_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 564.1
+      },
+      {
+        "instance_name": "instance_0181_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1495.2
+      },
+      {
+        "instance_name": "instance_0182_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 706.75
+      },
+      {
+        "instance_name": "instance_0187_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 611.9
+      },
+      {
+        "instance_name": "instance_0189_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 504.9
+      },
+      {
+        "instance_name": "instance_0190_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 307.6
+      },
+      {
+        "instance_name": "instance_0191_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 431.2
+      },
+      {
+        "instance_name": "instance_0193_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 537.75
+      },
+      {
+        "instance_name": "instance_0194_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 672.9
+      },
+      {
+        "instance_name": "instance_0196_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 345.9
+      },
+      {
+        "instance_name": "instance_0197_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 718.35
+      },
+      {
+        "instance_name": "instance_0198_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 534.9
+      },
+      {
+        "instance_name": "instance_0200_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 783.95
+      },
+      {
+        "instance_name": "instance_0202_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 551.9
+      },
+      {
+        "instance_name": "instance_0203_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 660.8
+      },
+      {
+        "instance_name": "instance_0207_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1974.45
+      },
+      {
+        "instance_name": "instance_0208_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 629.3
+      },
+      {
+        "instance_name": "instance_0209_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 464.3
+      },
+      {
+        "instance_name": "instance_0210_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1083.65
+      },
+      {
+        "instance_name": "instance_0211_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 816.6
+      },
+      {
+        "instance_name": "instance_0214_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 361.0
+      },
+      {
+        "instance_name": "instance_0215_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 132.0
+      },
+      {
+        "instance_name": "instance_0217_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 815.75
+      },
+      {
+        "instance_name": "instance_0218_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 642.05
+      },
+      {
+        "instance_name": "instance_0219_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1223.65
+      },
+      {
+        "instance_name": "instance_0220_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1143.3
+      },
+      {
+        "instance_name": "instance_0221_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 385.65
+      },
+      {
+        "instance_name": "instance_0222_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1549.25
+      },
+      {
+        "instance_name": "instance_0225_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 345.0
+      },
+      {
+        "instance_name": "instance_0226_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 363.0
+      },
+      {
+        "instance_name": "instance_0228_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 708.55
+      },
+      {
+        "instance_name": "instance_0229_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1800.8
+      },
+      {
+        "instance_name": "instance_0231_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1102.55
+      },
+      {
+        "instance_name": "instance_0234_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 999.85
+      },
+      {
+        "instance_name": "instance_0235_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 661.8
+      },
+      {
+        "instance_name": "instance_0236_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 589.9
+      },
+      {
+        "instance_name": "instance_0237_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 767.15
+      },
+      {
+        "instance_name": "instance_0238_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 892.95
+      },
+      {
+        "instance_name": "instance_0239_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 830.6
+      },
+      {
+        "instance_name": "instance_0241_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 980.5
+      },
+      {
+        "instance_name": "instance_0244_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 510.85
+      },
+      {
+        "instance_name": "instance_0245_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 556.65
+      },
+      {
+        "instance_name": "instance_0246_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 748.15
+      },
+      {
+        "instance_name": "instance_0247_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 735.55
+      },
+      {
+        "instance_name": "instance_0248_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 489.4
+      },
+      {
+        "instance_name": "instance_0249_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 406.25
+      },
+      {
+        "instance_name": "instance_0250_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 461.15
+      },
+      {
+        "instance_name": "instance_0251_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 441.45
+      },
+      {
+        "instance_name": "instance_0252_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 596.0
+      },
+      {
+        "instance_name": "instance_0253_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1007.65
+      },
+      {
+        "instance_name": "instance_0254_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1273.6
+      },
+      {
+        "instance_name": "instance_0256_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 934.95
+      },
+      {
+        "instance_name": "instance_0257_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 548.85
+      },
+      {
+        "instance_name": "instance_0258_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 549.75
+      },
+      {
+        "instance_name": "instance_0260_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 298.5
+      },
+      {
+        "instance_name": "instance_0261_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 438.8
+      },
+      {
+        "instance_name": "instance_0262_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 410.6
+      },
+      {
+        "instance_name": "instance_0266_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 532.15
+      },
+      {
+        "instance_name": "instance_0267_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 612.1
+      },
+      {
+        "instance_name": "instance_0268_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 479.05
+      },
+      {
+        "instance_name": "instance_0271_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 938.1
+      },
+      {
+        "instance_name": "instance_0272_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 425.0
+      },
+      {
+        "instance_name": "instance_0273_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 316.0
+      },
+      {
+        "instance_name": "instance_0274_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1127.1
+      },
+      {
+        "instance_name": "instance_0275_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 761.85
+      },
+      {
+        "instance_name": "instance_0278_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1480.9
+      },
+      {
+        "instance_name": "instance_0281_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 894.9
+      },
+      {
+        "instance_name": "instance_0282_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1022.05
+      },
+      {
+        "instance_name": "instance_0283_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 602.45
+      },
+      {
+        "instance_name": "instance_0285_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 604.45
+      },
+      {
+        "instance_name": "instance_0289_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 479.5
+      },
+      {
+        "instance_name": "instance_0290_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 584.8
+      },
+      {
+        "instance_name": "instance_0292_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 410.85
+      },
+      {
+        "instance_name": "instance_0294_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1038.3
+      },
+      {
+        "instance_name": "instance_0296_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1008.65
+      },
+      {
+        "instance_name": "instance_0297_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1480.5
+      },
+      {
+        "instance_name": "instance_0298_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1557.95
+      },
+      {
+        "instance_name": "instance_0299_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 493.45
+      },
+      {
+        "instance_name": "instance_0301_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2174.85
+      },
+      {
+        "instance_name": "instance_0302_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 624.15
+      },
+      {
+        "instance_name": "instance_0303_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 745.3
+      },
+      {
+        "instance_name": "instance_0304_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 391.2
+      },
+      {
+        "instance_name": "instance_0310_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 778.45
+      },
+      {
+        "instance_name": "instance_0311_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 561.3
+      },
+      {
+        "instance_name": "instance_0312_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 692.35
+      },
+      {
+        "instance_name": "instance_0314_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 969.8
+      },
+      {
+        "instance_name": "instance_0315_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 685.3
+      },
+      {
+        "instance_name": "instance_0317_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 703.05
+      },
+      {
+        "instance_name": "instance_0321_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 949.2
+      },
+      {
+        "instance_name": "instance_0324_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 784.45
+      },
+      {
+        "instance_name": "instance_0326_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 518.45
+      },
+      {
+        "instance_name": "instance_0327_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1222.95
+      },
+      {
+        "instance_name": "instance_0330_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 440.75
+      },
+      {
+        "instance_name": "instance_0331_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1286.9
+      },
+      {
+        "instance_name": "instance_0332_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1185.0
+      },
+      {
+        "instance_name": "instance_0334_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 667.55
+      },
+      {
+        "instance_name": "instance_0337_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 498.8
+      },
+      {
+        "instance_name": "instance_0339_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 640.4
+      },
+      {
+        "instance_name": "instance_0340_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 496.85
+      },
+      {
+        "instance_name": "instance_0341_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1879.9
+      },
+      {
+        "instance_name": "instance_0347_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2234.1
+      },
+      {
+        "instance_name": "instance_0348_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 361.45
+      },
+      {
+        "instance_name": "instance_0349_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 437.0
+      },
+      {
+        "instance_name": "instance_0351_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 666.6
+      },
+      {
+        "instance_name": "instance_0352_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 428.0
+      },
+      {
+        "instance_name": "instance_0353_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1257.25
+      },
+      {
+        "instance_name": "instance_0356_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 678.15
+      },
+      {
+        "instance_name": "instance_0357_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 547.3
+      },
+      {
+        "instance_name": "instance_0358_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 264.8
+      },
+      {
+        "instance_name": "instance_0359_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 653.25
+      },
+      {
+        "instance_name": "instance_0361_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 520.4
+      },
+      {
+        "instance_name": "instance_0362_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 485.95
+      },
+      {
+        "instance_name": "instance_0363_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 802.25
+      },
+      {
+        "instance_name": "instance_0364_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1027.4
+      },
+      {
+        "instance_name": "instance_0365_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 436.0
+      },
+      {
+        "instance_name": "instance_0366_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 642.75
+      },
+      {
+        "instance_name": "instance_0367_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1134.05
+      },
+      {
+        "instance_name": "instance_0368_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 576.0
+      },
+      {
+        "instance_name": "instance_0369_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 312.3
+      },
+      {
+        "instance_name": "instance_0370_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 483.95
+      },
+      {
+        "instance_name": "instance_0373_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 375.85
+      },
+      {
+        "instance_name": "instance_0374_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 540.35
+      },
+      {
+        "instance_name": "instance_0376_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 766.8
+      },
+      {
+        "instance_name": "instance_0377_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 445.2
+      },
+      {
+        "instance_name": "instance_0378_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 890.65
+      },
+      {
+        "instance_name": "instance_0379_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 690.1
+      },
+      {
+        "instance_name": "instance_0381_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1599.35
+      },
+      {
+        "instance_name": "instance_0382_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 552.8
+      },
+      {
+        "instance_name": "instance_0383_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 522.4
+      },
+      {
+        "instance_name": "instance_0387_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 671.9
+      },
+      {
+        "instance_name": "instance_0389_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1070.9
+      },
+      {
+        "instance_name": "instance_0391_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 405.75
+      },
+      {
+        "instance_name": "instance_0395_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1047.6
+      },
+      {
+        "instance_name": "instance_0397_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 939.7
+      },
+      {
+        "instance_name": "instance_0401_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 468.6
+      },
+      {
+        "instance_name": "instance_0404_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 617.9
+      },
+      {
+        "instance_name": "instance_0406_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 544.2
+      },
+      {
+        "instance_name": "instance_0409_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 796.5
+      },
+      {
+        "instance_name": "instance_0413_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 257.15
+      },
+      {
+        "instance_name": "instance_0414_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1199.3
+      },
+      {
+        "instance_name": "instance_0416_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 877.45
+      },
+      {
+        "instance_name": "instance_0418_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1342.85
+      },
+      {
+        "instance_name": "instance_0419_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 871.9
+      },
+      {
+        "instance_name": "instance_0420_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1070.6
+      },
+      {
+        "instance_name": "instance_0421_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 726.25
+      },
+      {
+        "instance_name": "instance_0422_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 342.3
+      },
+      {
+        "instance_name": "instance_0423_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 680.85
+      },
+      {
+        "instance_name": "instance_0424_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 415.0
+      },
+      {
+        "instance_name": "instance_0427_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 617.25
+      },
+      {
+        "instance_name": "instance_0428_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 549.95
+      },
+      {
+        "instance_name": "instance_0429_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 211.65
+      },
+      {
+        "instance_name": "instance_0432_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 566.7
+      },
+      {
+        "instance_name": "instance_0433_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 592.6
+      },
+      {
+        "instance_name": "instance_0435_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 475.55
+      },
+      {
+        "instance_name": "instance_0440_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2189.85
+      },
+      {
+        "instance_name": "instance_0441_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 612.5
+      },
+      {
+        "instance_name": "instance_0442_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 566.05
+      },
+      {
+        "instance_name": "instance_0444_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 535.3
+      },
+      {
+        "instance_name": "instance_0445_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 618.7
+      },
+      {
+        "instance_name": "instance_0446_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 461.6
+      },
+      {
+        "instance_name": "instance_0448_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1079.4
+      },
+      {
+        "instance_name": "instance_0449_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1069.0
+      },
+      {
+        "instance_name": "instance_0453_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 374.15
+      },
+      {
+        "instance_name": "instance_0454_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 469.0
+      },
+      {
+        "instance_name": "instance_0455_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 608.05
+      },
+      {
+        "instance_name": "instance_0456_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 380.0
+      },
+      {
+        "instance_name": "instance_0458_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1676.95
+      },
+      {
+        "instance_name": "instance_0460_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 360.6
+      },
+      {
+        "instance_name": "instance_0461_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 959.55
+      },
+      {
+        "instance_name": "instance_0463_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 763.45
+      },
+      {
+        "instance_name": "instance_0464_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 898.8
+      },
+      {
+        "instance_name": "instance_0467_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 876.3
+      },
+      {
+        "instance_name": "instance_0468_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1233.1
+      },
+      {
+        "instance_name": "instance_0470_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 560.6
+      },
+      {
+        "instance_name": "instance_0471_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1395.55
+      },
+      {
+        "instance_name": "instance_0472_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 790.75
+      },
+      {
+        "instance_name": "instance_0473_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 503.25
+      },
+      {
+        "instance_name": "instance_0475_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 845.45
+      },
+      {
+        "instance_name": "instance_0477_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 799.75
+      },
+      {
+        "instance_name": "instance_0478_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 923.6
+      },
+      {
+        "instance_name": "instance_0479_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 606.3
+      },
+      {
+        "instance_name": "instance_0480_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 673.6
+      },
+      {
+        "instance_name": "instance_0481_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 445.95
+      },
+      {
+        "instance_name": "instance_0482_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 937.75
+      },
+      {
+        "instance_name": "instance_0483_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 538.2
+      },
+      {
+        "instance_name": "instance_0484_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 862.15
+      },
+      {
+        "instance_name": "instance_0486_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 632.9
+      },
+      {
+        "instance_name": "instance_0487_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 595.4
+      },
+      {
+        "instance_name": "instance_0489_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 789.05
+      },
+      {
+        "instance_name": "instance_0492_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1156.1
+      },
+      {
+        "instance_name": "instance_0494_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 581.8
+      },
+      {
+        "instance_name": "instance_0495_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 566.45
+      },
+      {
+        "instance_name": "instance_0496_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 588.5
+      },
+      {
+        "instance_name": "instance_0497_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 392.6
+      },
+      {
+        "instance_name": "instance_0499_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1012.95
+      },
+      {
+        "instance_name": "instance_0500_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 759.15
+      },
+      {
+        "instance_name": "instance_0503_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 860.95
+      },
+      {
+        "instance_name": "instance_0504_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 962.3
+      },
+      {
+        "instance_name": "instance_0505_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1698.05
+      },
+      {
+        "instance_name": "instance_0506_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 521.95
+      },
+      {
+        "instance_name": "instance_0507_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 955.65
+      },
+      {
+        "instance_name": "instance_0509_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 469.0
+      },
+      {
+        "instance_name": "instance_0510_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2258.7
+      },
+      {
+        "instance_name": "instance_0511_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 333.5
+      },
+      {
+        "instance_name": "instance_0514_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 270.55
+      },
+      {
+        "instance_name": "instance_0516_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 327.0
+      },
+      {
+        "instance_name": "instance_0519_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 343.55
+      },
+      {
+        "instance_name": "instance_0521_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 450.9
+      },
+      {
+        "instance_name": "instance_0522_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 427.0
+      },
+      {
+        "instance_name": "instance_0524_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 524.55
+      },
+      {
+        "instance_name": "instance_0525_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 470.6
+      },
+      {
+        "instance_name": "instance_0526_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 938.15
+      },
+      {
+        "instance_name": "instance_0527_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 413.75
+      },
+      {
+        "instance_name": "instance_0529_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1230.65
+      },
+      {
+        "instance_name": "instance_0531_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 342.85
+      },
+      {
+        "instance_name": "instance_0532_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 457.8
+      },
+      {
+        "instance_name": "instance_0538_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 885.25
+      },
+      {
+        "instance_name": "instance_0540_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 591.1
+      },
+      {
+        "instance_name": "instance_0541_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 484.2
+      },
+      {
+        "instance_name": "instance_0542_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 920.95
+      },
+      {
+        "instance_name": "instance_0543_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2045.9
+      },
+      {
+        "instance_name": "instance_0545_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 488.35
+      },
+      {
+        "instance_name": "instance_0549_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 387.75
+      },
+      {
+        "instance_name": "instance_0552_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 896.4
+      },
+      {
+        "instance_name": "instance_0553_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 807.95
+      },
+      {
+        "instance_name": "instance_0554_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 477.3
+      },
+      {
+        "instance_name": "instance_0555_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 692.25
+      },
+      {
+        "instance_name": "instance_0558_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 824.25
+      },
+      {
+        "instance_name": "instance_0562_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 357.1
+      },
+      {
+        "instance_name": "instance_0563_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1305.85
+      },
+      {
+        "instance_name": "instance_0566_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 448.6
+      },
+      {
+        "instance_name": "instance_0570_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 812.45
+      },
+      {
+        "instance_name": "instance_0572_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 476.6
+      },
+      {
+        "instance_name": "instance_0574_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 645.6
+      },
+      {
+        "instance_name": "instance_0575_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1377.75
+      },
+      {
+        "instance_name": "instance_0578_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2031.15
+      },
+      {
+        "instance_name": "instance_0580_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 593.3
+      },
+      {
+        "instance_name": "instance_0581_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 744.9
+      },
+      {
+        "instance_name": "instance_0582_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1189.4
+      },
+      {
+        "instance_name": "instance_0584_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 466.8
+      },
+      {
+        "instance_name": "instance_0586_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 587.95
+      },
+      {
+        "instance_name": "instance_0589_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 272.0
+      },
+      {
+        "instance_name": "instance_0591_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 441.2
+      },
+      {
+        "instance_name": "instance_0592_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 942.8
+      },
+      {
+        "instance_name": "instance_0597_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 563.6
+      },
+      {
+        "instance_name": "instance_0600_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 723.1
+      },
+      {
+        "instance_name": "instance_0601_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 439.0
+      },
+      {
+        "instance_name": "instance_0605_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1378.1
+      },
+      {
+        "instance_name": "instance_0608_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 814.8
+      },
+      {
+        "instance_name": "instance_0609_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 553.65
+      },
+      {
+        "instance_name": "instance_0612_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 611.6
+      },
+      {
+        "instance_name": "instance_0613_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 614.6
+      },
+      {
+        "instance_name": "instance_0615_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2018.7
+      },
+      {
+        "instance_name": "instance_0619_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1187.0
+      },
+      {
+        "instance_name": "instance_0622_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1691.65
+      },
+      {
+        "instance_name": "instance_0623_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 633.65
+      },
+      {
+        "instance_name": "instance_0624_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 673.55
+      },
+      {
+        "instance_name": "instance_0628_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 340.0
+      },
+      {
+        "instance_name": "instance_0629_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 316.05
+      },
+      {
+        "instance_name": "instance_0631_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 565.8
+      },
+      {
+        "instance_name": "instance_0632_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 855.3
+      },
+      {
+        "instance_name": "instance_0634_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 597.25
+      },
+      {
+        "instance_name": "instance_0635_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 513.5
+      },
+      {
+        "instance_name": "instance_0637_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 531.3
+      },
+      {
+        "instance_name": "instance_0638_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1933.05
+      },
+      {
+        "instance_name": "instance_0639_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 956.95
+      },
+      {
+        "instance_name": "instance_0640_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 484.6
+      },
+      {
+        "instance_name": "instance_0644_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 976.1
+      },
+      {
+        "instance_name": "instance_0646_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 441.95
+      },
+      {
+        "instance_name": "instance_0648_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 408.55
+      },
+      {
+        "instance_name": "instance_0649_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 900.5
+      },
+      {
+        "instance_name": "instance_0650_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 425.55
+      },
+      {
+        "instance_name": "instance_0651_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 444.55
+      },
+      {
+        "instance_name": "instance_0652_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 208.0
+      },
+      {
+        "instance_name": "instance_0653_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 518.35
+      },
+      {
+        "instance_name": "instance_0654_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 501.4
+      },
+      {
+        "instance_name": "instance_0655_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 803.0
+      },
+      {
+        "instance_name": "instance_0656_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 608.15
+      },
+      {
+        "instance_name": "instance_0658_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 545.7
+      },
+      {
+        "instance_name": "instance_0659_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 360.75
+      },
+      {
+        "instance_name": "instance_0661_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 366.15
+      },
+      {
+        "instance_name": "instance_0662_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 500.6
+      },
+      {
+        "instance_name": "instance_0663_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 556.85
+      },
+      {
+        "instance_name": "instance_0664_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 506.8
+      },
+      {
+        "instance_name": "instance_0667_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 350.05
+      },
+      {
+        "instance_name": "instance_0668_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 730.4
+      },
+      {
+        "instance_name": "instance_0669_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 501.2
+      },
+      {
+        "instance_name": "instance_0672_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1383.95
+      },
+      {
+        "instance_name": "instance_0674_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 704.55
+      },
+      {
+        "instance_name": "instance_0675_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1027.65
+      },
+      {
+        "instance_name": "instance_0676_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 899.45
+      },
+      {
+        "instance_name": "instance_0677_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1249.35
+      },
+      {
+        "instance_name": "instance_0678_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 898.75
+      },
+      {
+        "instance_name": "instance_0681_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 914.65
+      },
+      {
+        "instance_name": "instance_0682_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1803.35
+      },
+      {
+        "instance_name": "instance_0683_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1066.75
+      },
+      {
+        "instance_name": "instance_0684_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 493.85
+      },
+      {
+        "instance_name": "instance_0686_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 592.2
+      },
+      {
+        "instance_name": "instance_0687_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 545.0
+      },
+      {
+        "instance_name": "instance_0689_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 667.65
+      },
+      {
+        "instance_name": "instance_0690_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1415.55
+      },
+      {
+        "instance_name": "instance_0694_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 789.95
+      },
+      {
+        "instance_name": "instance_0695_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 766.65
+      },
+      {
+        "instance_name": "instance_0696_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2146.4
+      },
+      {
+        "instance_name": "instance_0697_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1312.75
+      },
+      {
+        "instance_name": "instance_0700_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 680.5
+      },
+      {
+        "instance_name": "instance_0701_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 685.05
+      },
+      {
+        "instance_name": "instance_0704_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 437.8
+      },
+      {
+        "instance_name": "instance_0707_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 260.4
+      },
+      {
+        "instance_name": "instance_0708_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 805.1
+      },
+      {
+        "instance_name": "instance_0710_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 463.4
+      },
+      {
+        "instance_name": "instance_0711_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 402.0
+      },
+      {
+        "instance_name": "instance_0713_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 427.85
+      },
+      {
+        "instance_name": "instance_0715_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1996.4
+      },
+      {
+        "instance_name": "instance_0716_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1523.95
+      },
+      {
+        "instance_name": "instance_0717_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 675.5
+      },
+      {
+        "instance_name": "instance_0719_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 396.45
+      },
+      {
+        "instance_name": "instance_0720_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 507.0
+      },
+      {
+        "instance_name": "instance_0721_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 552.95
+      },
+      {
+        "instance_name": "instance_0722_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1499.3
+      },
+      {
+        "instance_name": "instance_0723_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1670.45
+      },
+      {
+        "instance_name": "instance_0724_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1451.7
+      },
+      {
+        "instance_name": "instance_0725_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 659.35
+      },
+      {
+        "instance_name": "instance_0729_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 619.8
+      },
+      {
+        "instance_name": "instance_0731_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 716.6
+      },
+      {
+        "instance_name": "instance_0732_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1053.65
+      },
+      {
+        "instance_name": "instance_0733_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 797.85
+      },
+      {
+        "instance_name": "instance_0734_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 486.4
+      },
+      {
+        "instance_name": "instance_0735_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1835.1
+      },
+      {
+        "instance_name": "instance_0736_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 618.25
+      },
+      {
+        "instance_name": "instance_0737_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 889.55
+      },
+      {
+        "instance_name": "instance_0739_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 485.95
+      },
+      {
+        "instance_name": "instance_0740_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 724.4
+      },
+      {
+        "instance_name": "instance_0744_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1160.3
+      },
+      {
+        "instance_name": "instance_0746_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 662.2
+      },
+      {
+        "instance_name": "instance_0749_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1239.35
+      },
+      {
+        "instance_name": "instance_0753_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1011.35
+      },
+      {
+        "instance_name": "instance_0755_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 552.8
+      },
+      {
+        "instance_name": "instance_0756_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 554.35
+      },
+      {
+        "instance_name": "instance_0757_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 408.85
+      },
+      {
+        "instance_name": "instance_0758_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 535.35
+      },
+      {
+        "instance_name": "instance_0759_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 532.15
+      },
+      {
+        "instance_name": "instance_0763_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 328.85
+      },
+      {
+        "instance_name": "instance_0766_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1227.15
+      },
+      {
+        "instance_name": "instance_0767_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 925.55
+      },
+      {
+        "instance_name": "instance_0768_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 207.95
+      },
+      {
+        "instance_name": "instance_0769_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 426.75
+      },
+      {
+        "instance_name": "instance_0770_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 469.7
+      },
+      {
+        "instance_name": "instance_0771_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 464.35
+      },
+      {
+        "instance_name": "instance_0772_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 361.0
+      },
+      {
+        "instance_name": "instance_0773_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 486.55
+      },
+      {
+        "instance_name": "instance_0774_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 655.85
+      },
+      {
+        "instance_name": "instance_0775_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 539.3
+      },
+      {
+        "instance_name": "instance_0777_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1149.55
+      },
+      {
+        "instance_name": "instance_0778_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 416.0
+      },
+      {
+        "instance_name": "instance_0780_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 544.05
+      },
+      {
+        "instance_name": "instance_0781_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 354.0
+      },
+      {
+        "instance_name": "instance_0782_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 384.75
+      },
+      {
+        "instance_name": "instance_0783_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 896.25
+      },
+      {
+        "instance_name": "instance_0784_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 702.1
+      },
+      {
+        "instance_name": "instance_0785_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 607.55
+      },
+      {
+        "instance_name": "instance_0786_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1004.7
+      },
+      {
+        "instance_name": "instance_0788_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 309.35
+      },
+      {
+        "instance_name": "instance_0789_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 719.55
+      },
+      {
+        "instance_name": "instance_0791_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 596.3
+      },
+      {
+        "instance_name": "instance_0796_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1330.35
+      },
+      {
+        "instance_name": "instance_0797_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 409.45
+      },
+      {
+        "instance_name": "instance_0800_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 602.3
+      },
+      {
+        "instance_name": "instance_0802_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 988.9
+      },
+      {
+        "instance_name": "instance_0803_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 528.0
+      },
+      {
+        "instance_name": "instance_0804_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 509.15
+      },
+      {
+        "instance_name": "instance_0805_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 836.8
+      },
+      {
+        "instance_name": "instance_0806_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 533.65
+      },
+      {
+        "instance_name": "instance_0807_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 388.3
+      },
+      {
+        "instance_name": "instance_0809_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 640.2
+      },
+      {
+        "instance_name": "instance_0811_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 519.25
+      },
+      {
+        "instance_name": "instance_0812_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 976.6
+      },
+      {
+        "instance_name": "instance_0813_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 316.65
+      },
+      {
+        "instance_name": "instance_0814_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 807.75
+      },
+      {
+        "instance_name": "instance_0816_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2436.45
+      },
+      {
+        "instance_name": "instance_0817_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1660.7
+      },
+      {
+        "instance_name": "instance_0819_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 814.5
+      },
+      {
+        "instance_name": "instance_0822_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 639.4
+      },
+      {
+        "instance_name": "instance_0824_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 532.8
+      },
+      {
+        "instance_name": "instance_0827_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 595.75
+      },
+      {
+        "instance_name": "instance_0829_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 482.0
+      },
+      {
+        "instance_name": "instance_0830_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 583.5
+      },
+      {
+        "instance_name": "instance_0831_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 661.4
+      },
+      {
+        "instance_name": "instance_0832_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 789.05
+      },
+      {
+        "instance_name": "instance_0833_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 695.0
+      },
+      {
+        "instance_name": "instance_0834_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 472.0
+      },
+      {
+        "instance_name": "instance_0835_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2157.3
+      },
+      {
+        "instance_name": "instance_0836_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1372.2
+      },
+      {
+        "instance_name": "instance_0837_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1276.55
+      },
+      {
+        "instance_name": "instance_0838_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 624.7
+      },
+      {
+        "instance_name": "instance_0840_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 785.9
+      },
+      {
+        "instance_name": "instance_0841_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 838.8
+      },
+      {
+        "instance_name": "instance_0842_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1762.35
+      },
+      {
+        "instance_name": "instance_0843_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 630.25
+      },
+      {
+        "instance_name": "instance_0845_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 803.55
+      },
+      {
+        "instance_name": "instance_0847_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 602.55
+      },
+      {
+        "instance_name": "instance_0848_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 812.7
+      },
+      {
+        "instance_name": "instance_0850_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 716.85
+      },
+      {
+        "instance_name": "instance_0852_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 468.4
+      },
+      {
+        "instance_name": "instance_0853_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1519.4
+      },
+      {
+        "instance_name": "instance_0854_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 670.45
+      },
+      {
+        "instance_name": "instance_0857_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 611.0
+      },
+      {
+        "instance_name": "instance_0858_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 394.6
+      },
+      {
+        "instance_name": "instance_0862_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 638.9
+      },
+      {
+        "instance_name": "instance_0863_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 422.7
+      },
+      {
+        "instance_name": "instance_0864_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 742.25
+      },
+      {
+        "instance_name": "instance_0866_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 632.0
+      },
+      {
+        "instance_name": "instance_0867_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 525.5
+      },
+      {
+        "instance_name": "instance_0868_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 656.25
+      },
+      {
+        "instance_name": "instance_0870_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 620.0
+      },
+      {
+        "instance_name": "instance_0871_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 638.5
+      },
+      {
+        "instance_name": "instance_0872_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 896.6
+      },
+      {
+        "instance_name": "instance_0873_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 874.85
+      },
+      {
+        "instance_name": "instance_0875_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 454.15
+      },
+      {
+        "instance_name": "instance_0876_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 838.95
+      },
+      {
+        "instance_name": "instance_0879_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 604.95
+      },
+      {
+        "instance_name": "instance_0882_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 646.55
+      },
+      {
+        "instance_name": "instance_0883_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 464.15
+      },
+      {
+        "instance_name": "instance_0884_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 466.25
+      },
+      {
+        "instance_name": "instance_0885_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 690.95
+      },
+      {
+        "instance_name": "instance_0887_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 344.15
+      },
+      {
+        "instance_name": "instance_0889_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1381.8
+      },
+      {
+        "instance_name": "instance_0890_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 758.55
+      },
+      {
+        "instance_name": "instance_0891_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 596.5
+      },
+      {
+        "instance_name": "instance_0892_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 464.95
+      },
+      {
+        "instance_name": "instance_0894_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1751.45
+      },
+      {
+        "instance_name": "instance_0897_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 716.75
+      },
+      {
+        "instance_name": "instance_0898_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 441.45
+      },
+      {
+        "instance_name": "instance_0899_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 454.65
+      },
+      {
+        "instance_name": "instance_0900_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 530.3
+      },
+      {
+        "instance_name": "instance_0902_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 808.85
+      },
+      {
+        "instance_name": "instance_0904_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 976.8
+      },
+      {
+        "instance_name": "instance_0905_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1165.35
+      },
+      {
+        "instance_name": "instance_0906_j20_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1399.95
+      },
+      {
+        "instance_name": "instance_0908_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1131.6
+      },
+      {
+        "instance_name": "instance_0910_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 490.75
+      },
+      {
+        "instance_name": "instance_0912_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 975.25
+      },
+      {
+        "instance_name": "instance_0914_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1745.75
+      },
+      {
+        "instance_name": "instance_0915_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 831.7
+      },
+      {
+        "instance_name": "instance_0916_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 408.9
+      },
+      {
+        "instance_name": "instance_0917_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 487.1
+      },
+      {
+        "instance_name": "instance_0920_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1830.65
+      },
+      {
+        "instance_name": "instance_0922_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 624.55
+      },
+      {
+        "instance_name": "instance_0923_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 843.25
+      },
+      {
+        "instance_name": "instance_0926_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 485.95
+      },
+      {
+        "instance_name": "instance_0927_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 539.65
+      },
+      {
+        "instance_name": "instance_0929_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 948.1
+      },
+      {
+        "instance_name": "instance_0930_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 651.2
+      },
+      {
+        "instance_name": "instance_0933_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 651.0
+      },
+      {
+        "instance_name": "instance_0934_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 616.15
+      },
+      {
+        "instance_name": "instance_0936_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 608.85
+      },
+      {
+        "instance_name": "instance_0938_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 517.7
+      },
+      {
+        "instance_name": "instance_0939_j20_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 678.0
+      },
+      {
+        "instance_name": "instance_0942_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 678.05
+      },
+      {
+        "instance_name": "instance_0945_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 592.1
+      },
+      {
+        "instance_name": "instance_0947_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 470.9
+      },
+      {
+        "instance_name": "instance_0948_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 445.75
+      },
+      {
+        "instance_name": "instance_0949_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 350.0
+      },
+      {
+        "instance_name": "instance_0950_j5_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 464.6
+      },
+      {
+        "instance_name": "instance_0951_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 874.35
+      },
+      {
+        "instance_name": "instance_0952_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 839.65
+      },
+      {
+        "instance_name": "instance_0955_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 721.3
+      },
+      {
+        "instance_name": "instance_0959_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 538.45
+      },
+      {
+        "instance_name": "instance_0960_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 575.85
+      },
+      {
+        "instance_name": "instance_0961_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 537.75
+      },
+      {
+        "instance_name": "instance_0963_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 406.9
+      },
+      {
+        "instance_name": "instance_0966_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 645.95
+      },
+      {
+        "instance_name": "instance_0968_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 932.75
+      },
+      {
+        "instance_name": "instance_0969_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 455.55
+      },
+      {
+        "instance_name": "instance_0971_j20_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 812.35
+      },
+      {
+        "instance_name": "instance_0973_j15_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 927.8
+      },
+      {
+        "instance_name": "instance_0975_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1213.5
+      },
+      {
+        "instance_name": "instance_0976_j15_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1470.95
+      },
+      {
+        "instance_name": "instance_0979_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 483.6
+      },
+      {
+        "instance_name": "instance_0982_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 377.95
+      },
+      {
+        "instance_name": "instance_0983_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 494.9
+      },
+      {
+        "instance_name": "instance_0985_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 440.4
+      },
+      {
+        "instance_name": "instance_0986_j15_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 579.45
+      },
+      {
+        "instance_name": "instance_0987_j15_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 597.25
+      },
+      {
+        "instance_name": "instance_0989_j5_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 307.0
+      },
+      {
+        "instance_name": "instance_0994_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 812.85
+      },
+      {
+        "instance_name": "instance_0995_j10_m10.fjs",
+        "dataset": "unknown",
+        "best_makespan": 385.15
+      },
+      {
+        "instance_name": "instance_0999_j10_m8.fjs",
+        "dataset": "unknown",
+        "best_makespan": 537.5
+      }
+    ]
+  },
+  "MWKR_EET": {
+    "label_index": 7,
+    "count": 15,
+    "instances": [
+      {
+        "instance_name": "instance_0057_j10_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 896.6
+      },
+      {
+        "instance_name": "instance_0082_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 295.8
+      },
+      {
+        "instance_name": "instance_0099_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 770.25
+      },
+      {
+        "instance_name": "instance_0106_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1494.3
+      },
+      {
+        "instance_name": "instance_0167_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 853.3
+      },
+      {
+        "instance_name": "instance_0170_j5_m6.fjs",
+        "dataset": "unknown",
+        "best_makespan": 437.75
+      },
+      {
+        "instance_name": "instance_0277_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1292.5
+      },
+      {
+        "instance_name": "instance_0550_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 725.95
+      },
+      {
+        "instance_name": "instance_0559_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1181.95
+      },
+      {
+        "instance_name": "instance_0577_j10_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 1224.8
+      },
+      {
+        "instance_name": "instance_0764_j20_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 2183.8
+      },
+      {
+        "instance_name": "instance_0839_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 950.7
+      },
+      {
+        "instance_name": "instance_0925_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 559.05
+      },
+      {
+        "instance_name": "instance_0956_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 903.6
+      },
+      {
+        "instance_name": "instance_0962_j5_m4.fjs",
+        "dataset": "unknown",
+        "best_makespan": 550.6
+      }
+    ]
+  }
+}
