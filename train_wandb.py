@@ -199,9 +199,9 @@ class Trainer:
         # 使用Focal Loss替代普通NLLLoss
         self.criterion = FocalLoss(
             alpha=self.class_weights,
-            gamma=2.0  # 增大gamma更关注难样本，8分类建议3-4
+            gamma=3.0  # 增大gamma更关注难样本，8分类建议3-4
         )
-        print(f"使用 Focal Loss (gamma=2.0) 处理类别不平衡")
+        print(f"使用 Focal Loss (gamma=3.0) 处理类别不平衡")
 
         
         # 创建数据加载器 - 由于图大小不一致，每次加载一个图
@@ -1294,7 +1294,7 @@ def main():
                         help='批次大小 - 注意：由于图大小不一致，实际batch_size固定为1，此参数已废弃 (默认: 32)')
     parser.add_argument('--accumulation_steps', type=int, default=32,
                         help='梯度累积步数，模拟更大的batch size (默认: 32)')
-    parser.add_argument('--lr', type=float, default=0.001,
+    parser.add_argument('--lr', type=float, default=0.0001,
                         help='初始学习率 (默认: 0.001)')
     parser.add_argument('--weight_decay', type=float, default=5e-4,
                         help='L2正则化系数 (默认: 5e-4)')
