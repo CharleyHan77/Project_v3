@@ -2,6 +2,7 @@ from torch.utils.data import dataset
 import os
 import os.path
 import json
+import random
 
 from torch_geometric.data import Data as Graph
 import torch
@@ -9,12 +10,14 @@ from torch.utils.data.dataset import random_split
 
 
 class Dataset(dataset.Dataset):
-    def __init__(self, fjs_root_path, label_root_path, *, label_name = "mean", device = None, train_ratio = 0.8):
+    def __init__(self, fjs_root_path, label_root_path, *, label_name = "mean", device = None, train_ratio = 0.8, augment = False, aug_prob = 0.5):
         self.fjs_root_path = fjs_root_path
         self.label_root_path = label_root_path
         self.label_name = label_name
         self.device = device
         self.train_ratio = train_ratio
+        self.augment = augment  # 是否启用数据增强（新增）
+        self.aug_prob = aug_prob  # 数据增强概率（新增）
 
         labels = self._get_files(self.label_root_path)
         self.data = []
@@ -44,11 +47,11 @@ class Dataset(dataset.Dataset):
                 torch.tensor(
                     [
                         label_info["FIFO_SPT"]["makespan"]["values"][self.label_name], 
-                        label_info["FIFO_EET"]["makespan"]["values"][self.label_name], 
+                        #label_info["FIFO_EET"]["makespan"]["values"][self.label_name], 
                         label_info["MOPNR_SPT"]["makespan"]["values"][self.label_name], 
                         label_info["MOPNR_EET"]["makespan"]["values"][self.label_name], 
-                        label_info["LWKR_SPT"]["makespan"]["values"][self.label_name], 
-                        label_info["LWKR_EET"]["makespan"]["values"][self.label_name], 
+                        #label_info["LWKR_SPT"]["makespan"]["values"][self.label_name], 
+                        #label_info["LWKR_EET"]["makespan"]["values"][self.label_name], 
                         label_info["MWKR_SPT"]["makespan"]["values"][self.label_name], 
                         label_info["MWKR_EET"]["makespan"]["values"][self.label_name]
                     ]
@@ -60,11 +63,67 @@ class Dataset(dataset.Dataset):
         # self._split_dataset()
 
     def __getitem__(self, i):
-        return self.data[i]
+        data = self.data[i]
+        
+        # 如果启用增强，且随机决定要增强这个样本
+        if self.augment and random.random() < self.aug_prob:
+            data = self._augment_graph(data)
+        
+        return data
 
     def __len__(self):
         return len(self.data)
 
+
+    # ============ 新增：数据增强方法 ============
+    def _augment_graph(self, data):
+        """
+        图数据增强
+        保持图的语义不变，只对特征进行合理扰动
+        """
+        # 深拷贝，避免修改原始数据
+        augmented = data.clone()
+        
+        # 增强1：边时间特征添加高斯噪声（±5-10%）
+        # 模拟加工时间的估计误差
+        edge_attr = augmented.edge_attr.clone()
+        time_mask = edge_attr[:, 0] == 0  # 只对机器-工序边（非工序连接边）添加噪声
+        
+        if time_mask.any():
+            # 生成噪声：均值0，标准差为原值的5-10%
+            noise_std = 0.05 + random.random() * 0.05  # 随机选择5-10%
+            time_values = edge_attr[time_mask, 1]
+            noise = torch.randn_like(time_values) * noise_std * time_values
+            edge_attr[time_mask, 1] = time_values + noise
+            # 确保时间非负
+            edge_attr[time_mask, 1] = torch.clamp(edge_attr[time_mask, 1], min=0.1)
+        
+        augmented.edge_attr = edge_attr
+        
+        # 增强2：边Dropout（随机删除5-15%的机器-工序边）
+        # 模拟某些机器不可用的情况，增加模型鲁棒性
+        if random.random() < 0.4:  # 40%概率进行边dropout
+            dropout_ratio = 0.05 + random.random() * 0.10  # 删除5-15%
+            edge_keep_prob = 1.0 - dropout_ratio
+            edge_mask = torch.rand(augmented.edge_index.shape[1]) < edge_keep_prob
+            
+            # 保留所有工序之间的连接边（这些边定义了工序顺序，不能删除）
+            process_edges = augmented.edge_attr[:, 0] == 1
+            edge_mask = edge_mask | process_edges
+            
+            # 应用mask
+            augmented.edge_index = augmented.edge_index[:, edge_mask]
+            augmented.edge_attr = augmented.edge_attr[edge_mask]
+        
+        # 增强3：时间缩放（模拟不同速度的机器）
+        if random.random() < 0.3:  # 30%概率进行全局时间缩放
+            scale_factor = 0.9 + random.random() * 0.2  # 0.9-1.1倍
+            time_mask = augmented.edge_attr[:, 0] == 0
+            augmented.edge_attr[time_mask, 1] *= scale_factor
+        
+        return augmented
+    # ============ 数据增强方法结束 ============
+    
     ############# 验证集分层采样 #############
 
     def get_best_method(self, i):

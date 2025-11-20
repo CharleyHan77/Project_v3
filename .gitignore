@@ -1,0 +1,4 @@
+*.png
+checkpoints/
+__pycache__/
+

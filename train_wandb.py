@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.data import DataLoader
 from torch.utils.data.dataset import random_split
@@ -9,6 +10,7 @@ from datetime import datetime
 import numpy as np
 from tqdm import tqdm
 import matplotlib
+from torch.utils.data import WeightedRandomSampler
 matplotlib.use('Agg')  # 使用非交互式后端，适合服务器环境
 import matplotlib.pyplot as plt
 from sklearn.metrics import (
@@ -29,10 +31,93 @@ from dataset import Dataset
 - 任务类型：分类任务（选择最佳的初始化方法）
 - 标签格式：[heuristic性能, mixed性能, random性能]
 - 标签转换：将性能值转为类别（argmin，因为性能值越小越好）
-- 损失函数：NLLLoss（配合模型的log_softmax输出）
+- 损失函数：KLDivLoss（配合模型的log_softmax输出）
 - 评估指标：分类准确率
 """
 
+class FocalLoss(nn.Module):
+    """
+    Focal Loss for addressing extreme class imbalance
+    
+    论文: Lin et al. "Focal Loss for Dense Object Detection" (ICCV 2017)
+    
+    FL(p_t) = -α_t * (1 - p_t)^γ * log(p_t)
+    
+    其中:
+    - p_t: 正确类别的预测概率
+    - α_t: 类别权重（处理类别不平衡）
+    - γ: 聚焦参数（调节简单/困难样本的权重）
+    
+    Args:
+        alpha: 类别权重向量 [num_classes], 通常为 1/类别频率
+        gamma: 聚焦参数，默认2.0
+               - γ=0 退化为标准交叉熵
+               - γ=2 简单样本权重降低100倍+
+               - γ=5 简单样本权重降低1000倍+
+        reduction: 'mean', 'sum' or 'none'
+    """
+    def __init__(self, alpha=None, gamma=2.0, reduction='mean'):
+        super(FocalLoss, self).__init__()
+        self.alpha = alpha  # 类别权重，shape: [num_classes]
+        self.gamma = gamma  # 聚焦参数
+        self.reduction = reduction
+        
+    def forward(self, inputs, targets):
+        """
+        Args:
+            inputs: [batch_size, num_classes] - 模型输出的log概率（log_softmax的结果）
+            targets: [batch_size] - 真实类别标签（整数索引）
+        
+        Returns:
+            loss: 标量损失值
+        """
+        # 输入验证
+        assert inputs.dim() == 2, f"Expected 2D input, got {inputs.dim()}D"
+        assert targets.dim() == 1, f"Expected 1D targets, got {targets.dim()}D"
+        
+        # 从log概率转换为概率: p = exp(log_p)
+        probs = torch.exp(inputs)
+        
+        # 获取正确类别的概率和log概率
+        batch_size = inputs.size(0)
+        targets = targets.view(-1, 1)  # [batch_size, 1]
+        
+        # 使用gather提取目标类别的值
+        probs_t = probs.gather(1, targets).view(-1)      # p_t: [batch_size]
+        log_probs_t = inputs.gather(1, targets).view(-1) # log(p_t): [batch_size]
+        
+        # 计算Focal Loss的调制因子: (1 - p_t)^γ
+        focal_weight = torch.pow(1.0 - probs_t, self.gamma)
+        
+        # 应用类别权重α_t
+        if self.alpha is not None:
+            # 确保alpha在正确的设备上
+            if self.alpha.device != inputs.device:
+                self.alpha = self.alpha.to(inputs.device)
+            
+            # 提取每个样本对应类别的alpha值
+            alpha_t = self.alpha.gather(0, targets.view(-1))
+            focal_weight = alpha_t * focal_weight
+        
+        # 计算最终的Focal Loss: -α_t * (1-p_t)^γ * log(p_t)
+        loss = -focal_weight * log_probs_t
+        
+        # 应用reduction
+        if self.reduction == 'mean':
+            return loss.mean()
+        elif self.reduction == 'sum':
+            return loss.sum()
+        else:  # 'none'
+            return loss
+    
+    def get_params_info(self):
+        """返回当前参数信息（用于调试）"""
+        info = {
+            'gamma': self.gamma,
+            'alpha': self.alpha.cpu().numpy().tolist() if self.alpha is not None else None,
+            'reduction': self.reduction
+        }
+        return info
 
 class Trainer:
     def __init__(self, args):
@@ -49,7 +134,7 @@ class Trainer:
 
         # 初始化 wandb
         wandb.init(
-            project="GNN for fjsp",  # 项目名称，可以自定义
+            project="Project_v3.1",  # 项目名称，可以自定义
             name=f"{args.model_name}_{timestamp}",  # 运行名称
             config={
                 "model_name": args.model_name,
@@ -68,18 +153,17 @@ class Trainer:
             dir=self.save_path  # wandb 日志保存到相同目录
         )
 
-        if args.num_classes == 8:
-            self.class_names = ['FIFO_SPT', 'FIFO_EET', 'MOPNR_SPT', 'MOPNR_EET', 
-                               'LWKR_SPT', 'LWKR_EET', 'MWKR_SPT', 'MWKR_EET']
-        elif args.num_classes == 3:
-            self.class_names = ['heuristic', 'mixed', 'random']
-        else:
-            # 对于其他类别数，使用通用名称
-            self.class_names = [f'class_{i}' for i in range(args.num_classes)]
+        self.class_names = ['FIFO_SPT', 'MOPNR_SPT', 'MOPNR_EET', 'MWKR_SPT', 'MWKR_EET']
         
         # 加载数据集
         print(f"正在加载数据集...")
-        full_dataset = Dataset(args.fjs_root_path, args.label_root_path, device="cuda")
+        full_dataset = Dataset(
+            args.fjs_root_path, 
+            args.label_root_path, 
+            device="cuda",
+            augment=args.use_augmentation,      # 新增：根据参数决定是否增强
+            aug_prob=args.augmentation_prob     # 新增：增强概率
+            )
         
         # 划分训练集和验证集
         train_size = int(args.train_ratio * len(full_dataset))
@@ -103,8 +187,10 @@ class Trainer:
         print(f"  验证集: {len(self.val_dataset)} 样本")
         
         print(f"\n训练集类别分布:")
+        class_counts = np.zeros(self.args.num_classes, dtype=int)  # 新增：记录类别计数
         for method_id, method_name in zip(range(self.args.num_classes), self.class_names):
             count = train_methods.count(method_id)
+            class_counts[method_id] = count  # 新增
             print(f"  {method_name}: {count} ({100*count/len(train_methods):.1f}%)")
         
         print(f"\n验证集类别分布:")
@@ -117,13 +203,56 @@ class Trainer:
         
         print(f"\n训练模式: 单图训练 + 梯度累积({args.accumulation_steps}步)")
         print(f"等效批次大小: {args.accumulation_steps}")
+
         
-        # 创建数据加载器 - 由于图大小不一致，每次加载一个图
-        self.train_loader = DataLoader(
-            self.train_dataset, 
-            batch_size=1,  # 每次处理一个图
-            shuffle=True
-        )
+        
+        # ============ 新增：创建加权采样器（处理类别不平衡）============
+        if args.use_weighted_sampling:
+            print(f"\n启用加权采样策略:")
+            print(f"  类别计数: {class_counts}")
+            
+            # 计算每个样本的权重（少数类权重高）
+            # weight = 1 / class_count，这样少数类被采样的概率更高
+            sample_weights = []
+            for label in train_methods:
+                if class_counts[label] > 0:
+                    sample_weights.append(1.0 / class_counts[label])
+                else:
+                    sample_weights.append(0.0)
+            
+            # 计算采样倍数
+            sampling_multiplier = args.sampling_multiplier
+            num_samples = int(len(self.train_dataset) * sampling_multiplier)
+            
+            print(f"  采样倍数: {sampling_multiplier}x")
+            print(f"  每个epoch有效样本数: {num_samples} (原始: {len(self.train_dataset)})")
+            
+            # 创建加权随机采样器
+            sampler = WeightedRandomSampler(
+                weights=sample_weights,
+                num_samples=num_samples,
+                replacement=True  # 允许重复采样
+            )
+            
+            # 使用sampler创建DataLoader
+            self.train_loader = DataLoader(
+                self.train_dataset, 
+                batch_size=1,
+                sampler=sampler,  # 使用加权采样器
+                # 注意：使用sampler时不能使用shuffle=True
+            )
+            
+            print(f"  加权采样器已启用：少数类将被更频繁采样")
+        else:
+            # 不使用加权采样，保持原有逻辑
+            self.train_loader = DataLoader(
+                self.train_dataset, 
+                batch_size=1,
+                shuffle=True
+            )
+        # ============ 加权采样器设置结束 ============
+
+
         self.val_loader = DataLoader(
             self.val_dataset,
             batch_size=1,  # 每次处理一个图
@@ -138,6 +267,56 @@ class Trainer:
             hidden_dim=args.hidden_dim,
             num_classes=args.num_classes
         ).to(self.device)
+
+        # ============ 新增：初始化损失函数（Focal Loss或NLL Loss）============
+        if args.use_focal_loss:
+            print(f"\n{'='*60}")
+            print("初始化 Focal Loss")
+            print(f"{'='*60}")
+            
+            # 计算类别权重alpha
+            # 方法1: 基于逆频率（推荐）
+            alpha = np.zeros(self.args.num_classes, dtype=np.float32)
+            for i in range(self.args.num_classes):
+                if class_counts[i] > 0:
+                    alpha[i] = 1.0 / class_counts[i]
+                else:
+                    alpha[i] = 0.0
+            
+            # 归一化alpha，使其和为num_classes（保持与标准损失相同的量级）
+            alpha = alpha / alpha.sum() * self.args.num_classes
+            alpha = torch.FloatTensor(alpha).to(self.device)
+            
+            print(f"\n类别权重 (alpha):")
+            for i, (name, a, count) in enumerate(zip(self.class_names, alpha.cpu().numpy(), class_counts)):
+                print(f"  {name:12s}: α={a:.4f} (样本数={count}, 相对权重={a/alpha.min():.1f}x)")
+            
+            # 创建Focal Loss
+            self.criterion = FocalLoss(
+                alpha=alpha,
+                gamma=args.focal_gamma,
+                reduction='mean'
+            )
+            
+            print(f"\nFocal Loss参数:")
+            print(f"  gamma (γ): {args.focal_gamma}")
+            print(f"  说明: γ越大，越关注困难样本")
+            print(f"       γ=0 → 标准交叉熵")
+            print(f"       γ=2 → 简单样本权重↓100倍（推荐）")
+            print(f"       γ=5 → 简单样本权重↓1000倍（激进）")
+            print(f"{'='*60}\n")
+            
+            # 记录到wandb
+            wandb.config.update({
+                "loss_function": "FocalLoss",
+                "focal_gamma": args.focal_gamma,
+                "focal_alpha": alpha.cpu().numpy().tolist()
+            })
+        else:
+            print(f"\n使用标准 NLL Loss")
+            self.criterion = None  # 在train_epoch中直接使用F.nll_loss
+        # ============ 损失函数初始化结束 ============
+
         
         # 优化器和学习率调度器
         self.optimizer = torch.optim.Adam(
@@ -215,8 +394,12 @@ class Trainer:
             # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
             class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
             
-            # 计算分类损失 - 使用NLLLoss（配合模型的log_softmax输出）
-            loss = F.kl_div(output, class_label, reduction='batchmean')
+            # ============ 修改：使用Focal Loss或NLL Loss ============
+            if self.args.use_focal_loss:
+                # 使用Focal Loss
+                loss = self.criterion(output, class_label)
+            else:
+                loss = F.kl_div(output, class_label, reduction='batchmean')
 
             ############################ 分类/回归 标签转换 ############################
 
@@ -284,9 +467,12 @@ class Trainer:
                 # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
                 class_label = F.softmax(-data.y, dim=0).unsqueeze(0) 
 
-                # 计算分类损失
-                # loss = F.nll_loss(output, class_label)
-                loss = F.kl_div(output, class_label, reduction='batchmean')
+                # ============ 修改：使用Focal Loss或NLL Loss ============
+                if self.args.use_focal_loss:
+                    loss = self.criterion(output, class_label)
+                else:
+                    loss = F.kl_div(output, class_label, reduction='batchmean')
+                    
                 total_loss += loss.item()
 
                 # 新增：记录每个batch的损失
@@ -385,7 +571,7 @@ class Trainer:
             print(f"  [调试] unique labels: {np.unique(all_labels, return_counts=True)}")
             roc_auc = 0.0
         
-        # 4. 混淆矩阵 - 指定labels参数确保始终生成3x3矩阵
+        # 4. 混淆矩阵
         conf_matrix = confusion_matrix(all_labels, all_preds, labels=list(range(self.args.num_classes)))
         
         # 返回所有指标
@@ -1039,8 +1225,8 @@ def main():
                         help='标签文件根目录路径')
     parser.add_argument('--label_name', type=str, default='mean',
                         help='标签名称 (默认: mean)')
-    parser.add_argument('--train_ratio', type=float, default=0.8,
-                        help='训练集占比 (默认: 0.8)')
+    parser.add_argument('--train_ratio', type=float, default=0.7,
+                        help='训练集占比 (默认: 0.7)')
     parser.add_argument('--model_name', type=str, 
                         choices=list(MODEL_REGISTRY.keys()),
                         help=f'模型名称，可选: {list(MODEL_REGISTRY.keys())}')
@@ -1052,8 +1238,8 @@ def main():
                         help='边特征维度 (默认: 2)')
     parser.add_argument('--hidden_dim', type=int, default=64,
                         help='隐藏层维度 (默认: 64)')
-    parser.add_argument('--num_classes', type=int, default=8,
-                        help='分类类别数 (默认: 8)')
+    parser.add_argument('--num_classes', type=int, default=5,
+                        help='分类类别数 (默认: 5)')
     
     # 训练相关参数
     parser.add_argument('--epochs', type=int, default=100,
@@ -1066,8 +1252,8 @@ def main():
                         help='初始学习率 (默认: 0.001)')
     parser.add_argument('--weight_decay', type=float, default=5e-4,
                         help='L2正则化系数 (默认: 5e-4)')
-    parser.add_argument('--patience', type=int, default=10,
-                        help='学习率衰减的耐心值 (默认: 10)')
+    parser.add_argument('--patience', type=int, default=30,
+                        help='学习率衰减的耐心值 (默认: 30)')
     
     # 其他参数
     parser.add_argument('--seed', type=int, default=42,
@@ -1082,7 +1268,26 @@ def main():
                         help='模型保存间隔（轮次） (默认: 10)')
     parser.add_argument('--save_dir', type=str, default='./checkpoints',
                         help='模型保存目录 (默认: ./checkpoints)')
-    
+
+    # ============ 数据增强和重采样参数 ============
+    parser.add_argument('--use_augmentation', action='store_true', default=False,
+                        help='是否启用数据增强 (默认: False)')
+    parser.add_argument('--augmentation_prob', type=float, default=0.5,
+                        help='数据增强概率 (默认: 0.5)')
+    parser.add_argument('--use_weighted_sampling', action='store_true', default=False,
+                        help='是否使用加权采样处理类别不平衡 (默认: False)')
+    parser.add_argument('--sampling_multiplier', type=float, default=1.5,
+                        help='采样倍数，>1表示过采样 (默认: 1.5)')
+
+        # ============ Focal Loss相关参数 ============
+    parser.add_argument('--use_focal_loss', action='store_true', default=False,
+                        help='是否使用Focal Loss处理类别不平衡 (默认: False，使用NLL Loss)')
+    parser.add_argument('--focal_gamma', type=float, default=2.0,
+                        help='Focal Loss的gamma参数，控制对困难样本的关注度 (默认: 2.0)\n'
+                             '  gamma=0: 标准交叉熵\n'
+                             '  gamma=2: 推荐值，简单样本权重降低100倍\n'
+                             '  gamma=5: 激进值，简单样本权重降低1000倍')
+
     args = parser.parse_args()
     
     # 创建训练器并开始训练
