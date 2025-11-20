@@ -164,7 +164,7 @@ class Trainer:
             augment=args.use_augmentation,      # 新增：根据参数决定是否增强
             aug_prob=args.augmentation_prob     # 新增：增强概率
             )
-        
+
         # 划分训练集和验证集
         train_size = int(args.train_ratio * len(full_dataset))
         val_size = len(full_dataset) - train_size
@@ -268,7 +268,7 @@ class Trainer:
             num_classes=args.num_classes
         ).to(self.device)
 
-        # ============ 新增：初始化损失函数（Focal Loss或NLL Loss）============
+        # ============ 新增：初始化损失函数（Focal Loss或kl_div）============
         if args.use_focal_loss:
             print(f"\n{'='*60}")
             print("初始化 Focal Loss")
@@ -277,9 +277,12 @@ class Trainer:
             # 计算类别权重alpha
             # 方法1: 基于逆频率（推荐）
             alpha = np.zeros(self.args.num_classes, dtype=np.float32)
+            max_count = np.max(class_counts)
             for i in range(self.args.num_classes):
                 if class_counts[i] > 0:
-                    alpha[i] = 1.0 / class_counts[i]
+                    # 指数倒数
+                    ratio = max_count / class_counts[i]
+                    alpha[i] = np.power(ratio, 0.75)  # 0.5-1.0之间调整
                 else:
                     alpha[i] = 0.0
             
@@ -313,8 +316,7 @@ class Trainer:
                 "focal_alpha": alpha.cpu().numpy().tolist()
             })
         else:
-            print(f"\n使用标准 NLL Loss")
-            self.criterion = None  # 在train_epoch中直接使用F.nll_loss
+            self.criterion = None
         # ============ 损失函数初始化结束 ============
 
         
@@ -380,9 +382,17 @@ class Trainer:
 
         # 新增：记录每个batch的损失
         batch_losses = []
+
+        # 统计实际采样类别
+        if epoch == 1:  # 只在第一个epoch统计
+            epoch_sampled_labels = []
         
         pbar = tqdm(self.train_loader, desc=f'Epoch {epoch}/{self.args.epochs} [训练]')
         for batch_idx, data in enumerate(pbar):
+            
+            if epoch == 1:
+                epoch_sampled_labels.append(data.y.argmin().item())
+
             # 前向传播
             output = self.model(data.x, data.edge_index, data.edge_attr, data.batch)
 
@@ -392,14 +402,16 @@ class Trainer:
             # output shape: [1, num_classes] -> [1, 8]（8种初始化方法的概率分布）
             # label shape: [8] -> [FIFO_SPT, FIFO_EET, MOPNR_SPT, MOPNR_EET, LWKR_SPT, LWKR_EET, MWKR_SPT, MWKR_EET的性能]
             # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
-            class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
-            
-            # ============ 修改：使用Focal Loss或NLL Loss ============
+
+            # ============ 修改：根据损失函数类型准备标签 ============
             if self.args.use_focal_loss:
-                # 使用Focal Loss
+                # Focal Loss 需要类别索引（1D整数）
+                class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
                 loss = self.criterion(output, class_label)
             else:
+                class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
                 loss = F.kl_div(output, class_label, reduction='batchmean')
+                # loss = F.nll_loss(output, class_label)
 
             ############################ 分类/回归 标签转换 ############################
 
@@ -422,11 +434,22 @@ class Trainer:
                     'loss': f'{loss.item() * accumulation_steps:.4f}',
                     'avg_loss': f'{total_loss / (batch_idx + 1):.4f}'
                 })
+
+        
         
         # 处理最后剩余的梯度
         if len(self.train_loader) % accumulation_steps != 0:
             self.optimizer.step()
             self.optimizer.zero_grad()
+
+        # ============ 新增：打印第一个epoch的采样统计 ============
+        if epoch == 1 and hasattr(self, 'args') and self.args.use_weighted_sampling:
+            print(f"\n第1个epoch实际采样的类别分布（共{len(epoch_sampled_labels)}个样本）:")
+            for method_id, method_name in zip(range(self.args.num_classes), self.class_names):
+                count = epoch_sampled_labels.count(method_id)
+                print(f"  {method_name}: {count} ({100*count/len(epoch_sampled_labels):.1f}%)")
+            print("*"*50)
+    # ============================================
         
         avg_loss = total_loss / len(self.train_loader)
 
@@ -441,6 +464,14 @@ class Trainer:
     def validate(self, epoch):
         """验证模型 - 计算完整的评估指标"""
         self.model.eval()
+
+        # 将数据集设置为评估模式（禁用数据增强）
+        # random_split 返回的 Subset 对象，通过 .dataset 访问原始数据集
+        if hasattr(self.train_dataset, 'dataset'):
+            original_dataset = self.train_dataset.dataset
+            if hasattr(original_dataset, 'set_mode'):
+                original_dataset.set_mode('eval')
+        
         total_loss = 0
         correct = 0
         total = 0
@@ -465,23 +496,25 @@ class Trainer:
                 # 将性能值标签转换为分类标签（选择性能最小的方法）
                 # label shape: [3] -> [heuristic性能, mixed性能, random性能]
                 # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
-                class_label = F.softmax(-data.y, dim=0).unsqueeze(0) 
-
-                # ============ 修改：使用Focal Loss或NLL Loss ============
+                # ============ 修改：根据损失函数类型准备标签 ============
                 if self.args.use_focal_loss:
+                    # Focal Loss 需要类别索引（1D整数）
+                    class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
                     loss = self.criterion(output, class_label)
+                    true_label = class_label  # 真实的最佳方法索引, shape: [1]
                 else:
+                    class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
                     loss = F.kl_div(output, class_label, reduction='batchmean')
-                    
+                    true_label = class_label.argmax(dim=1)
+
+                # 累计验证loss
                 total_loss += loss.item()
 
                 # 新增：记录每个batch的损失
                 batch_val_losses.append(loss.item())
 
                 # 计算准确率
-                pred = output.argmax(dim=1)  # 预测的最佳方法索引, shape: [1]
-                true_label = class_label.argmax(dim=1)  # 真实的最佳方法索引, shape: [1]
-                # true_label = data.y.argmin()
+                pred = output.argmax(dim=1)  # 预测最佳方法索引, shape: [1]
                 correct += (pred == true_label).sum().item()
                 total += 1  # 每次处理一个图
                 
@@ -589,6 +622,12 @@ class Trainer:
             'all_labels': all_labels,
             'all_probs': all_probs
         }
+
+        # 在返回前恢复训练模式
+        if hasattr(self.train_dataset, 'dataset'):
+            original_dataset = self.train_dataset.dataset
+            if hasattr(original_dataset, 'set_mode'):
+                original_dataset.set_mode('train')
         
         return metrics
     
@@ -1011,6 +1050,26 @@ class Trainer:
         print("\n" + "="*60)
         print("开始训练")
         print("="*60 + "\n")
+
+         # ============ 新增：验证加权采样是否工作 ============
+        if self.args.use_weighted_sampling:
+            print("验证加权采样效果（统计第1个epoch的实际采样分布）...")
+            sampled_labels = []
+            temp_loader_iter = iter(self.train_loader)
+            for _ in range(min(100, len(self.train_loader))):  # 统计前100个样本
+                try:
+                    data = next(temp_loader_iter)
+                    sampled_labels.append(data.y.argmin().item())
+                except StopIteration:
+                    break
+            
+            if sampled_labels:
+                print(f"\n前{len(sampled_labels)}个采样的类别分布:")
+                for method_id, method_name in zip(range(self.args.num_classes), self.class_names):
+                    count = sampled_labels.count(method_id)
+                    print(f"  {method_name}: {count} ({100*count/len(sampled_labels):.1f}%)")
+                print()
+        # ============ 验证代码结束 ============
         
         for epoch in range(1, self.args.epochs + 1):
             # 训练
@@ -1214,6 +1273,16 @@ class Trainer:
         wandb.finish()
         print("✓ wandb 日志已保存")
 
+def str2bool(v):
+    """正确的布尔值解析函数"""
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0', ''):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def main():
     parser = argparse.ArgumentParser(description='图神经网络训练脚本 - FJSP问题')
@@ -1252,8 +1321,8 @@ def main():
                         help='初始学习率 (默认: 0.001)')
     parser.add_argument('--weight_decay', type=float, default=5e-4,
                         help='L2正则化系数 (默认: 5e-4)')
-    parser.add_argument('--patience', type=int, default=30,
-                        help='学习率衰减的耐心值 (默认: 30)')
+    parser.add_argument('--patience', type=int, default=15,
+                        help='学习率衰减的耐心值 (默认: 15)')
     
     # 其他参数
     parser.add_argument('--seed', type=int, default=42,
@@ -1270,18 +1339,18 @@ def main():
                         help='模型保存目录 (默认: ./checkpoints)')
 
     # ============ 数据增强和重采样参数 ============
-    parser.add_argument('--use_augmentation', action='store_true', default=False,
-                        help='是否启用数据增强 (默认: False)')
+    parser.add_argument('--use_augmentation', type=str2bool, default=False,
+                    help='是否启用数据增强 (True/False)')
     parser.add_argument('--augmentation_prob', type=float, default=0.5,
                         help='数据增强概率 (默认: 0.5)')
-    parser.add_argument('--use_weighted_sampling', action='store_true', default=False,
+    parser.add_argument('--use_weighted_sampling', type=str2bool, required=True,
                         help='是否使用加权采样处理类别不平衡 (默认: False)')
     parser.add_argument('--sampling_multiplier', type=float, default=1.5,
                         help='采样倍数，>1表示过采样 (默认: 1.5)')
 
         # ============ Focal Loss相关参数 ============
-    parser.add_argument('--use_focal_loss', action='store_true', default=False,
-                        help='是否使用Focal Loss处理类别不平衡 (默认: False，使用NLL Loss)')
+    parser.add_argument('--use_focal_loss', type=str2bool, default=False,
+                    help='是否使用Focal Loss处理类别不平衡 (True/False)')
     parser.add_argument('--focal_gamma', type=float, default=2.0,
                         help='Focal Loss的gamma参数，控制对困难样本的关注度 (默认: 2.0)\n'
                              '  gamma=0: 标准交叉熵\n'

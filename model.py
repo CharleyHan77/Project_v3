@@ -345,6 +345,78 @@ class Transformer_Mean_Pooling(torch.nn.Module):
         return F.log_softmax(x, dim=1)
 
 
+class NNConv_Deep_Mean_Pooling(torch.nn.Module):
+    """更深的网络架构"""
+    def __init__(self, node_features, edge_features, hidden_dim, num_classes):
+        super().__init__()
+        
+        # 第1层：node_features -> hidden_dim
+        nn1 = torch.nn.Sequential(
+            torch.nn.Linear(edge_features, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_dim, node_features * hidden_dim)
+        )
+        self.conv1 = NNConv(node_features, hidden_dim, nn1)
+        self.bn1 = torch.nn.BatchNorm1d(hidden_dim)  # 新增：BN稳定训练
+        
+        # 第2层：hidden_dim -> hidden_dim
+        nn2 = torch.nn.Sequential(
+            torch.nn.Linear(edge_features, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_dim, hidden_dim * hidden_dim)
+        )
+        self.conv2 = NNConv(hidden_dim, hidden_dim, nn2)
+        self.bn2 = torch.nn.BatchNorm1d(hidden_dim)
+        
+        # 第3层：hidden_dim -> hidden_dim（新增）
+        nn3 = torch.nn.Sequential(
+            torch.nn.Linear(edge_features, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_dim, hidden_dim * hidden_dim)
+        )
+        self.conv3 = NNConv(hidden_dim, hidden_dim, nn3)
+        self.bn3 = torch.nn.BatchNorm1d(hidden_dim)
+        
+        # 第4层（可选）
+        nn4 = torch.nn.Sequential(
+            torch.nn.Linear(edge_features, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_dim, hidden_dim * hidden_dim)
+        )
+        self.conv4 = NNConv(hidden_dim, hidden_dim, nn4)
+        self.bn4 = torch.nn.BatchNorm1d(hidden_dim)
+        
+        # 更深的分类头
+        self.fc1 = torch.nn.Linear(hidden_dim, hidden_dim)
+        self.fc2 = torch.nn.Linear(hidden_dim, hidden_dim // 2)
+        self.fc3 = torch.nn.Linear(hidden_dim // 2, num_classes)
+        
+    def forward(self, x, edge_index, edge_attr, batch):
+        # 使用残差连接防止梯度消失
+        x = F.relu(self.bn1(self.conv1(x, edge_index, edge_attr)))
+        x = F.dropout(x, p=0.1, training=self.training)  # 轻微dropout
+        
+        x = F.relu(self.bn2(self.conv2(x, edge_index, edge_attr)))
+        x = F.dropout(x, p=0.1, training=self.training)
+        
+        x = F.relu(self.bn3(self.conv3(x, edge_index, edge_attr)))
+        x = F.dropout(x, p=0.1, training=self.training)
+        
+        x = F.relu(self.bn4(self.conv4(x, edge_index, edge_attr)))
+        
+        # 图级聚合
+        x = global_mean_pool(x, batch)
+
+        # 分类头
+        x = F.relu(self.fc1(x))
+        x = F.dropout(x, p=0.4, training=self.training)
+        x = F.relu(self.fc2(x))
+        x = F.dropout(x, p=0.4, training=self.training)
+        x = self.fc3(x)
+        
+        return F.log_softmax(x, dim=1)
+
+
 # ==================== 模型注册表 ====================
 MODEL_REGISTRY = {
     'NNConv_Mean_Pooling': NNConv_Mean_Pooling,
@@ -353,7 +425,8 @@ MODEL_REGISTRY = {
     'NNConv_Set2Set_Pooling': NNConv_Set2Set_Pooling,
     "NNConv_Max_Pooling": NNConv_Max_Pooling,
     "GINE_Mean_Pooling": GINE_Mean_Pooling,
-    "Transformer_Mean_Pooling": Transformer_Mean_Pooling
+    "Transformer_Mean_Pooling": Transformer_Mean_Pooling,
+    "NNConv_Deep_Mean_Pooling": NNConv_Deep_Mean_Pooling
 }
 
 def get_model(model_name, **kwargs):
