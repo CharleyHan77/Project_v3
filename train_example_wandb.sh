@@ -4,7 +4,7 @@
 # 使用方法: bash train_example_wandb.sh
 
 # 启用 wandb 离线模式
-export WANDB_MODE=offline
+# export WANDB_MODE=offline
 
 # 设置数据路径（请根据实际情况修改）
 FJS_ROOT_PATH="/workspace/Project_v3/dataset_new"

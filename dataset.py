@@ -47,14 +47,22 @@ class Dataset(dataset.Dataset):
             g.y = torch.log(
                 torch.tensor(
                     [
-                        label_info["FIFO_SPT"]["makespan"]["values"][self.label_name], 
-                        #label_info["FIFO_EET"]["makespan"]["values"][self.label_name], 
-                        label_info["MOPNR_SPT"]["makespan"]["values"][self.label_name], 
-                        label_info["MOPNR_EET"]["makespan"]["values"][self.label_name], 
-                        #label_info["LWKR_SPT"]["makespan"]["values"][self.label_name], 
-                        #label_info["LWKR_EET"]["makespan"]["values"][self.label_name], 
-                        label_info["MWKR_SPT"]["makespan"]["values"][self.label_name], 
-                        label_info["MWKR_EET"]["makespan"]["values"][self.label_name]
+                        # label_info["FIFO_SPT"]["makespan"]["values"][self.label_name], 
+                        # #label_info["FIFO_EET"]["makespan"]["values"][self.label_name], 
+                        # label_info["MOPNR_SPT"]["makespan"]["values"][self.label_name], 
+                        # label_info["MOPNR_EET"]["makespan"]["values"][self.label_name], 
+                        # #label_info["LWKR_SPT"]["makespan"]["values"][self.label_name], 
+                        # #label_info["LWKR_EET"]["makespan"]["values"][self.label_name], 
+                        # label_info["MWKR_SPT"]["makespan"]["values"][self.label_name], 
+                        # label_info["MWKR_EET"]["makespan"]["values"][self.label_name]
+                        label_info["FIFO_SPT"]["max_machine_load"]["values"][self.label_name], 
+                        label_info["FIFO_EET"]["max_machine_load"]["values"][self.label_name], 
+                        label_info["MOPNR_SPT"]["max_machine_load"]["values"][self.label_name], 
+                        label_info["MOPNR_EET"]["max_machine_load"]["values"][self.label_name], 
+                        label_info["LWKR_SPT"]["max_machine_load"]["values"][self.label_name], 
+                        label_info["LWKR_EET"]["max_machine_load"]["values"][self.label_name], 
+                        label_info["MWKR_SPT"]["max_machine_load"]["values"][self.label_name], 
+                        label_info["MWKR_EET"]["max_machine_load"]["values"][self.label_name]
                     ]
                 ) + 1)
             if self.device is not None:

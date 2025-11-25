@@ -153,7 +153,7 @@ class Trainer:
             dir=self.save_path  # wandb 日志保存到相同目录
         )
 
-        self.class_names = ['FIFO_SPT', 'MOPNR_SPT', 'MOPNR_EET', 'MWKR_SPT', 'MWKR_EET']
+        self.class_names = ['FIFO_SPT', 'FIFO_EET', 'MOPNR_SPT', 'MOPNR_EET', 'LWKR_SPT', 'LWKR_EET', 'MWKR_SPT', 'MWKR_EET']
         
         # 加载数据集
         print(f"正在加载数据集...")
@@ -1404,8 +1404,8 @@ def main():
                         help='边特征维度 (默认: 2)')
     parser.add_argument('--hidden_dim', type=int, default=64,
                         help='隐藏层维度 (默认: 64)')
-    parser.add_argument('--num_classes', type=int, default=5,
-                        help='分类类别数 (默认: 5)')
+    parser.add_argument('--num_classes', type=int, default=8,
+                        help='分类类别数 (默认: )')
     
     # 训练相关参数
     parser.add_argument('--epochs', type=int, default=100,
