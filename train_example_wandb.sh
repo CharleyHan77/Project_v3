@@ -4,7 +4,7 @@
 # 使用方法: bash train_example_wandb.sh
 
 # 启用 wandb 离线模式
-export WANDB_MODE=offline
+# export WANDB_MODE=offline
 
 # 设置数据路径（请根据实际情况修改）
 FJS_ROOT_PATH="/workspace/Project_v3/dataset_new"
@@ -22,20 +22,34 @@ MODEL_NAME="NNConv_Deep_Mean_Pooling"
 
 
 # 训练参数
-EPOCHS=40
-ACCUMULATION_STEPS=32  # 梯度累积步数，模拟batch_size=32的效果
+EPOCHS=50
+ACCUMULATION_STEPS=16  # 梯度累积步数，模拟batch_size=16的效果
 LEARNING_RATE=0.0001
 HIDDEN_DIM=64
 
 # Focal Loss参数
 USE_FOCAL_LOSS=True  # 启用开关Focal Loss
-FOCAL_GAMMA=3.0
+FOCAL_GAMMA=5.0
 
 # 新增：数据增强和重采样参数
 USE_AUGMENTATION=False  # 启用数据增强
 AUGMENTATION_PROB=0.6  # 60%的样本会被增强
 USE_WEIGHTED_SAMPLING=False  # 启用加权采样
-SAMPLING_MULTIPLIER=1.5  # 1.5倍过采样
+SAMPLING_MULTIPLIER=3  # n倍过采样，n越大，少数类被采样的概率越高
+
+# 综合评分系统参数
+USE_COMPREHENSIVE_SCORE=True  # 是否使用综合评分
+SCORE_NORMALIZE=True  # 是否全局归一化
+
+# 综合评分权重配置（总和应接近1.0）
+WEIGHT_MEAN=0.30              # 平均性能
+WEIGHT_MIN=0.15               # 最佳性能
+WEIGHT_MEDIAN=0.10            # 中位数性能
+WEIGHT_STD=0.10               # 稳定性
+WEIGHT_RANGE=0.05             # 性能范围
+WEIGHT_CONV_AVG=0.20          # 收敛速度
+WEIGHT_CONV_STD=0.05          # 收敛稳定性
+WEIGHT_EARLY_IMPROVEMENT=0.05 # 早期改进能力
 
 # 运行训练
 # 注意：由于图大小不一致，每次只训练一个图，通过梯度累积模拟批处理
@@ -56,7 +70,17 @@ python train_wandb.py \
     --use_augmentation ${USE_AUGMENTATION} \
     --augmentation_prob ${AUGMENTATION_PROB} \
     --use_weighted_sampling ${USE_WEIGHTED_SAMPLING} \
-    --sampling_multiplier ${SAMPLING_MULTIPLIER}
+    --sampling_multiplier ${SAMPLING_MULTIPLIER} \
+    --use_comprehensive_score ${USE_COMPREHENSIVE_SCORE} \
+    --score_normalize ${SCORE_NORMALIZE} \
+    --weight_mean ${WEIGHT_MEAN} \
+    --weight_min ${WEIGHT_MIN} \
+    --weight_median ${WEIGHT_MEDIAN} \
+    --weight_std ${WEIGHT_STD} \
+    --weight_range ${WEIGHT_RANGE} \
+    --weight_conv_avg ${WEIGHT_CONV_AVG} \
+    --weight_conv_std ${WEIGHT_CONV_STD} \
+    --weight_early_improvement ${WEIGHT_EARLY_IMPROVEMENT}
 
 
 # 训练指定一个模型

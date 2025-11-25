@@ -23,7 +23,8 @@ import seaborn as sns
 import wandb
 
 from model import get_model, MODEL_REGISTRY # 支持模型注册选择
-from dataset import Dataset
+# from dataset import Dataset
+from dataset_compreh import Dataset
 
 
 """
@@ -157,13 +158,58 @@ class Trainer:
         
         # 加载数据集
         print(f"正在加载数据集...")
+        # full_dataset = Dataset(
+        #     args.fjs_root_path, 
+        #     args.label_root_path, 
+        #     device="cuda",
+        #     augment=args.use_augmentation,      # 新增：根据参数决定是否增强
+        #     aug_prob=args.augmentation_prob     # 新增：增强概率
+        #     )
+        # 构建评分配置
+        score_config = {
+            'weights': {
+                'mean': args.weight_mean,
+                'min': args.weight_min,
+                'median': args.weight_median,
+                'std': args.weight_std,
+                'range': args.weight_range,
+                'conv_avg': args.weight_conv_avg,
+                'conv_std': args.weight_conv_std,
+                'early_improvement': args.weight_early_improvement,
+            },
+            'normalize': args.score_normalize,
+            'inverse_for_minimization': True,
+        }
+        
+        # 验证权重总和
+        weight_sum = sum(score_config['weights'].values())
+        if abs(weight_sum - 1.0) > 0.01:
+            print(f"⚠️  警告: 权重总和为 {weight_sum:.4f}，建议接近1.0")
+        
+        print(f"\n{'='*60}")
+        print(f"📊 综合评分配置:")
+        print(f"  使用综合评分: {args.use_comprehensive_score}")
+        if args.use_comprehensive_score:
+            print(f"  归一化方式: {'全局归一化' if args.score_normalize else '局部归一化'}")
+            print(f"  权重配置:")
+            for metric, weight in score_config['weights'].items():
+                print(f"    - {metric:20s}: {weight:.3f}")
+            print(f"  权重总和: {weight_sum:.4f}")
+        else:
+            print(f"  使用简单标签: {args.label_name}")
+        print(f"{'='*60}\n")
+        
+        # 加载数据集
         full_dataset = Dataset(
             args.fjs_root_path, 
-            args.label_root_path, 
+            args.label_root_path,
+            label_name=args.label_name,
+            use_comprehensive_score=args.use_comprehensive_score,
+            score_config=score_config if args.use_comprehensive_score else None,
             device="cuda",
-            augment=args.use_augmentation,      # 新增：根据参数决定是否增强
-            aug_prob=args.augmentation_prob     # 新增：增强概率
-            )
+            augment=args.use_augmentation,
+            aug_prob=args.augmentation_prob
+        )
 
         # 划分训练集和验证集
         train_size = int(args.train_ratio * len(full_dataset))
@@ -414,10 +460,11 @@ class Trainer:
         )
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             self.optimizer,
-            mode='min',
+            mode='max',
             factor=0.5,
             patience=args.patience,
-            verbose=True
+            verbose=True,
+            min_lr=1e-6
         )
         
         # 训练历史记录
@@ -1189,7 +1236,7 @@ class Trainer:
             conf_matrix = metrics['confusion_matrix']
             
             # 学习率调整
-            self.scheduler.step(val_loss)
+            self.scheduler.step(val_accuracy)
             current_lr = self.optimizer.param_groups[0]['lr']
             
             # 记录历史
@@ -1418,8 +1465,8 @@ def main():
                         help='初始学习率 (默认: 0.001)')
     parser.add_argument('--weight_decay', type=float, default=5e-4,
                         help='L2正则化系数 (默认: 5e-4)')
-    parser.add_argument('--patience', type=int, default=15,
-                        help='学习率衰减的耐心值 (默认: 15)')
+    parser.add_argument('--patience', type=int, default=10,
+                        help='学习率衰减的耐心值 (默认: 10)')
     
     # 其他参数
     parser.add_argument('--seed', type=int, default=42,
@@ -1445,7 +1492,32 @@ def main():
     parser.add_argument('--sampling_multiplier', type=float, default=1.5,
                         help='采样倍数，>1表示过采样 (默认: 1.5)')
 
-        # ============ Focal Loss相关参数 ============
+    # 综合评分系统参数
+    parser.add_argument('--use_comprehensive_score', type=str2bool, default=True,
+                        help='是否使用综合评分系统 (True/False，默认: True)')
+    parser.add_argument('--score_normalize', type=str2bool, default=True,
+                        help='是否使用全局归一化 (True/False，默认: True)')
+    
+    # 综合评分权重参数
+    parser.add_argument('--weight_mean', type=float, default=0.30,
+                        help='平均makespan的权重 (默认: 0.30)')
+    parser.add_argument('--weight_min', type=float, default=0.15,
+                        help='最小makespan的权重 (默认: 0.15)')
+    parser.add_argument('--weight_median', type=float, default=0.10,
+                        help='中位数makespan的权重 (默认: 0.10)')
+    parser.add_argument('--weight_std', type=float, default=0.10,
+                        help='标准差（稳定性）的权重 (默认: 0.10)')
+    parser.add_argument('--weight_range', type=float, default=0.05,
+                        help='性能范围的权重 (默认: 0.05)')
+    parser.add_argument('--weight_conv_avg', type=float, default=0.20,
+                        help='平均收敛代数的权重 (默认: 0.20)')
+    parser.add_argument('--weight_conv_std', type=float, default=0.05,
+                        help='收敛稳定性的权重 (默认: 0.05)')
+    parser.add_argument('--weight_early_improvement', type=float, default=0.05,
+                        help='早期改进能力的权重 (默认: 0.05)')
+    
+    
+    # ============ Focal Loss相关参数 ============
     parser.add_argument('--use_focal_loss', type=str2bool, default=False,
                     help='是否使用Focal Loss处理类别不平衡 (True/False)')
     parser.add_argument('--focal_gamma', type=float, default=2.0,
