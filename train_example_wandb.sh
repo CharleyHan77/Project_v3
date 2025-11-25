@@ -3,6 +3,9 @@
 # 图神经网络训练示例脚本
 # 使用方法: bash train_example_wandb.sh
 
+# 启用 wandb 离线模式
+export WANDB_MODE=offline
+
 # 设置数据路径（请根据实际情况修改）
 FJS_ROOT_PATH="/workspace/Project_v3/dataset_new"
 LABEL_ROOT_PATH="/workspace/Project_v3/init_validity_result_new"
@@ -19,9 +22,9 @@ MODEL_NAME="NNConv_Deep_Mean_Pooling"
 
 
 # 训练参数
-EPOCHS=100
+EPOCHS=40
 ACCUMULATION_STEPS=32  # 梯度累积步数，模拟batch_size=32的效果
-LEARNING_RATE=0.0005
+LEARNING_RATE=0.0001
 HIDDEN_DIM=64
 
 # Focal Loss参数

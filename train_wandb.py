@@ -204,6 +204,91 @@ class Trainer:
         print(f"\n训练模式: 单图训练 + 梯度累积({args.accumulation_steps}步)")
         print(f"等效批次大小: {args.accumulation_steps}")
 
+
+
+        # ============ 新增：数据集标签差异分析 ============
+        print("\n" + "="*60)
+        print("数据集标签差异分析（诊断任务难度）")
+        print("="*60)
+        
+        # 分析整个数据集的性能差距
+        min_gaps = []  # 最佳方法与次佳方法的性能差距（百分比）
+        max_gaps = []  # 最佳方法与最差方法的性能差距（百分比）
+        best_method_ids = []  # 每个样本的最佳方法
+        
+        for i in range(len(full_dataset)):
+            data = full_dataset.data[i]
+            values = torch.exp(data.y) - 1  # 还原真实makespan值
+            sorted_vals, sorted_indices = torch.sort(values)
+            
+            # 最佳 vs 次佳的相对差距
+            gap_min = ((sorted_vals[1] - sorted_vals[0]) / sorted_vals[0] * 100).item()
+            min_gaps.append(gap_min)
+            
+            # 最佳 vs 最差的相对差距
+            gap_max = ((sorted_vals[-1] - sorted_vals[0]) / sorted_vals[0] * 100).item()
+            max_gaps.append(gap_max)
+            
+            # 记录最佳方法
+            best_method_ids.append(values.argmin().item())
+        
+        min_gaps = np.array(min_gaps)
+        max_gaps = np.array(max_gaps)
+        
+        print(f"\n📊 性能差距统计（最佳方法 vs 次佳方法）:")
+        print(f"  平均差距: {min_gaps.mean():.2f}%")
+        print(f"  中位数差距: {np.median(min_gaps):.2f}%")
+        print(f"  标准差: {min_gaps.std():.2f}%")
+        print(f"  最小差距: {min_gaps.min():.2f}%")
+        print(f"  最大差距: {min_gaps.max():.2f}%")
+        
+        print(f"\n📊 性能差距统计（最佳方法 vs 最差方法）:")
+        print(f"  平均差距: {max_gaps.mean():.2f}%")
+        print(f"  中位数差距: {np.median(max_gaps):.2f}%")
+        
+        print(f"\n🔍 难度分级（基于最佳vs次佳的差距）:")
+        very_hard = (min_gaps < 1).sum()
+        hard = ((min_gaps >= 1) & (min_gaps < 5)).sum()
+        medium = ((min_gaps >= 5) & (min_gaps < 10)).sum()
+        easy = (min_gaps >= 10).sum()
+        
+        print(f"  极难样本 (差距<1%):  {very_hard:4d} ({100*very_hard/len(min_gaps):5.1f}%) - 几乎无法区分")
+        print(f"  困难样本 (1%≤差距<5%): {hard:4d} ({100*hard/len(min_gaps):5.1f}%) - 模型难以学习")
+        print(f"  中等样本 (5%≤差距<10%): {medium:4d} ({100*medium/len(min_gaps):5.1f}%) - 模型可学习")
+        print(f"  简单样本 (差距≥10%):  {easy:4d} ({100*easy/len(min_gaps):5.1f}%) - 模型易学习")
+        
+        print(f"\n💡 任务难度评估:")
+        if min_gaps.mean() < 3:
+            print(f"  ⚠️  平均差距<3%，这是一个**极难**的分类任务！")
+            print(f"      很多样本的最佳方法差异微小，60%准确率可能已经不错。")
+        elif min_gaps.mean() < 5:
+            print(f"  ⚠️  平均差距<5%，这是一个**困难**的分类任务。")
+            print(f"      建议目标准确率：65-75%")
+        elif min_gaps.mean() < 10:
+            print(f"  ✓  平均差距5-10%，这是一个**中等难度**的任务。")
+            print(f"      建议目标准确率：75-85%")
+        else:
+            print(f"  ✓  平均差距≥10%，这是一个**相对简单**的任务。")
+            print(f"      建议目标准确率：>85%")
+        
+        # 分析软标签的平滑度
+        print(f"\n🎯 软标签分析（如果使用KL散度）:")
+        sample_data = full_dataset.data[0]
+        sample_probs = F.softmax(-sample_data.y, dim=0)
+        entropy = -torch.sum(sample_probs * torch.log(sample_probs + 1e-10))
+        max_entropy = np.log(len(sample_probs))
+        print(f"  示例样本的软标签熵: {entropy:.3f} / {max_entropy:.3f}")
+        print(f"  熵占比: {(entropy/max_entropy*100):.1f}%")
+        if entropy / max_entropy > 0.8:
+            print(f"  ⚠️  软标签过于平滑（熵>80%），建议使用硬标签!")
+        elif entropy / max_entropy > 0.6:
+            print(f"  ⚠️  软标签较平滑（熵>60%），考虑加温度参数锐化")
+        else:
+            print(f"  ✓  软标签区分度尚可")
+        
+        print("="*60 + "\n")
+        # ============ 诊断分析结束 ============
+
         
         
         # ============ 新增：创建加权采样器（处理类别不平衡）============
@@ -278,11 +363,12 @@ class Trainer:
             # 方法1: 基于逆频率（推荐）
             alpha = np.zeros(self.args.num_classes, dtype=np.float32)
             max_count = np.max(class_counts)
+            total_samples = sum(class_counts)
             for i in range(self.args.num_classes):
                 if class_counts[i] > 0:
-                    # 指数倒数
-                    ratio = max_count / class_counts[i]
-                    alpha[i] = np.power(ratio, 0.75)  # 0.5-1.0之间调整
+                    # 使用平方反比，让少数类权重更高
+                    # 现在：使用总样本数/类别样本数的平方根
+                    alpha[i] = np.sqrt(total_samples / class_counts[i])
                 else:
                     alpha[i] = 0.0
             
@@ -404,14 +490,18 @@ class Trainer:
             # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
 
             # ============ 修改：根据损失函数类型准备标签 ============
+            class_label = data.y.argmin().unsqueeze(0)  # 统一使用硬标签
             if self.args.use_focal_loss:
-                # Focal Loss 需要类别索引（1D整数）
-                class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
                 loss = self.criterion(output, class_label)
             else:
-                class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
-                loss = F.kl_div(output, class_label, reduction='batchmean')
-                # loss = F.nll_loss(output, class_label)
+                loss = F.nll_loss(output, class_label)  # 使用负对数似然损失
+            # if self.args.use_focal_loss:
+            #     # Focal Loss 需要类别索引（1D整数）
+            #     class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
+            #     loss = self.criterion(output, class_label)
+            # else:
+            #     class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
+            #     loss = F.kl_div(output, class_label, reduction='batchmean')
 
             ############################ 分类/回归 标签转换 ############################
 
@@ -497,15 +587,22 @@ class Trainer:
                 # label shape: [3] -> [heuristic性能, mixed性能, random性能]
                 # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
                 # ============ 修改：根据损失函数类型准备标签 ============
+                # if self.args.use_focal_loss:
+                #     # Focal Loss 需要类别索引（1D整数）
+                #     class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
+                #     loss = self.criterion(output, class_label)
+                #     true_label = class_label  # 真实的最佳方法索引, shape: [1]
+                # else:
+                #     class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
+                #     loss = F.kl_div(output, class_label, reduction='batchmean')
+                #     true_label = class_label.argmax(dim=1)
+
+                class_label = data.y.argmin().unsqueeze(0)  # 统一使用硬标签
+                true_label = class_label
                 if self.args.use_focal_loss:
-                    # Focal Loss 需要类别索引（1D整数）
-                    class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
                     loss = self.criterion(output, class_label)
-                    true_label = class_label  # 真实的最佳方法索引, shape: [1]
                 else:
-                    class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
-                    loss = F.kl_div(output, class_label, reduction='batchmean')
-                    true_label = class_label.argmax(dim=1)
+                    loss = F.nll_loss(output, class_label)
 
                 # 累计验证loss
                 total_loss += loss.item()
