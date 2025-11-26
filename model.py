@@ -415,6 +415,8 @@ class NNConv_Deep_Mean_Pooling(torch.nn.Module):
         x = self.fc3(x)
         
         return F.log_softmax(x, dim=1)
+        # p [0.2, 0.3, 0.1, 0.3, 0.1]
+        # t [0.1, 0.2, 0.3, 0.2, 0.2]
 
 
 # ==================== 模型注册表 ====================

@@ -112,9 +112,9 @@ class FocalLoss(nn.Module):
             return loss
 
 
-class PairwiseRankingLoss(nn.Module):
+class IntraInstancePairwiseRankingLoss(nn.Module):
     """
-    成对排序损失
+    实例内 成对排序损失
     
     确保模型预测的排序和真实makespan排序一致
     如果makespan(i) < makespan(j)，则希望 score(i) < score(j)
@@ -122,9 +122,16 @@ class PairwiseRankingLoss(nn.Module):
     Args:
         margin: 排序边界，越大越严格 (默认: 0.5)
         reduction: 'mean' or 'sum'
+
+    (一种混合方法)
+    与标准 Pairwise Ranking 的区别：
+    - 不是跨图比较，而是在单个实例内比较5个方法
+    - 模型输出softmax分布，表示相对偏好
+    - 适合"给定问题，排序多个解决方案"的场景
+    
     """
     def __init__(self, margin=0.5, reduction='mean'):
-        super(PairwiseRankingLoss, self).__init__()
+        super(IntraInstancePairwiseRankingLoss, self).__init__()
         self.margin = margin
         self.reduction = reduction
     
@@ -179,16 +186,16 @@ class PairwiseRankingLoss(nn.Module):
         }
         return info
 
-class WeightedRankingLoss(nn.Module):
+class IntraInstanceWeightedRankingLoss(nn.Module):
     """
-    加权排序损失
+    实例内 加权排序损失
     
     根据真实性能差距调整权重：
     - 差距大的样本对，权重高（容易学）
     - 差距小的样本对，权重低（难学且可能是噪声）
     """
     def __init__(self, margin=0.5, gap_threshold=0.05, reduction='mean'):
-        super(WeightedRankingLoss, self).__init__()
+        super(IntraInstanceWeightedRankingLoss, self).__init__()
         self.margin = margin
         self.gap_threshold = gap_threshold  # 5%差距阈值
         self.reduction = reduction
@@ -227,7 +234,10 @@ class WeightedRankingLoss(nn.Module):
                         # 差距>10%，高权重（清晰的排序）
                         weight = 1.0
                     
-                    # 计算排序违反
+                    # 排序违反程度
+                    # margin:1.避免模糊预测：强迫模型给出明确的区分
+                    # 2.增强泛化能力：不只是学会排序，还要学会"信心十足"地排序
+                    # 3.对抗噪声：小的扰动不会改变排序结果
                     if true_i < true_j:
                         violation = pred_scores[b, i] - pred_scores[b, j] + self.margin
                     else:
@@ -242,7 +252,73 @@ class WeightedRankingLoss(nn.Module):
         else:
             return total_loss
 
+class ListNetLoss(nn.Module):
+    """
+    ListNet Loss - 基于Top-K概率分布的交叉熵
+    
+    将排序问题转换为概率分布学习：
+    - 真实排序 → Top-1概率分布（基于makespan）
+    - 预测排序 → Top-1概率分布（基于模型输出）
+    - 最小化两个分布的交叉熵
+    
+    论文：Cao et al., "Learning to Rank: From Pairwise to Listwise", ICML 2007
+    
+    Args:
+        temperature: Plackett-Luce模型的温度参数（默认1.0）
+    """
+    def __init__(self, temperature=1.0, reduction='mean'):
+        super(ListNetLoss, self).__init__()
+        self.temperature = temperature
+        self.reduction = reduction
+    
+    def forward(self, predictions, true_values):
+        """
+        Args:
+            predictions: [batch_size, num_classes] - 模型log_softmax输出
+            true_values: [batch_size, num_classes] - 真实makespan（log变换后）
+        
+        Returns:
+            loss: 标量
+        """
+        batch_size, num_classes = predictions.shape
+        # ⭐ 先还原真实makespan
+        true_makespan = torch.exp(true_values) - 1  # 还原真实makespan
 
+        # ⭐ 关键修复：归一化到[0, 1]，避免数值爆炸
+        # makespan越小越好，所以用max-value来归一化
+        true_makespan_min = true_makespan.min(dim=1, keepdim=True)[0]
+        true_makespan_max = true_makespan.max(dim=1, keepdim=True)[0]
+        
+        # 归一化：越小的makespan得到越大的分数
+        true_scores_normalized = (true_makespan_max - true_makespan) / (
+            true_makespan_max - true_makespan_min + 1e-8
+        )  # 范围[0, 1]，最小makespan=1.0，最大makespan=0.0
+        
+        # Step 1: 将真实makespan转换为概率分布
+        # makespan越小，概率越大（取负数）
+        true_scores = true_scores_normalized / self.temperature  # [batch_size, num_classes]
+        true_probs = F.softmax(true_scores, dim=1)     # Plackett-Luce分布
+        
+        # Step 2: 将模型输出转换为概率分布
+        # ⭐ predictions是log_softmax输出
+        if self.temperature != 1.0:
+            # 重新缩放后归一化（推荐）
+            pred_probs = torch.exp(predictions / self.temperature)
+            pred_probs = pred_probs / (pred_probs.sum(dim=1, keepdim=True) + 1e-10)
+        else:
+            # 直接转换（temperature=1.0时最简单）
+            pred_probs = torch.exp(predictions)
+        
+        # Step 3: 计算交叉熵 H(true_probs, pred_probs)
+        # -Σ true_probs * log(pred_probs)
+        loss = -torch.sum(true_probs * torch.log(pred_probs + 1e-10), dim=1)
+        
+        if self.reduction == 'mean':
+            return loss.mean()
+        elif self.reduction == 'sum':
+            return loss.sum()
+        else:
+            return loss
 
 class Trainer:
     def __init__(self, args):
@@ -525,15 +601,21 @@ class Trainer:
             print(f"  Loss类型: {'加权排序' if args.use_weighted_ranking else '成对排序'}")
             
             if args.use_weighted_ranking:
-                self.criterion = WeightedRankingLoss(
+                self.criterion = IntraInstanceWeightedRankingLoss(
                     margin=args.ranking_margin,
                     gap_threshold=args.ranking_gap_threshold,
                     reduction='mean'
                 )
                 print(f"  排序边界(margin): {args.ranking_margin}")
                 print(f"  差距阈值: {args.ranking_gap_threshold*100}%")
+            elif args.use_listnet:
+                self.criterion = ListNetLoss(
+                    temperature=args.listnet_temperature,
+                    reduction='mean'
+                )
+                print(f"  - Temperature: {args.listnet_temperature}")
             else:
-                self.criterion = PairwiseRankingLoss(
+                self.criterion = IntraInstancePairwiseRankingLoss(
                     margin=args.ranking_margin,
                     reduction='mean'
                 )
@@ -1907,12 +1989,17 @@ def main():
     # ============ 排序学习参数 ============
     parser.add_argument('--use_ranking_loss', type=str2bool, default=False,
                         help='是否使用排序损失（推荐用于标签差异小的场景）')
-    parser.add_argument('--use_weighted_ranking', type=str2bool, default=True,
+    parser.add_argument('--use_weighted_ranking', type=str2bool, default=False,
                         help='是否使用加权排序（根据性能差距调整权重）')
     parser.add_argument('--ranking_margin', type=float, default=0.1,
                         help='排序边界，越大越严格 (默认: 0.5)')
     parser.add_argument('--ranking_gap_threshold', type=float, default=0.1,
                         help='性能差距阈值，低于此值降低权重 (默认: 0.05=5%)')
+
+    parser.add_argument('--use_listnet', type=str2bool, default=False,
+                        help='是否使用ListNet')
+    parser.add_argument('--listnet_temperature', type=float, default=1.0,
+                    help='ListNet的温度参数')
 
     args = parser.parse_args()
     

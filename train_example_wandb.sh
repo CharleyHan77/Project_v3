@@ -20,7 +20,6 @@ LABEL_ROOT_PATH="/workspace/Project_v3/init_validity_result_new"
 # MODEL_NAME="Transformer_Mean_Pooling"
 MODEL_NAME="NNConv_Deep_Mean_Pooling"
 
-
 # 训练参数
 EPOCHS=40
 ACCUMULATION_STEPS=32  # 梯度累积步数，模拟batch_size=16的效果
@@ -41,7 +40,6 @@ SAMPLING_MULTIPLIER=3  # n倍过采样，n越大，少数类被采样的概率�
 # 综合评分系统参数
 USE_COMPREHENSIVE_SCORE=False  # 是否使用综合评分
 SCORE_NORMALIZE=False  # 是否全局归一化
-
 # 综合评分权重配置（总和应接近1.0）
 WEIGHT_MEAN=0.30              # 平均性能
 WEIGHT_MIN=0.15               # 最佳性能
@@ -52,11 +50,17 @@ WEIGHT_CONV_AVG=0.20          # 收敛速度
 WEIGHT_CONV_STD=0.05          # 收敛稳定性
 WEIGHT_EARLY_IMPROVEMENT=0.05 # 早期改进能力
 
-# ⭐ 排序学习参数（推荐！）
+# ⭐ 排序学习参数
 USE_RANKING_LOSS=True        # 启用排序损失
-USE_WEIGHTED_RANKING=True    # 使用加权版本
+
+# weightedrankingloss
+USE_WEIGHTED_RANKING=False    #使用加权版本（全部false则默认pairwise）
 RANKING_MARGIN=0.5           # 排序边界
 RANKING_GAP_THRESHOLD=0.05   # 差距阈值
+
+# ListNet
+USE_LISTNET=True    # 启用ListNet
+LISTNET_TEMPERATURE=1.0   # ListNet的温度参数
 
 # 运行训练
 # 注意：由于图大小不一致，每次只训练一个图，通过梯度累积模拟批处理
@@ -92,6 +96,8 @@ python train_wandb.py \
     --use_weighted_ranking ${USE_WEIGHTED_RANKING} \
     --ranking_margin ${RANKING_MARGIN} \
     --ranking_gap_threshold ${RANKING_GAP_THRESHOLD} \
+    --use_listnet ${USE_LISTNET} \
+    --listnet_temperature ${LISTNET_TEMPERATURE} \
 
 
 # 训练指定一个模型
