@@ -110,6 +110,65 @@ class FocalLoss(nn.Module):
             return loss.sum()
         else:  # 'none'
             return loss
+
+
+class PairwiseRankingLoss(nn.Module):
+    """
+    成对排序损失
+    
+    确保模型预测的排序和真实makespan排序一致
+    如果makespan(i) < makespan(j)，则希望 score(i) < score(j)
+    
+    Args:
+        margin: 排序边界，越大越严格 (默认: 0.5)
+        reduction: 'mean' or 'sum'
+    """
+    def __init__(self, margin=0.5, reduction='mean'):
+        super(PairwiseRankingLoss, self).__init__()
+        self.margin = margin
+        self.reduction = reduction
+    
+    def forward(self, predictions, true_values):
+        """
+        Args:
+            predictions: [batch_size, num_classes] - 模型输出的log概率
+            true_values: [batch_size, num_classes] - 真实的makespan值（已log变换）
+        
+        Returns:
+            loss: 标量
+        """
+        batch_size, num_classes = predictions.shape
+        
+        # 将log概率转换为得分（越小越好）
+        # 注意：predictions是log_softmax输出，需要转换
+        # 我们希望预测的排序和真实排序一致
+        pred_scores = -predictions  # 负log概率，越大越好变成越小越好
+        
+        total_loss = 0
+        total_pairs = 0
+        
+        for b in range(batch_size):
+            # 对每个样本，遍历所有方法对
+            for i in range(num_classes):
+                for j in range(i + 1, num_classes):
+                    # 真实值：如果i比j好（makespan更小）
+                    if true_values[b, i] < true_values[b, j]:
+                        # 希望pred_scores[i] < pred_scores[j]
+                        # 如果不满足，产生损失
+                        violation = pred_scores[b, i] - pred_scores[b, j] + self.margin
+                        loss_pair = F.relu(violation)
+                    else:
+                        # 如果j比i好
+                        violation = pred_scores[b, j] - pred_scores[b, i] + self.margin
+                        loss_pair = F.relu(violation)
+                    
+                    total_loss += loss_pair
+                    total_pairs += 1
+        
+        if self.reduction == 'mean':
+            return total_loss / (total_pairs + 1e-8)
+        else:
+            return total_loss
     
     def get_params_info(self):
         """返回当前参数信息（用于调试）"""
@@ -119,6 +178,71 @@ class FocalLoss(nn.Module):
             'reduction': self.reduction
         }
         return info
+
+class WeightedRankingLoss(nn.Module):
+    """
+    加权排序损失
+    
+    根据真实性能差距调整权重：
+    - 差距大的样本对，权重高（容易学）
+    - 差距小的样本对，权重低（难学且可能是噪声）
+    """
+    def __init__(self, margin=0.5, gap_threshold=0.05, reduction='mean'):
+        super(WeightedRankingLoss, self).__init__()
+        self.margin = margin
+        self.gap_threshold = gap_threshold  # 5%差距阈值
+        self.reduction = reduction
+    
+    def forward(self, predictions, true_values):
+        """
+        Args:
+            predictions: [batch_size, num_classes] - 模型log概率
+            true_values: [batch_size, num_classes] - 真实makespan（原始值，未log）
+        """
+        batch_size, num_classes = predictions.shape
+        
+        # 转换预测为得分
+        pred_scores = -predictions
+        
+        total_loss = 0
+        total_weight = 0
+        
+        for b in range(batch_size):
+            for i in range(num_classes):
+                for j in range(i + 1, num_classes):
+                    # 计算真实性能差距
+                    true_i = torch.exp(true_values[b, i]) - 1  # 还原真实makespan
+                    true_j = torch.exp(true_values[b, j]) - 1
+                    
+                    gap = torch.abs(true_i - true_j) / torch.min(true_i, true_j)
+                    
+                    # 根据差距计算权重
+                    if gap < self.gap_threshold:
+                        # 差距<5%，降低权重（可能是噪声）
+                        weight = 0.1
+                    elif gap < 0.10:
+                        # 差距5-10%，中等权重
+                        weight = 0.5
+                    else:
+                        # 差距>10%，高权重（清晰的排序）
+                        weight = 1.0
+                    
+                    # 计算排序违反
+                    if true_i < true_j:
+                        violation = pred_scores[b, i] - pred_scores[b, j] + self.margin
+                    else:
+                        violation = pred_scores[b, j] - pred_scores[b, i] + self.margin
+                    
+                    loss_pair = F.relu(violation)
+                    total_loss += weight * loss_pair
+                    total_weight += weight
+        
+        if self.reduction == 'mean':
+            return total_loss / (total_weight + 1e-8)
+        else:
+            return total_loss
+
+
 
 class Trainer:
     def __init__(self, args):
@@ -135,7 +259,7 @@ class Trainer:
 
         # 初始化 wandb
         wandb.init(
-            project="Project_v3.1",  # 项目名称，可以自定义
+            project="Project_v3.2_rank",  # 项目名称，可以自定义
             name=f"{args.model_name}_{timestamp}",  # 运行名称
             config={
                 "model_name": args.model_name,
@@ -158,13 +282,6 @@ class Trainer:
         
         # 加载数据集
         print(f"正在加载数据集...")
-        # full_dataset = Dataset(
-        #     args.fjs_root_path, 
-        #     args.label_root_path, 
-        #     device="cuda",
-        #     augment=args.use_augmentation,      # 新增：根据参数决定是否增强
-        #     aug_prob=args.augmentation_prob     # 新增：增强概率
-        #     )
         # 构建评分配置
         score_config = {
             'weights': {
@@ -399,8 +516,35 @@ class Trainer:
             num_classes=args.num_classes
         ).to(self.device)
 
+        # ============ 损失函数初始化 ============
+        print(f"\n{'='*60}")
+        print(f"损失函数配置:")
+        
+        if args.use_ranking_loss:  # 新增参数
+            print(f"  使用排序损失（Ranking Loss）")
+            print(f"  Loss类型: {'加权排序' if args.use_weighted_ranking else '成对排序'}")
+            
+            if args.use_weighted_ranking:
+                self.criterion = WeightedRankingLoss(
+                    margin=args.ranking_margin,
+                    gap_threshold=args.ranking_gap_threshold,
+                    reduction='mean'
+                )
+                print(f"  排序边界(margin): {args.ranking_margin}")
+                print(f"  差距阈值: {args.ranking_gap_threshold*100}%")
+            else:
+                self.criterion = PairwiseRankingLoss(
+                    margin=args.ranking_margin,
+                    reduction='mean'
+                )
+                print(f"  排序边界(margin): {args.ranking_margin}")
+            
+            print(f"  ✓ 任务定义: 学习方法的相对排序")
+            print(f"  ✓ 优势: 不需要精确分类，只需排序正确")
+
+
         # ============ 新增：初始化损失函数（Focal Loss或kl_div）============
-        if args.use_focal_loss:
+        elif args.use_focal_loss:
             print(f"\n{'='*60}")
             print("初始化 Focal Loss")
             print(f"{'='*60}")
@@ -476,12 +620,20 @@ class Trainer:
             'val_weighted_f1': [],
             'val_roc_auc': [],
             'lr': [],
-            'train_loss_std': [],  # 新增：每个epoch内batch损失的标准差
-            'train_loss_min': [],  # 新增：每个epoch内batch损失的最小值
-            'train_loss_max': [],  # 新增：每个epoch内batch损失的最大值
-            'val_loss_std': [],    # 新增：验证集每个batch损失的标准差
-            'val_loss_min': [],    # 新增：验证集每个batch损失的最小值
-            'val_loss_max': []     # 新增：验证集每个batch损失的最大值
+            'train_loss_std': [],
+            'train_loss_min': [],
+            'train_loss_max': [],
+            'val_loss_std': [],
+            'val_loss_min': [],
+            'val_loss_max': [],
+            # 排序指标（如果使用Ranking Loss会填充）
+            'kendall_tau': [],
+            'top2_accuracy': [],
+            'top3_accuracy': [],
+            'pairwise_accuracy': [],
+            'avg_rank_error': [],
+            'ndcg_at_3': [],
+            'ndcg_at_5': [],
         }
         
         self.best_val_loss = float('inf')
@@ -540,6 +692,8 @@ class Trainer:
             class_label = data.y.argmin().unsqueeze(0)  # 统一使用硬标签
             if self.args.use_focal_loss:
                 loss = self.criterion(output, class_label)
+            elif self.args.use_ranking_loss:
+                loss = self.criterion(output, data.y.unsqueeze(0))
             else:
                 loss = F.nll_loss(output, class_label)  # 使用负对数似然损失
             # if self.args.use_focal_loss:
@@ -597,6 +751,151 @@ class Trainer:
         loss_max = np.max(batch_losses_array)
 
         return avg_loss, loss_std, loss_min, loss_max
+
+    def calculate_ranking_metrics(self, all_preds, all_labels, all_true_values):
+        """
+        计算排序任务的专用指标
+        
+        Args:
+            all_preds: 模型预测的log概率 [N, num_classes]
+            all_labels: 真实最佳类别索引 [N]
+            all_true_values: 真实makespan值 [N, num_classes]
+        
+        Returns:
+            dict: 排序指标
+        """
+        from scipy.stats import kendalltau
+        import numpy as np
+        
+        n_samples = len(all_labels)
+        
+        # 初始化计数器
+        kendall_taus = []
+        top1_correct = 0
+        top2_correct = 0
+        top3_correct = 0
+        pairwise_correct = 0
+        pairwise_total = 0
+        ranking_errors = []
+        
+        # 新增：NDCG@K指标
+        ndcg_at_3_list = []
+        ndcg_at_5_list = []
+        
+        for i in range(n_samples):
+            # 真实排序（从好到坏）
+            true_values = all_true_values[i]  # [num_classes]
+            true_ranking = true_values.argsort().cpu().numpy()
+            
+            # 预测排序（log_softmax越大越可能被选中）
+            pred_probs = all_preds[i]  # [num_classes]
+            pred_ranking = pred_probs.argsort(descending=True).cpu().numpy()
+            
+            # 1. Kendall's Tau
+            tau, _ = kendalltau(true_ranking, pred_ranking)
+            kendall_taus.append(tau)
+            
+            # 2. Top-k准确率
+            true_best = all_labels[i].item()
+            if true_best == pred_ranking[0]:
+                top1_correct += 1
+            if true_best in pred_ranking[:2]:
+                top2_correct += 1
+            if true_best in pred_ranking[:3]:
+                top3_correct += 1
+            
+            # 3. Pairwise准确率
+            num_classes = len(true_values)
+            for j in range(num_classes):
+                for k in range(j+1, num_classes):
+                    true_better = true_values[j] < true_values[k]
+                    pred_better = pred_probs[j] > pred_probs[k]
+                    
+                    if true_better == pred_better:
+                        pairwise_correct += 1
+                    pairwise_total += 1
+            
+            # 4. 排序误差
+            pred_rank_of_best = np.where(pred_ranking == true_best)[0][0]
+            ranking_errors.append(pred_rank_of_best)
+            
+            # ⭐ 5. NDCG@K 计算
+            ndcg_3 = self._calculate_ndcg(
+                pred_ranking, 
+                true_values.cpu().numpy(), 
+                k=3
+            )
+            ndcg_at_3_list.append(ndcg_3)
+            
+            ndcg_5 = self._calculate_ndcg(
+                pred_ranking, 
+                true_values.cpu().numpy(), 
+                k=5
+            )
+            ndcg_at_5_list.append(ndcg_5)
+        
+        metrics = {
+            'kendall_tau': np.mean(kendall_taus),
+            'kendall_tau_std': np.std(kendall_taus),
+            'top1_acc': top1_correct / n_samples * 100,
+            'top2_acc': top2_correct / n_samples * 100,
+            'top3_acc': top3_correct / n_samples * 100,
+            'pairwise_acc': pairwise_correct / pairwise_total * 100,
+            'avg_rank_error': np.mean(ranking_errors),
+            'ndcg_at_3': np.mean(ndcg_at_3_list),      # ⭐ 新增
+            'ndcg_at_3_std': np.std(ndcg_at_3_list),    # ⭐ 新增
+            'ndcg_at_5': np.mean(ndcg_at_5_list),      # ⭐ 新增
+        }
+        
+        return metrics
+
+
+    def _calculate_ndcg(self, pred_ranking, true_values, k=3):
+        """
+        计算 NDCG@K (Normalized Discounted Cumulative Gain)
+        
+        Args:
+            pred_ranking: 预测的排序 [num_classes]，索引表示排名
+            true_values: 真实的makespan值 [num_classes]
+            k: 只考虑前k个位置
+        
+        Returns:
+            ndcg: NDCG@K 分数 (0~1)
+        """
+        k = min(k, len(pred_ranking))
+        
+        # 1. 计算相关性得分（makespan越小，相关性越高）
+        # 使用指数衰减：rel = 2^(-normalized_makespan) - 1
+        # 或更简单：rel = 1 / (rank + 1)
+        
+        # 方法A：基于真实排名的相关性
+        true_ranking = np.argsort(true_values)  # 从好到坏
+        relevance_scores = np.zeros(len(true_values))
+        for rank, idx in enumerate(true_ranking):
+            # 最好的得5分，次好的4分，依此类推
+            relevance_scores[idx] = len(true_values) - rank
+        
+        # 2. 计算DCG@K（根据预测排序）
+        dcg = 0.0
+        for i in range(k):
+            idx = pred_ranking[i]
+            rel = relevance_scores[idx]
+            # DCG公式：rel / log2(position + 2)
+            dcg += rel / np.log2(i + 2)
+        
+        # 3. 计算IDCG@K（理想排序，即按真实排序）
+        idcg = 0.0
+        sorted_relevance = np.sort(relevance_scores)[::-1]  # 降序
+        for i in range(k):
+            rel = sorted_relevance[i]
+            idcg += rel / np.log2(i + 2)
+        
+        # 4. 计算NDCG
+        if idcg == 0:
+            return 0.0
+        ndcg = dcg / idcg
+        
+        return ndcg
     
     def validate(self, epoch):
         """验证模型 - 计算完整的评估指标"""
@@ -618,6 +917,9 @@ class Trainer:
         all_labels = []
         all_probs = []  # 用于ROC-AUC计算
 
+        all_true_values = []  # 新增：收集真实makespan值
+        all_outputs = []      # 新增：收集完整模型输出
+
         # 新增：记录每个batch的验证损失
         batch_val_losses = []
         
@@ -628,49 +930,42 @@ class Trainer:
                 # 前向传播
                 output = self.model(data.x, data.edge_index, data.edge_attr, data.batch)
 
-                ############################ 分类/回归 标签转换 ############################
-                
-                # 将性能值标签转换为分类标签（选择性能最小的方法）
-                # label shape: [3] -> [heuristic性能, mixed性能, random性能]
-                # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
                 # ============ 修改：根据损失函数类型准备标签 ============
-                # if self.args.use_focal_loss:
-                #     # Focal Loss 需要类别索引（1D整数）
-                #     class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
-                #     loss = self.criterion(output, class_label)
-                #     true_label = class_label  # 真实的最佳方法索引, shape: [1]
-                # else:
-                #     class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
-                #     loss = F.kl_div(output, class_label, reduction='batchmean')
-                #     true_label = class_label.argmax(dim=1)
-
-                class_label = data.y.argmin().unsqueeze(0)  # 统一使用硬标签
-                true_label = class_label
-                if self.args.use_focal_loss:
+                if self.args.use_ranking_loss:
+                    # Ranking Loss: 需要完整的makespan值
+                    true_values = data.y.unsqueeze(0)
+                    loss = self.criterion(output, true_values)
+                    true_label = data.y.argmin().unsqueeze(0)
+                    # 收集真实值用于排序指标
+                    all_true_values.append(data.y.cpu())
+                    
+                elif self.args.use_focal_loss:
+                    # Focal Loss: 需要类别索引
+                    class_label = data.y.argmin().unsqueeze(0)
+                    true_label = class_label
                     loss = self.criterion(output, class_label)
+                    
                 else:
+                    # 标准交叉熵
+                    class_label = data.y.argmin().unsqueeze(0)
+                    true_label = class_label
                     loss = F.nll_loss(output, class_label)
-
-                # 累计验证loss
-                total_loss += loss.item()
-
-                # 新增：记录每个batch的损失
-                batch_val_losses.append(loss.item())
-
-                # 计算准确率
-                pred = output.argmax(dim=1)  # 预测最佳方法索引, shape: [1]
-                correct += (pred == true_label).sum().item()
-                total += 1  # 每次处理一个图
                 
-                # 收集预测和标签用于后续指标计算
-                all_preds.append(pred.cpu().numpy()[0])   # ！！！！！！！！！为什么要把pred搬回cpu
+                # 累计损失
+                total_loss += loss.item()
+                batch_val_losses.append(loss.item())
+                
+                # 计算准确率
+                pred = output.argmax(dim=1)
+                correct += (pred == true_label).sum().item()
+                total += 1
+                
+                # 收集数据用于后续指标计算
+                all_outputs.append(output.cpu())  # 完整输出
+                all_preds.append(pred.cpu().numpy()[0])
                 all_labels.append(true_label.cpu().numpy()[0])
-                # 从log_softmax转换为概率
-                probs = torch.exp(output).cpu().numpy()[0]
-                all_probs.append(probs)
-
-                ############################ 分类/回归 标签转换 ############################
-
+                all_probs.append(torch.exp(output).cpu().numpy()[0])
+                
                 pbar.set_postfix({
                     'loss': f'{loss.item():.4f}',
                     'acc': f'{100. * correct / total:.2f}%'
@@ -750,21 +1045,57 @@ class Trainer:
         
         # 4. 混淆矩阵
         conf_matrix = confusion_matrix(all_labels, all_preds, labels=list(range(self.args.num_classes)))
+
+        # ============ 新增：如果使用Ranking Loss，计算排序指标 ============
+        if self.args.use_ranking_loss and len(all_true_values) > 0:
+            # 准备数据
+            all_outputs_tensor = torch.cat(all_outputs, dim=0)  # [N, num_classes]
+            all_labels_tensor = torch.tensor(all_labels)
+            all_true_values_tensor = torch.stack(all_true_values, dim=0)  # [N, num_classes]
+            
+            # 计算排序指标
+            ranking_metrics = self.calculate_ranking_metrics(
+                all_outputs_tensor, 
+                all_labels_tensor, 
+                all_true_values_tensor
+            )
+            
+            # 打印排序指标
+            print(f"\n{'='*60}")
+            print(f"排序性能指标 (Ranking Metrics):")
+            print(f"{'='*60}")
+            print(f"  Kendall's Tau:     {ranking_metrics['kendall_tau']:>6.3f} (±{ranking_metrics['kendall_tau_std']:.3f})")
+            print(f"                     [1.0=完美, 0.0=随机, -1.0=相反]")
+            print(f"  NDCG@3:            {ranking_metrics['ndcg_at_3']:>6.3f} (±{ranking_metrics['ndcg_at_3_std']:.3f})")
+            print(f"  NDCG@5:            {ranking_metrics['ndcg_at_5']:>6.3f}")
+            print(f"                     [1.0=完美排序, 0.5=中等, 0.0=最差]")
+            print(f"  Top-1 准确率:      {ranking_metrics['top1_acc']:>6.2f}%")
+            print(f"  Top-2 准确率:      {ranking_metrics['top2_acc']:>6.2f}%")
+            print(f"  Top-3 准确率:      {ranking_metrics['top3_acc']:>6.2f}%")
+            print(f"  Pairwise准确率:    {ranking_metrics['pairwise_acc']:>6.2f}%")
+            print(f"  平均排序误差:      {ranking_metrics['avg_rank_error']:>6.2f}")
+            print(f"                     [0=完美, 4=最差]")
+            print(f"{'='*60}\n")
+            
+            # 使用Top-1作为主要准确率指标（兼容性）
+            accuracy = ranking_metrics['top1_acc']
         
-        # 返回所有指标
+        # 返回所有评估指标
         metrics = {
-            'loss': avg_loss,
-            'loss_std': val_loss_std,      # 新增
-            'loss_min': val_loss_min,      # 新增
-            'loss_max': val_loss_max,      # 新增
-            'accuracy': accuracy,
-            'macro_f1': macro_f1,
-            'weighted_f1': weighted_f1,
-            'roc_auc': roc_auc,
+            'val_loss': avg_loss,
+            'val_loss_std': val_loss_std,      # 新增
+            'val_loss_min': val_loss_min,      # 新增
+            'val_loss_max': val_loss_max,      # 新增
+            'val_accuracy': accuracy,
+            'val_macro_f1': macro_f1,
+            'val_weighted_f1': weighted_f1,
+            'val_roc_auc': roc_auc,
             'confusion_matrix': conf_matrix,
             'all_preds': all_preds,
             'all_labels': all_labels,
-            'all_probs': all_probs
+            'all_probs': all_probs,
+            'ndcg_at_3': ranking_metrics['ndcg_at_3'],      
+            'ndcg_at_5': ranking_metrics['ndcg_at_5'],       
         }
 
         # 在返回前恢复训练模式
@@ -772,6 +1103,17 @@ class Trainer:
             original_dataset = self.train_dataset.dataset
             if hasattr(original_dataset, 'set_mode'):
                 original_dataset.set_mode('train')
+
+        # 如果使用Ranking Loss，添加排序指标
+        if self.args.use_ranking_loss and len(all_true_values) > 0:
+            metrics.update({
+                'kendall_tau': ranking_metrics['kendall_tau'],
+                'top1_accuracy': ranking_metrics['top1_acc'],
+                'top2_accuracy': ranking_metrics['top2_acc'],
+                'top3_accuracy': ranking_metrics['top3_acc'],
+                'pairwise_accuracy': ranking_metrics['pairwise_acc'],
+                'avg_rank_error': ranking_metrics['avg_rank_error'],
+            })
         
         return metrics
     
@@ -807,43 +1149,43 @@ class Trainer:
         with open(history_path, 'w') as f:
             json.dump(serializable_history, f, indent=4)
     
-    def plot_confusion_matrix(self, conf_matrix, epoch):
-        """绘制混淆矩阵热力图"""
-        # 修改：使用实例变量
-        class_names = self.class_names
+    # def plot_confusion_matrix(self, conf_matrix, epoch):
+    #     """绘制混淆矩阵热力图"""
+    #     # 修改：使用实例变量
+    #     class_names = self.class_names
         
-        # 根据类别数量动态调整图表大小
-        fig_size = max(10, len(class_names) * 1.5)
-        plt.figure(figsize=(fig_size, fig_size * 0.8))
+    #     # 根据类别数量动态调整图表大小
+    #     fig_size = max(10, len(class_names) * 1.5)
+    #     plt.figure(figsize=(fig_size, fig_size * 0.8))
         
-        # 使用更小的字体以适应更多类别
-        annot_fontsize = 10 if len(class_names) <= 3 else 8
+    #     # 使用更小的字体以适应更多类别
+    #     annot_fontsize = 10 if len(class_names) <= 3 else 8
     
-        sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', 
-                    xticklabels=class_names, yticklabels=class_names,
-                    cbar_kws={'label': 'Count'},
-                    annot_kws={'size': annot_fontsize})
+    #     sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', 
+    #                 xticklabels=class_names, yticklabels=class_names,
+    #                 cbar_kws={'label': 'Count'},
+    #                 annot_kws={'size': annot_fontsize})
         
-        # 根据epoch参数设置标题和文件名
-        if epoch == 'final':
-            plt.title(f'Confusion Matrix (Final - Best Model)', fontsize=16, fontweight='bold')
-            cm_path = os.path.join(self.save_path, f'confusion_matrix_final.png')
-        else:
-            plt.title(f'Confusion Matrix (Epoch {epoch})', fontsize=16, fontweight='bold')
-            cm_path = os.path.join(self.save_path, f'confusion_matrix_epoch{epoch}.png')
+    #     # 根据epoch参数设置标题和文件名
+    #     if epoch == 'final':
+    #         plt.title(f'Confusion Matrix (Final - Best Model)', fontsize=16, fontweight='bold')
+    #         cm_path = os.path.join(self.save_path, f'confusion_matrix_final.png')
+    #     else:
+    #         plt.title(f'Confusion Matrix (Epoch {epoch})', fontsize=16, fontweight='bold')
+    #         cm_path = os.path.join(self.save_path, f'confusion_matrix_epoch{epoch}.png')
         
-        plt.ylabel('True Label', fontsize=14)
-        plt.xlabel('Predicted Label', fontsize=14)
+    #     plt.ylabel('True Label', fontsize=14)
+    #     plt.xlabel('Predicted Label', fontsize=14)
     
-        # 旋转x轴标签以避免重叠
-        plt.xticks(rotation=45, ha='right')
-        plt.yticks(rotation=0)
+    #     # 旋转x轴标签以避免重叠
+    #     plt.xticks(rotation=45, ha='right')
+    #     plt.yticks(rotation=0)
 
-        plt.tight_layout()
-        plt.savefig(cm_path, dpi=300, bbox_inches='tight')
-        plt.close()
+    #     plt.tight_layout()
+    #     plt.savefig(cm_path, dpi=300, bbox_inches='tight')
+    #     plt.close()
     
-        print(f"  混淆矩阵已保存到: {cm_path}")
+    #     print(f"  混淆矩阵已保存到: {cm_path}")
     
     def plot_roc_curves(self, all_labels, all_probs, n_classes, epoch=None):
         """绘制ROC曲线（One-vs-Rest）"""
@@ -960,10 +1302,17 @@ class Trainer:
         plt.rcParams['axes.unicode_minus'] = False
         
         epochs = range(1, len(self.train_history['train_loss']) + 1)
+
+        # ⭐ 检查是否有排序指标
+        has_ranking = (
+            'kendall_tau' in self.train_history and 
+            len(self.train_history['kendall_tau']) > 0
+        )
         
         # 创建3x2的子图布局（增加新指标）
         fig, axes = plt.subplots(3, 2, figsize=(18, 18))
         fig.suptitle('Training Process Monitor', fontsize=18, fontweight='bold')
+        
         
         # 子图1: 训练损失和验证损失
         # axes[0, 0].plot(epochs, self.train_history['train_loss'], 'b-', label='Train Loss', linewidth=2)
@@ -1058,6 +1407,29 @@ class Trainer:
         axes[2, 1].legend(loc='lower right', fontsize=9)
         axes[2, 1].grid(True, alpha=0.3)
         axes[2, 1].set_ylim([0, 105])
+
+        # 新增：排序指标曲线
+        if has_ranking:
+            # Kendall's Tau
+            ax = axes[2, 0]
+            ax.plot(self.train_history['kendall_tau'], 'b-', label="Kendall's Tau")
+            ax.set_xlabel('Epoch')
+            ax.set_ylabel("Kendall's Tau")
+            ax.set_title("Ranking Correlation")
+            ax.legend()
+            ax.grid(True)
+            
+            # Pairwise Accuracy
+            ax = axes[2, 1]
+            ax.plot(self.train_history['pairwise_accuracy'], 'g-', label='Pairwise Acc')
+            ax.plot(self.train_history['top2_accuracy'], 'b--', label='Top-2 Acc')
+            ax.plot(self.train_history['top3_accuracy'], 'r--', label='Top-3 Acc')
+            ax.set_xlabel('Epoch')
+            ax.set_ylabel('Accuracy (%)')
+            ax.set_title('Ranking Accuracies')
+            ax.legend()
+            ax.grid(True)
+
         
         # 调整子图之间的间距
         plt.tight_layout()
@@ -1225,15 +1597,11 @@ class Trainer:
             metrics = self.validate(epoch)
             
             # 提取指标
-            val_loss = metrics['loss']
-            val_loss_std = metrics['loss_std']      # 新增
-            val_loss_min = metrics['loss_min']      # 新增
-            val_loss_max = metrics['loss_max']      # 新增
-            val_accuracy = metrics['accuracy']
-            val_macro_f1 = metrics['macro_f1']
-            val_weighted_f1 = metrics['weighted_f1']
-            val_roc_auc = metrics['roc_auc']
-            conf_matrix = metrics['confusion_matrix']
+            val_loss = metrics['val_loss']                 # ✓
+            val_loss_std = metrics['val_loss_std']         # ✓
+            val_loss_min = metrics['val_loss_min']         # ✓
+            val_loss_max = metrics['val_loss_max']         # ✓
+            val_accuracy = metrics['val_accuracy']         # ✓
             
             # 学习率调整
             self.scheduler.step(val_accuracy)
@@ -1244,75 +1612,85 @@ class Trainer:
             self.train_history['train_loss_std'].append(train_loss_std)
             self.train_history['train_loss_min'].append(train_loss_min)
             self.train_history['train_loss_max'].append(train_loss_max)
+            
             self.train_history['val_loss'].append(val_loss)
-            self.train_history['val_loss_std'].append(val_loss_std)      # 新增
-            self.train_history['val_loss_min'].append(val_loss_min)      # 新增
-            self.train_history['val_loss_max'].append(val_loss_max)      # 新增
+            self.train_history['val_loss_std'].append(val_loss_std)    
+            self.train_history['val_loss_min'].append(val_loss_min)    
+            self.train_history['val_loss_max'].append(val_loss_max)    
+
             self.train_history['val_accuracy'].append(val_accuracy)
-            self.train_history['val_macro_f1'].append(val_macro_f1)
-            self.train_history['val_weighted_f1'].append(val_weighted_f1)
-            self.train_history['val_roc_auc'].append(val_roc_auc)
+            self.train_history['val_macro_f1'].append(metrics['val_macro_f1'])
+            self.train_history['val_weighted_f1'].append(metrics['val_weighted_f1'])
+            self.train_history['val_roc_auc'].append(metrics['val_roc_auc'])
             self.train_history['lr'].append(current_lr)
             
-            # 打印统计信息
-            print(f"\nEpoch {epoch}/{self.args.epochs} 总结:")
-            print(f"  训练损失: {train_loss:.4f}")
-            print(f"  验证损失: {val_loss:.4f}")
-            print(f"  验证准确率: {val_accuracy:.2f}%")
-            print(f"  宏平均 F1-Score: {val_macro_f1:.2f}%")
-            print(f"  加权平均 F1-Score: {val_weighted_f1:.2f}%")
-            print(f"  ROC-AUC (OvR): {val_roc_auc:.2f}%")
-            print(f"  学习率: {current_lr:.6f}")
-
-            # 记录到 wandb
-            wandb.log({
-                "epoch": epoch,
-                "train/loss": train_loss,
-                "train/loss_std": train_loss_std,
-                "train/loss_min": train_loss_min,
-                "train/loss_max": train_loss_max,
-                "val/loss": val_loss,
-                "val/loss_std": val_loss_std,
-                "val/loss_min": val_loss_min,
-                "val/loss_max": val_loss_max,
-                "val/accuracy": val_accuracy,
-                "val/macro_f1": val_macro_f1,
-                "val/weighted_f1": val_weighted_f1,
-                "val/roc_auc": val_roc_auc,
-                "learning_rate": current_lr,
-            }, step=epoch)
-
+            # 如果使用Ranking Loss，记录排序指标
+            if self.args.use_ranking_loss:
+                # 确保历史字典中有这些键
+                if 'kendall_tau' not in self.train_history:
+                    self.train_history['kendall_tau'] = []
+                    self.train_history['top2_accuracy'] = []
+                    self.train_history['top3_accuracy'] = []
+                    self.train_history['pairwise_accuracy'] = []
+                    self.train_history['avg_rank_error'] = []
+                    self.train_history['ndcg_at_3'] = [] 
+                    self.train_history['ndcg_at_5'] = []  
+                
+                self.train_history['kendall_tau'].append(metrics.get('kendall_tau', 0))
+                self.train_history['top2_accuracy'].append(metrics.get('top2_accuracy', 0))
+                self.train_history['top3_accuracy'].append(metrics.get('top3_accuracy', 0))
+                self.train_history['pairwise_accuracy'].append(metrics.get('pairwise_accuracy', 0))
+                self.train_history['avg_rank_error'].append(metrics.get('avg_rank_error', 0))
+                self.train_history['ndcg_at_3'].append(metrics.get('ndcg_at_3', 0))
+                self.train_history['ndcg_at_5'].append(metrics.get('ndcg_at_5', 0)) 
             
-            # 额外记录混淆矩阵到 wandb（可选）
-            wandb.log({
-                "confusion_matrix": wandb.plot.confusion_matrix(
-                    probs=None,
-                    y_true=metrics['all_labels'],
-                    preds=metrics['all_preds'],
-                    class_names=self.class_names
-                )
-            }, step=epoch)
+            # 构建wandb日志字典
+            wandb_log = {
+                'epoch': epoch,
+                'train/loss': train_loss,
+                'val/loss': val_loss,
+                'val/accuracy': val_accuracy,
+                'val/macro_f1': metrics['val_macro_f1'],
+                'val/weighted_f1': metrics['val_weighted_f1'],
+                'val/roc_auc': metrics['val_roc_auc'],
+                'learning_rate': current_lr
+            }
             
-            # 打印混淆矩阵
-            print(f"\n  混淆矩阵:")
-            # 修改：使用实例变量并动态调整格式
-            class_names = self.class_names
-            n_classes = min(len(class_names), conf_matrix.shape[0])
+            # 如果使用Ranking Loss，添加排序指标
+            if self.args.use_ranking_loss:
+                wandb_log.update({
+                    'val/kendall_tau': metrics.get('kendall_tau', 0),
+                    'val/top1_accuracy': metrics.get('top1_accuracy', 0),
+                    'val/top2_accuracy': metrics.get('top2_accuracy', 0),
+                    'val/top3_accuracy': metrics.get('top3_accuracy', 0),
+                    'val/pairwise_accuracy': metrics.get('pairwise_accuracy', 0),
+                    'val/avg_rank_error': metrics.get('avg_rank_error', 0),
+                    'val/ndcg_at_3': metrics.get('ndcg_at_3', 0), 
+                    'val/ndcg_at_5': metrics.get('ndcg_at_5', 0),
+                })
             
-            # 计算最大类别名称长度，用于对齐
-            max_name_len = max(len(name) for name in class_names[:n_classes])
-            padding = max(max_name_len, 12)
+            wandb.log(wandb_log)
             
-            # 打印表头
-            header_names = [name[:9].ljust(9) for name in class_names[:n_classes]]
-            header = " " * (padding + 10) + "预测: " + "  ".join(header_names)
-            print(header)
+            # # 打印混淆矩阵
+            # print(f"\n  混淆矩阵:")
+            # # 修改：使用实例变量并动态调整格式
+            # class_names = self.class_names
+            # n_classes = min(len(class_names), conf_matrix.shape[0])
             
-            # 打印每一行
-            for i in range(n_classes):
-                row_label = f"真实: {class_names[i]}".ljust(padding + 10)
-                row_values = "  ".join([f"{conf_matrix[i, j]:6d}" for j in range(n_classes)])
-                print(row_label + row_values)
+            # # 计算最大类别名称长度，用于对齐
+            # max_name_len = max(len(name) for name in class_names[:n_classes])
+            # padding = max(max_name_len, 12)
+            
+            # # 打印表头
+            # header_names = [name[:9].ljust(9) for name in class_names[:n_classes]]
+            # header = " " * (padding + 10) + "预测: " + "  ".join(header_names)
+            # print(header)
+            
+            # # 打印每一行
+            # for i in range(n_classes):
+            #     row_label = f"真实: {class_names[i]}".ljust(padding + 10)
+            #     row_values = "  ".join([f"{conf_matrix[i, j]:6d}" for j in range(n_classes)])
+            #     print(row_label + row_values)
             
             # 保存检查点
             is_best = val_loss < self.best_val_loss
@@ -1362,15 +1740,15 @@ class Trainer:
             final_metrics = self.validate(best_epoch)
             
             print(f"\n最佳模型的最终评估指标:")
-            print(f"  - 准确率: {final_metrics['accuracy']:.2f}%")
-            print(f"  - 宏平均 F1: {final_metrics['macro_f1']:.2f}%")
-            print(f"  - 加权平均 F1: {final_metrics['weighted_f1']:.2f}%")
-            print(f"  - ROC-AUC: {final_metrics['roc_auc']:.2f}%")
+            print(f"  - 准确率: {final_metrics['val_accuracy']:.2f}%")
+            print(f"  - 宏平均 F1: {final_metrics['val_macro_f1']:.2f}%")
+            print(f"  - 加权平均 F1: {final_metrics['val_weighted_f1']:.2f}%")
+            print(f"  - ROC-AUC: {final_metrics['val_roc_auc']:.2f}%")
             
             # 生成最终的混淆矩阵
-            print(f"\n正在生成最终混淆矩阵...")
-            final_cm_path = self.plot_confusion_matrix(final_metrics['confusion_matrix'], 'final')
-            print(f"✓ 最终混淆矩阵已保存至: {final_cm_path}")
+            # print(f"\n正在生成最终混淆矩阵...")
+            # final_cm_path = self.plot_confusion_matrix(final_metrics['confusion_matrix'], 'final')
+            # print(f"✓ 最终混淆矩阵已保存至: {final_cm_path}")
             
             # 生成最终的ROC曲线
             print(f"\n正在生成最终ROC曲线...")
@@ -1525,6 +1903,16 @@ def main():
                              '  gamma=0: 标准交叉熵\n'
                              '  gamma=2: 推荐值，简单样本权重降低100倍\n'
                              '  gamma=5: 激进值，简单样本权重降低1000倍')
+
+    # ============ 排序学习参数 ============
+    parser.add_argument('--use_ranking_loss', type=str2bool, default=False,
+                        help='是否使用排序损失（推荐用于标签差异小的场景）')
+    parser.add_argument('--use_weighted_ranking', type=str2bool, default=True,
+                        help='是否使用加权排序（根据性能差距调整权重）')
+    parser.add_argument('--ranking_margin', type=float, default=0.1,
+                        help='排序边界，越大越严格 (默认: 0.5)')
+    parser.add_argument('--ranking_gap_threshold', type=float, default=0.1,
+                        help='性能差距阈值，低于此值降低权重 (默认: 0.05=5%)')
 
     args = parser.parse_args()
     

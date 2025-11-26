@@ -93,7 +93,7 @@ class Dataset(dataset.Dataset):
                     label_info["MWKR_EET"]["makespan"]["values"][self.label_name]
                 ]
             
-            scores = self.apply_temperature_scaling(scores, temperature=0.5)
+            # scores = self.apply_temperature_scaling(scores, temperature=0.5)
             g.y = torch.log(torch.tensor(scores, dtype=torch.float) + 1)
             
             if self.device is not None:
