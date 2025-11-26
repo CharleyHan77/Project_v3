@@ -215,7 +215,7 @@ class Trainer:
             # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
             class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
             
-            # 计算分类损失 - 使用NLLLoss（配合模型的log_softmax输出）
+            # 计算分类损失（KL散度）
             loss = F.kl_div(output, class_label, reduction='batchmean')
 
             ############################ 分类/回归 标签转换 ############################
