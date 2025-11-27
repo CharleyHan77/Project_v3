@@ -95,7 +95,7 @@ class Trainer:
 
         # 初始化 wandb
         wandb.init(
-            project="GNN for fjsp",  # 项目名称，可以自定义
+            project="Project_v3.1",  # 项目名称，可以自定义
             name=f"{args.model_name}_{timestamp}",  # 运行名称
             config={
                 "model_name": args.model_name,
@@ -196,12 +196,12 @@ class Trainer:
         print(f"\n训练模式: 单图训练 + 梯度累积({args.accumulation_steps}步)")
         print(f"等效批次大小: {args.accumulation_steps}")
 
-        # 使用Focal Loss替代普通NLLLoss
-        self.criterion = FocalLoss(
-            alpha=self.class_weights,
-            gamma=2.0  # 增大gamma更关注难样本，8分类建议3-4
-        )
-        print(f"使用 Focal Loss (gamma=2.0) 处理类别不平衡")
+        # # 使用Focal Loss替代普通NLLLoss
+        # self.criterion = FocalLoss(
+        #     alpha=self.class_weights,
+        #     gamma=2.0  # 增大gamma更关注难样本，8分类建议3-4
+        # )
+        # print(f"使用 Focal Loss (gamma=2.0) 处理类别不平衡")
 
         
         # 创建数据加载器 - 由于图大小不一致，每次加载一个图
@@ -362,10 +362,9 @@ class Trainer:
             # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
 
             ############原有软标签 + 熵正则 ############
-            # class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
+            class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
             
-            # # loss = F.kl_div(output, class_label, reduction='batchmean') # 加权kl散度
-            # loss = F.kl_div(output, class_label, reduction='none')
+            loss = F.kl_div(output, class_label, reduction='batchmean')
             # true_class_idx = class_label.argmax(dim=1)  # 提取真实类别索引
             # weight = self.class_weights[true_class_idx]  # 获取对应的权重
             # loss = (loss.sum(dim=1) * weight).mean()
@@ -377,8 +376,8 @@ class Trainer:
             ############原有软标签 + 熵正则 ############
 
             ################Focal Loss###############
-            class_label = data.y.argmin().unsqueeze(0)
-            loss = self.criterion(output, class_label)
+            # class_label = data.y.argmin().unsqueeze(0)
+            # loss = self.criterion(output, class_label)
             ################Focal Loss###############
 
             ############################ 硬标签 + 交叉熵 ############################
@@ -473,10 +472,10 @@ class Trainer:
                 # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
 
                 ############原有软标签############
-                # class_label = F.softmax(-data.y, dim=0).unsqueeze(0) 
+                class_label = F.softmax(-data.y, dim=0).unsqueeze(0) 
 
                 # # 计算分类损失
-                # # loss = F.kl_div(output, class_label, reduction='batchmean')
+                loss = F.kl_div(output, class_label, reduction='batchmean')
                 # # 加权kl散度
                 # loss = F.kl_div(output, class_label, reduction='none')
                 # true_class_idx = class_label.argmax(dim=1)  # 提取真实类别索引
@@ -485,8 +484,8 @@ class Trainer:
                 ############原有软标签############
 
                 ################Focal Loss###############
-                class_label = data.y.argmin().unsqueeze(0)
-                loss = self.criterion(output, class_label)
+                # class_label = data.y.argmin().unsqueeze(0)
+                # loss = self.criterion(output, class_label)
                 ################Focal Loss###############
 
                 ############ 硬标签 ##############  
@@ -500,8 +499,7 @@ class Trainer:
 
                 # 计算准确率
                 pred = output.argmax(dim=1)  # 预测的最佳方法索引, shape: [1]
-                true_label = class_label
-                # true_label = data.y.argmin()
+                true_label = class_label.argmax(dim=1)                 # true_label = data.y.argmin()
                 correct += (pred == true_label).sum().item()
                 total += 1  # 每次处理一个图
                 
