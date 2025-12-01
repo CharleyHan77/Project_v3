@@ -42,6 +42,7 @@ class NNConv_Mean_Pooling(torch.nn.Module):
         x = self.fc2(x)
         
         return F.log_softmax(x, dim=1)
+        # return x
 
 
 class NNConv_Max_Pooling(torch.nn.Module):
@@ -129,7 +130,7 @@ class NNConv_Multi_Scale_Pooling(torch.nn.Module):
 
 
 class NNConv_Attention_Pooling(torch.nn.Module):
-    """学习每个节点的重要性权重"""
+    """注意力池化"""
     def __init__(self, node_features, edge_features, hidden_dim, num_classes):
         super().__init__()
         
@@ -173,7 +174,82 @@ class NNConv_Attention_Pooling(torch.nn.Module):
         x = F.dropout(x, p=0.5, training=self.training)
         x = self.fc2(x)
         
-        return F.log_softmax(x, dim=1)
+        # return F.log_softmax(x, dim=1)
+        return x
+
+class NNConv_Deep_Attention_Pooling(torch.nn.Module):
+    """更深层GCN+注意力池化"""
+    def __init__(self, node_features, edge_features, hidden_dim, num_classes):
+        super().__init__()
+        
+        # 第1层
+        nn1 = torch.nn.Sequential(
+            torch.nn.Linear(edge_features, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(0.15),  # 适中的dropout
+            torch.nn.Linear(hidden_dim, node_features * hidden_dim)
+        )
+        self.conv1 = NNConv(node_features, hidden_dim, nn1)
+        self.bn1 = torch.nn.BatchNorm1d(hidden_dim)
+        
+        # 第2-3层
+        nn2 = torch.nn.Sequential(
+            torch.nn.Linear(edge_features, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(0.15),
+            torch.nn.Linear(hidden_dim, hidden_dim * hidden_dim)
+        )
+        self.conv2 = NNConv(hidden_dim, hidden_dim, nn2)
+        self.bn2 = torch.nn.BatchNorm1d(hidden_dim)
+        
+        nn3 = torch.nn.Sequential(
+            torch.nn.Linear(edge_features, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(0.15),
+            torch.nn.Linear(hidden_dim, hidden_dim * hidden_dim)
+        )
+        self.conv3 = NNConv(hidden_dim, hidden_dim, nn3)
+        self.bn3 = torch.nn.BatchNorm1d(hidden_dim)
+        
+        # 注意力池化
+        gate_nn = torch.nn.Sequential(
+            torch.nn.Linear(hidden_dim, hidden_dim // 2),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(0.25),
+            torch.nn.Linear(hidden_dim // 2, 1)
+        )
+        self.attention_pool = GlobalAttention(gate_nn)
+        
+        # 分类器（简化版）
+        self.fc1 = torch.nn.Linear(hidden_dim, hidden_dim // 2)
+        self.fc2 = torch.nn.Linear(hidden_dim // 2, num_classes)
+        
+    def forward(self, x, edge_index, edge_attr, batch):
+        # 第1层
+        x = F.relu(self.bn1(self.conv1(x, edge_index, edge_attr)))
+        x = F.dropout(x, p=0.15, training=self.training)
+        
+        # 第2层（带残差）
+        identity = x
+        x = F.relu(self.bn2(self.conv2(x, edge_index, edge_attr)))
+        x = F.dropout(x, p=0.15, training=self.training)
+        x = x + identity
+        
+        # 第3层（带残差）
+        identity = x
+        x = F.relu(self.bn3(self.conv3(x, edge_index, edge_attr)))
+        x = F.dropout(x, p=0.15, training=self.training)
+        x = x + identity
+        
+        # 注意力池化
+        x = self.attention_pool(x, batch)
+        
+        # 分类
+        x = F.relu(self.fc1(x))
+        x = F.dropout(x, p=0.35, training=self.training)
+        x = self.fc2(x)
+        
+        return x
 
 
 class NNConv_Set2Set_Pooling(torch.nn.Module):
@@ -350,6 +426,7 @@ MODEL_REGISTRY = {
     'NNConv_Mean_Pooling': NNConv_Mean_Pooling,
     'NNConv_Multi_Scale_Pooling': NNConv_Multi_Scale_Pooling,
     'NNConv_Attention_Pooling': NNConv_Attention_Pooling,
+    "NNConv_Deep_Attention_Pooling": NNConv_Deep_Attention_Pooling,
     'NNConv_Set2Set_Pooling': NNConv_Set2Set_Pooling,
     "NNConv_Max_Pooling": NNConv_Max_Pooling,
     "GINE_Mean_Pooling": GINE_Mean_Pooling,

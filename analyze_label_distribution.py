@@ -210,11 +210,11 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='分析数据标签分布')
     parser.add_argument('--label_root_path', type=str, 
-                        default='/workspace/Project_v3/init_validity_result_new',
+                        default='/workspace/Project_v3/init_validity_result_mksp_mean',
                         help='标签文件根目录')
     parser.add_argument('--label_name', type=str, default='mean',
                         help='使用的标签名称 (mean, min, max等)')
-    parser.add_argument('--output_txt', type=str, default='label_distribution_report.txt',
+    parser.add_argument('--output_txt', type=str, default='label_distribution_report_mksp_mean.txt',
                         help='文本报告输出文件名')
     parser.add_argument('--output_json', type=str, default='label_distribution.json',
                         help='JSON数据输出文件名')

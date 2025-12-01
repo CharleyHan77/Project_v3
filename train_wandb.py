@@ -147,7 +147,8 @@ class Trainer:
         # 使用Subset创建训练集和验证集
         self.train_dataset = Subset(full_dataset, train_indices)
         self.val_dataset = Subset(full_dataset, val_indices)
-                
+
+        #####################################################        
         # 计算类别权重以处理类别不平衡问题
         print(f"\n正在计算类别权重...")
         train_labels = [full_dataset[i].y.argmin().item() for i in train_indices]
@@ -167,6 +168,7 @@ class Trainer:
         
         self.class_weights = torch.FloatTensor(class_weights).to(self.device)
         print(f"类别权重: {class_weights}")
+        #####################################################
         
         # 统计训练集和验证集的类别分布
         train_methods = [full_dataset[i].y.argmin().item() for i in train_indices]
@@ -362,12 +364,15 @@ class Trainer:
             # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
 
             ############原有软标签 + 熵正则 ############
-            class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
-            
-            loss = F.kl_div(output, class_label, reduction='batchmean')
+            # temperature = 20  # 温度参数（使得分布更平滑）
+            # class_label = F.softmax(-data.y / temperature, dim=0).unsqueeze(0)
+        
+            # loss = F.kl_div(output, class_label, reduction='batchmean')
+
             # true_class_idx = class_label.argmax(dim=1)  # 提取真实类别索引
             # weight = self.class_weights[true_class_idx]  # 获取对应的权重
             # loss = (loss.sum(dim=1) * weight).mean()
+
 
             # 下方是熵正则 建议先禁用，等模型收敛后再考虑
             # pred_probs = torch.exp(output)  # shape: [1, num_classes]
@@ -382,10 +387,8 @@ class Trainer:
 
             ############################ 硬标签 + 交叉熵 ############################
             # 将性能值转为硬标签（选择最优方法）
-            # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
-            
-            # # 使用标准交叉熵损失（模型输出已经是log_softmax）
-            # loss = F.nll_loss(output, class_label, weight=self.class_weights)
+            class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
+            loss = F.cross_entropy(output, class_label, weight=self.class_weights)
 
             # 如果要保留熵正则化（可选，建议先不加）
             # pred_probs = torch.exp(output)
@@ -472,15 +475,11 @@ class Trainer:
                 # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
 
                 ############原有软标签############
-                class_label = F.softmax(-data.y, dim=0).unsqueeze(0) 
+                # temperature = 20  # 温度参数（使得分布更平滑）
+                # class_label = F.softmax(-data.y / temperature, dim=0).unsqueeze(0) 
 
-                # # 计算分类损失
-                loss = F.kl_div(output, class_label, reduction='batchmean')
-                # # 加权kl散度
-                # loss = F.kl_div(output, class_label, reduction='none')
-                # true_class_idx = class_label.argmax(dim=1)  # 提取真实类别索引
-                # weight = self.class_weights[true_class_idx]  # 获取对应的权重
-                # loss = (loss.sum(dim=1) * weight).mean()
+                # # # 计算分类损失
+                # loss = F.kl_div(output, class_label, reduction='batchmean')
                 ############原有软标签############
 
                 ################Focal Loss###############
@@ -489,8 +488,8 @@ class Trainer:
                 ################Focal Loss###############
 
                 ############ 硬标签 ##############  
-                # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
-                # loss = F.nll_loss(output, class_label, weight=self.class_weights)
+                class_label = data.y.argmin().unsqueeze(0)   # shape: [1]
+                loss = F.cross_entropy(output, class_label, weight=self.class_weights)
                 ############ 硬标签 ##############
                 total_loss += loss.item()
 
@@ -499,15 +498,17 @@ class Trainer:
 
                 # 计算准确率
                 pred = output.argmax(dim=1)  # 预测的最佳方法索引, shape: [1]
-                true_label = class_label.argmax(dim=1)                 # true_label = data.y.argmin()
+                # true_label = class_label.argmax(dim=1)                 # true_label = data.y.argmin()
+                true_label = data.y.argmin()
                 correct += (pred == true_label).sum().item()
                 total += 1  # 每次处理一个图
                 
                 # 收集预测和标签用于后续指标计算
                 all_preds.append(pred.cpu().numpy()[0])   # ！！！！！！！！！为什么要把pred搬回cpu
-                all_labels.append(true_label.cpu().numpy()[0])
-                # 从log_softmax转换为概率
-                probs = torch.exp(output).cpu().numpy()[0]
+                all_labels.append(data.y.argmin().item())
+                # 转换为概率
+                # probs = torch.exp(output).cpu().numpy()[0]
+                probs = F.softmax(output, dim=1).cpu().numpy()[0]  # 从logits转换
                 all_probs.append(probs)
 
                 ############################ 分类/回归 标签转换 ############################
@@ -1296,8 +1297,8 @@ def main():
                         help='初始学习率 (默认: 0.001)')
     parser.add_argument('--weight_decay', type=float, default=5e-4,
                         help='L2正则化系数 (默认: 5e-4)')
-    parser.add_argument('--patience', type=int, default=15,
-                        help='学习率衰减的耐心值 (默认: 15)')
+    parser.add_argument('--patience', type=int, default=8,
+                        help='学习率衰减的耐心值')
     
     # 其他参数
     parser.add_argument('--seed', type=int, default=42,

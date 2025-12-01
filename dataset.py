@@ -38,6 +38,11 @@ class Dataset(dataset.Dataset):
                     fjs_path = os.path.join(self.fjs_root_path, label["dataset"], label["instance"])
         
             label_info = label["initialization_methods"]
+
+            # 添加文件存在性检查：只处理存在的FJS文件
+            if not os.path.exists(fjs_path):
+                print(f"* FJS文件不存在，跳过: {fjs_path}")
+                continue
             
             g = self._convert_fjs(fjs_path)
             # g.y = torch.log(
