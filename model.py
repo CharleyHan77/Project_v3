@@ -190,7 +190,7 @@ class NNConv_Deep_Attention_Pooling(torch.nn.Module):
             torch.nn.Linear(hidden_dim, node_features * hidden_dim)
         )
         self.conv1 = NNConv(node_features, hidden_dim, nn1)
-        self.bn1 = torch.nn.BatchNorm1d(hidden_dim)
+        self.bn1 = torch.nn.LayerNorm(hidden_dim)
         
         # 第2-3层
         nn2 = torch.nn.Sequential(
@@ -200,7 +200,7 @@ class NNConv_Deep_Attention_Pooling(torch.nn.Module):
             torch.nn.Linear(hidden_dim, hidden_dim * hidden_dim)
         )
         self.conv2 = NNConv(hidden_dim, hidden_dim, nn2)
-        self.bn2 = torch.nn.BatchNorm1d(hidden_dim)
+        self.bn2 = torch.nn.LayerNorm(hidden_dim)
         
         nn3 = torch.nn.Sequential(
             torch.nn.Linear(edge_features, hidden_dim),
@@ -209,7 +209,7 @@ class NNConv_Deep_Attention_Pooling(torch.nn.Module):
             torch.nn.Linear(hidden_dim, hidden_dim * hidden_dim)
         )
         self.conv3 = NNConv(hidden_dim, hidden_dim, nn3)
-        self.bn3 = torch.nn.BatchNorm1d(hidden_dim)
+        self.bn3 = torch.nn.LayerNorm(hidden_dim)
         
         # 注意力池化
         gate_nn = torch.nn.Sequential(
@@ -335,6 +335,92 @@ class GINE_Mean_Pooling(torch.nn.Module):
         return F.log_softmax(x, dim=1)
 
 
+class GINE_Deep_Attention_Pooling(torch.nn.Module):
+    def __init__(self, node_features, edge_features, hidden_dim, num_classes):
+        super().__init__()
+        
+        # 边特征投影层：将边特征投影到与节点特征相同的维度
+        self.edge_proj1 = torch.nn.Linear(edge_features, node_features)
+        self.edge_proj2 = torch.nn.Linear(edge_features, hidden_dim)
+        self.edge_proj3 = torch.nn.Linear(edge_features, hidden_dim)
+        
+        # 第1层 - GINEConv 的 nn 是处理节点特征的 MLP
+        nn1 = torch.nn.Sequential(
+            torch.nn.Linear(node_features, hidden_dim),
+            torch.nn.BatchNorm1d(hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(0.15),
+            torch.nn.Linear(hidden_dim, hidden_dim)
+        )
+        self.conv1 = GINEConv(nn1, edge_dim=node_features, train_eps=True)
+        self.bn1 = torch.nn.LayerNorm(hidden_dim)
+        
+        # 第2层
+        nn2 = torch.nn.Sequential(
+            torch.nn.Linear(hidden_dim, hidden_dim),
+            torch.nn.BatchNorm1d(hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(0.15),
+            torch.nn.Linear(hidden_dim, hidden_dim)
+        )
+        self.conv2 = GINEConv(nn2, edge_dim=hidden_dim, train_eps=True)
+        self.bn2 = torch.nn.LayerNorm(hidden_dim)
+        
+        # 第3层
+        nn3 = torch.nn.Sequential(
+            torch.nn.Linear(hidden_dim, hidden_dim),
+            torch.nn.BatchNorm1d(hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(0.15),
+            torch.nn.Linear(hidden_dim, hidden_dim)
+        )
+        self.conv3 = GINEConv(nn3, edge_dim=hidden_dim, train_eps=True)
+        self.bn3 = torch.nn.LayerNorm(hidden_dim)
+        
+        # 注意力池化
+        gate_nn = torch.nn.Sequential(
+            torch.nn.Linear(hidden_dim, hidden_dim // 2),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(0.25),
+            torch.nn.Linear(hidden_dim // 2, 1)
+        )
+        self.attention_pool = GlobalAttention(gate_nn)
+        
+        # 分类器
+        self.fc1 = torch.nn.Linear(hidden_dim, hidden_dim // 2)
+        self.fc2 = torch.nn.Linear(hidden_dim // 2, num_classes)
+        
+    def forward(self, x, edge_index, edge_attr, batch):
+        # 第1层 - 边特征投影到 node_features 维度
+        edge_attr1 = self.edge_proj1(edge_attr)
+        x = F.relu(self.bn1(self.conv1(x, edge_index, edge_attr1)))
+        x = F.dropout(x, p=0.15, training=self.training)
+        
+        # 第2层（带残差）- 边特征投影到 hidden_dim 维度
+        identity = x
+        edge_attr2 = self.edge_proj2(edge_attr)
+        x = F.relu(self.bn2(self.conv2(x, edge_index, edge_attr2)))
+        x = F.dropout(x, p=0.15, training=self.training)
+        x = x + identity
+        
+        # 第3层（带残差）
+        identity = x
+        edge_attr3 = self.edge_proj3(edge_attr)
+        x = F.relu(self.bn3(self.conv3(x, edge_index, edge_attr3)))
+        x = F.dropout(x, p=0.15, training=self.training)
+        x = x + identity
+        
+        # 注意力池化
+        x = self.attention_pool(x, batch)
+        
+        # 分类
+        x = F.relu(self.fc1(x))
+        x = F.dropout(x, p=0.35, training=self.training)
+        x = self.fc2(x)
+        
+        return x
+
+
 # class GATv2_Classifier(torch.nn.Module):
 #     """使用 GATv2Conv：注意力机制   当前PYG版本过低""" 
 #     def __init__(self, node_features, edge_features, hidden_dim, num_classes):
@@ -430,6 +516,7 @@ MODEL_REGISTRY = {
     'NNConv_Set2Set_Pooling': NNConv_Set2Set_Pooling,
     "NNConv_Max_Pooling": NNConv_Max_Pooling,
     "GINE_Mean_Pooling": GINE_Mean_Pooling,
+    "GINE_Deep_Attention_Pooling": GINE_Deep_Attention_Pooling,
     "Transformer_Mean_Pooling": Transformer_Mean_Pooling
 }
 

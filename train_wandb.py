@@ -4,6 +4,7 @@ import torch.nn as nn
 from torch_geometric.data import DataLoader
 from torch.utils.data.dataset import random_split
 from torch.utils.data import Subset
+from torch.utils.data.sampler import WeightedRandomSampler
 import argparse
 import os
 import json
@@ -148,9 +149,9 @@ class Trainer:
         self.train_dataset = Subset(full_dataset, train_indices)
         self.val_dataset = Subset(full_dataset, val_indices)
 
-        #####################################################        
+        ######################### 损失函数加权 ###########################        
         # 计算类别权重以处理类别不平衡问题
-        print(f"\n正在计算类别权重...")
+        # print(f"\n正在计算类别权重...")
         train_labels = [full_dataset[i].y.argmin().item() for i in train_indices]
         
         # 统计每个类别的样本数
@@ -162,12 +163,30 @@ class Trainer:
         class_weights = np.zeros(args.num_classes)
         for cls, count in zip(unique_classes, class_counts):
             class_weights[cls] = total_samples / (args.num_classes * count)
-        
+    
         # 如果某个类别没有样本，权重设为0
         class_weights[class_weights == np.inf] = 0
-        
+    
         self.class_weights = torch.FloatTensor(class_weights).to(self.device)
+
+        # 自适应类别权重：跟踪每个类别的F1-Score。动态根据验证集表现调整
+        self.class_f1_history = {i: [] for i in range(args.num_classes)}
+        self.weight_adjustment_interval = 10  # 每10个epoch调整一次权重
+
         print(f"类别权重: {class_weights}")
+        ########################## 加权采样器 ###########################
+        # class_sample_count = [train_labels.count(i) for i in range(self.args.num_classes)]
+        # weight_per_class = 1.0 / np.array(class_sample_count)  # shape: [5]
+        
+        # # 为每个样本分配权重
+        # samples_weight = [weight_per_class[label] for label in train_labels]  # 例如 shape: [809]
+        # samples_weight = torch.FloatTensor(samples_weight)
+
+        # sampler = WeightedRandomSampler(
+        #     weights=samples_weight.type('torch.DoubleTensor'),  # 必须是Double类型            
+        #     num_samples=len(train_indices),
+        #     replacement=True
+        # )
         #####################################################
         
         # 统计训练集和验证集的类别分布
@@ -198,18 +217,19 @@ class Trainer:
         print(f"\n训练模式: 单图训练 + 梯度累积({args.accumulation_steps}步)")
         print(f"等效批次大小: {args.accumulation_steps}")
 
-        # # 使用Focal Loss替代普通NLLLoss
+        # 使用Focal Loss替代普通NLLLoss（震荡剧烈）
         # self.criterion = FocalLoss(
         #     alpha=self.class_weights,
-        #     gamma=2.0  # 增大gamma更关注难样本，8分类建议3-4
+        #     gamma=3.0  # 增大gamma更关注难样本，8分类建议3-4
         # )
-        # print(f"使用 Focal Loss (gamma=2.0) 处理类别不平衡")
+        # print(f"使用 Focal Loss (gamma=3.0) 处理类别不平衡")
 
         
         # 创建数据加载器 - 由于图大小不一致，每次加载一个图
         self.train_loader = DataLoader(
             self.train_dataset, 
             batch_size=1,  # 每次处理一个图
+            # sampler=sampler
             shuffle=True
         )
         self.val_loader = DataLoader(
@@ -271,6 +291,27 @@ class Trainer:
         
         print(f"模型已初始化，使用设备: {self.device}")
         # print(f"模型参数数量: {sum(p.numel() for p in self.model.parameters())}")
+
+    def adjust_class_weights(self, epoch, class_f1_scores):
+        """根据每个类别的F1-Score动态调整权重"""
+        if epoch % self.weight_adjustment_interval != 0:
+            return
+        
+        # 找出F1-Score低于平均值的类别
+        mean_f1 = np.mean(class_f1_scores)
+        
+        for cls_id, f1 in enumerate(class_f1_scores):
+            # 如果某类别F1持续低于平均值的60%，增加其权重
+            if f1 < mean_f1 * 0.6:
+                self.class_weights[cls_id] *= 1.2  # 温和增加20%
+                print(f"  [自适应] 类别 {cls_id} F1={f1:.2f}% 低于阈值，权重增加至 {self.class_weights[cls_id]:.4f}")
+            
+            # 如果F1已经很高，可以略微降低权重
+            elif f1 > mean_f1 * 1.5:
+                self.class_weights[cls_id] *= 0.95
+        
+        # 重新归一化，防止权重爆炸
+        self.class_weights = self.class_weights / self.class_weights.sum() * self.args.num_classes
     
     def set_seed(self, seed):
         """设置随机种子以确保可重复性"""
@@ -592,6 +633,29 @@ class Trainer:
         
         # 4. 混淆矩阵 - 指定labels参数确保始终生成3x3矩阵
         conf_matrix = confusion_matrix(all_labels, all_preds, labels=list(range(self.args.num_classes)))
+
+        # 【新增】计算每个类别的F1-Score
+        class_f1_scores = []
+        for cls_id in range(self.args.num_classes):
+            # 计算单个类别的F1
+            mask = (all_labels == cls_id)
+            if mask.sum() > 0:
+                cls_f1 = f1_score(
+                    all_labels[mask], 
+                    all_preds[mask], 
+                    labels=[cls_id], 
+                    average='micro', 
+                    zero_division=0
+                ) * 100
+            else:
+                cls_f1 = 0.0
+            class_f1_scores.append(cls_f1)
+        # 动态调整权重
+        self.adjust_class_weights(epoch, class_f1_scores)
+        if epoch % 5 == 0:
+            print(f"\n  各类别F1-Score:")
+            for i, (name, f1) in enumerate(zip(self.class_names, class_f1_scores)):
+                print(f"    {name}: {f1:.2f}%")
         
         # 返回所有指标
         metrics = {

@@ -11,10 +11,11 @@ LABEL_ROOT_PATH="/workspace/Project_v3/init_validity_result_mksp_mean_balance"
 # MODEL_NAME="NNConv_Mean_Pooling"
 # MODEL_NAME="NNConv_Multi_Scale_Pooling"
 # MODEL_NAME="NNConv_Attention_Pooling"
-MODEL_NAME="NNConv_Deep_Attention_Pooling"
+# MODEL_NAME="NNConv_Deep_Attention_Pooling"
 # MODEL_NAME="NNConv_Set2Set_Pooling"
 # MODEL_NAME="NNConv_Max_Pooling"
 # MODEL_NAME="GINE_Mean_Pooling"
+MODEL_NAME="GINE_Deep_Attention_Pooling"
 # MODEL_NAME="Transformer_Mean_Pooling"
 
 # wandb离线模型
@@ -23,7 +24,7 @@ MODEL_NAME="NNConv_Deep_Attention_Pooling"
 
 # 训练参数
 EPOCHS=100
-ACCUMULATION_STEPS=32  # 梯度累积步数，模拟batch_size=32的效果
+ACCUMULATION_STEPS=16  # 梯度累积步数，模拟batch_size=xx的效果
 LEARNING_RATE=0.001
 HIDDEN_DIM=128
 
