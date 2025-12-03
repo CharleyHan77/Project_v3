@@ -174,8 +174,8 @@ class NNConv_Attention_Pooling(torch.nn.Module):
         x = F.dropout(x, p=0.5, training=self.training)
         x = self.fc2(x)
         
-        # return F.log_softmax(x, dim=1)
-        return x
+        return F.log_softmax(x, dim=1)
+
 
 class NNConv_Deep_Attention_Pooling(torch.nn.Module):
     """更深层GCN+注意力池化"""
@@ -249,7 +249,7 @@ class NNConv_Deep_Attention_Pooling(torch.nn.Module):
         x = F.dropout(x, p=0.35, training=self.training)
         x = self.fc2(x)
         
-        return x
+        return F.log_softmax(x, dim=1)
 
 
 class NNConv_Set2Set_Pooling(torch.nn.Module):

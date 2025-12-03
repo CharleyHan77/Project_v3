@@ -327,8 +327,6 @@ class Trainer:
         
         self.model.train()
         return activations
-
-    
     
     def save_config(self):
         """保存训练配置"""
@@ -357,43 +355,11 @@ class Trainer:
             output = self.model(data.x, data.edge_index, data.edge_attr, data.batch)
 
             ############################ 分类/回归 标签转换 ############################
-            
-            # 将性能值标签转换为分类标签（选择性能最小的方法）
-            # output shape: [1, num_classes] -> [1, 8]（8种初始化方法的概率分布）
-            # label shape: [8] -> [FIFO_SPT, FIFO_EET, MOPNR_SPT, MOPNR_EET, LWKR_SPT, LWKR_EET, MWKR_SPT, MWKR_EET的性能]
-            # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
 
-            ############原有软标签 + 熵正则 ############
-            # temperature = 20  # 温度参数（使得分布更平滑）
-            # class_label = F.softmax(-data.y / temperature, dim=0).unsqueeze(0)
-        
-            # loss = F.kl_div(output, class_label, reduction='batchmean')
+            temperature = 0.02  # 温度参数（使得分布更平滑）
+            class_label = F.softmax(-data.y / temperature, dim=0).unsqueeze(0)
+            loss = F.kl_div(output, class_label, reduction='batchmean')
 
-            # true_class_idx = class_label.argmax(dim=1)  # 提取真实类别索引
-            # weight = self.class_weights[true_class_idx]  # 获取对应的权重
-            # loss = (loss.sum(dim=1) * weight).mean()
-
-
-            # 下方是熵正则 建议先禁用，等模型收敛后再考虑
-            # pred_probs = torch.exp(output)  # shape: [1, num_classes]
-            # entropy = -(pred_probs * output).sum(dim=1).mean()
-            # loss = main_loss - entropy_weight * entropy
-            ############原有软标签 + 熵正则 ############
-
-            ################Focal Loss###############
-            # class_label = data.y.argmin().unsqueeze(0)
-            # loss = self.criterion(output, class_label)
-            ################Focal Loss###############
-
-            ############################ 硬标签 + 交叉熵 ############################
-            # 将性能值转为硬标签（选择最优方法）
-            class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
-            loss = F.cross_entropy(output, class_label, weight=self.class_weights)
-
-            # 如果要保留熵正则化（可选，建议先不加）
-            # pred_probs = torch.exp(output)
-            # entropy = -(pred_probs * output).sum(dim=1).mean()
-            # loss = loss - entropy_weight * entropy
             ############################ 分类/回归 标签转换 ############################
 
             # 记录原始损失值（在梯度累积之前）
@@ -401,6 +367,7 @@ class Trainer:
             
             # 梯度累积
             loss = loss / accumulation_steps
+            # 反向传播
             loss.backward()
 
             # 【新增】在backward之后计算梯度范数
@@ -469,17 +436,12 @@ class Trainer:
                 output = self.model(data.x, data.edge_index, data.edge_attr, data.batch)
 
                 ############################ 分类/回归 标签转换 ############################
-                
-                # 将性能值标签转换为分类标签（选择性能最小的方法）
-                # label shape: [3] -> [heuristic性能, mixed性能, random性能]
-                # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
 
                 ############原有软标签############
-                # temperature = 20  # 温度参数（使得分布更平滑）
-                # class_label = F.softmax(-data.y / temperature, dim=0).unsqueeze(0) 
+                temperature = 0.02  # 温度参数（使得分布更平滑）
+                class_label = F.softmax(-data.y / temperature, dim=0).unsqueeze(0)
 
-                # # # 计算分类损失
-                # loss = F.kl_div(output, class_label, reduction='batchmean')
+                loss = F.kl_div(output, class_label, reduction='batchmean')
                 ############原有软标签############
 
                 ################Focal Loss###############
@@ -488,8 +450,8 @@ class Trainer:
                 ################Focal Loss###############
 
                 ############ 硬标签 ##############  
-                class_label = data.y.argmin().unsqueeze(0)   # shape: [1]
-                loss = F.cross_entropy(output, class_label, weight=self.class_weights)
+                # class_label = data.y.argmin().unsqueeze(0)   # shape: [1]
+                # loss = F.cross_entropy(output, class_label, weight=self.class_weights)
                 ############ 硬标签 ##############
                 total_loss += loss.item()
 
@@ -498,8 +460,8 @@ class Trainer:
 
                 # 计算准确率
                 pred = output.argmax(dim=1)  # 预测的最佳方法索引, shape: [1]
-                # true_label = class_label.argmax(dim=1)                 # true_label = data.y.argmin()
-                true_label = data.y.argmin()
+                true_label = class_label.argmax(dim=1) 
+                # true_label = data.y.argmin()
                 correct += (pred == true_label).sum().item()
                 total += 1  # 每次处理一个图
                 
@@ -507,7 +469,6 @@ class Trainer:
                 all_preds.append(pred.cpu().numpy()[0])   # ！！！！！！！！！为什么要把pred搬回cpu
                 all_labels.append(data.y.argmin().item())
                 # 转换为概率
-                # probs = torch.exp(output).cpu().numpy()[0]
                 probs = F.softmax(output, dim=1).cpu().numpy()[0]  # 从logits转换
                 all_probs.append(probs)
 

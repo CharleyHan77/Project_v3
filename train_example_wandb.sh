@@ -23,7 +23,7 @@ MODEL_NAME="NNConv_Deep_Attention_Pooling"
 
 # 训练参数
 EPOCHS=100
-ACCUMULATION_STEPS=32  # 梯度累积步数，模拟batch_size=32的效果
+ACCUMULATION_STEPS=16  # 梯度累积步数，模拟batch_size=32的效果
 LEARNING_RATE=0.001
 HIDDEN_DIM=128
 
