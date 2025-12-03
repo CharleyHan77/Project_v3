@@ -420,6 +420,86 @@ class GINE_Deep_Attention_Pooling(torch.nn.Module):
         
         return x
 
+# class RGAT_Deep_Attention_Pooling(torch.nn.Module):
+#     """更深层的 RGAT + 残差连接 + 注意力池化"""
+#     def __init__(self, node_features, edge_features, hidden_dim, num_classes, num_relations=3):
+#         super().__init__()
+        
+#         self.num_heads = 4
+        
+#         # 第1层
+#         self.conv1 = RGATConv(
+#             node_features, hidden_dim,
+#             num_relations=num_relations,
+#             edge_dim=edge_features,
+#             heads=self.num_heads,
+#             concat=False,
+#             dropout=0.15
+#         )
+#         self.bn1 = torch.nn.LayerNorm(hidden_dim)
+        
+#         # 第2层
+#         self.conv2 = RGATConv(
+#             hidden_dim, hidden_dim,
+#             num_relations=num_relations,
+#             edge_dim=edge_features,
+#             heads=self.num_heads,
+#             concat=False,
+#             dropout=0.15
+#         )
+#         self.bn2 = torch.nn.LayerNorm(hidden_dim)
+        
+#         # 第3层
+#         self.conv3 = RGATConv(
+#             hidden_dim, hidden_dim,
+#             num_relations=num_relations,
+#             edge_dim=edge_features,
+#             heads=self.num_heads,
+#             concat=False,
+#             dropout=0.15
+#         )
+#         self.bn3 = torch.nn.LayerNorm(hidden_dim)
+        
+#         # 注意力池化
+#         gate_nn = torch.nn.Sequential(
+#             torch.nn.Linear(hidden_dim, hidden_dim // 2),
+#             torch.nn.ReLU(),
+#             torch.nn.Dropout(0.25),
+#             torch.nn.Linear(hidden_dim // 2, 1)
+#         )
+#         self.attention_pool = GlobalAttention(gate_nn)
+        
+#         # 分类器
+#         self.fc1 = torch.nn.Linear(hidden_dim, hidden_dim // 2)
+#         self.fc2 = torch.nn.Linear(hidden_dim // 2, num_classes)
+        
+#     def forward(self, x, edge_index, edge_attr, edge_type, batch):
+#         # 第1层
+#         x = F.relu(self.bn1(self.conv1(x, edge_index, edge_type, edge_attr)))
+#         x = F.dropout(x, p=0.15, training=self.training)
+        
+#         # 第2层（带残差）
+#         identity = x
+#         x = F.relu(self.bn2(self.conv2(x, edge_index, edge_type, edge_attr)))
+#         x = F.dropout(x, p=0.15, training=self.training)
+#         x = x + identity
+        
+#         # 第3层（带残差）
+#         identity = x
+#         x = F.relu(self.bn3(self.conv3(x, edge_index, edge_type, edge_attr)))
+#         x = F.dropout(x, p=0.15, training=self.training)
+#         x = x + identity
+        
+#         # 注意力池化
+#         x = self.attention_pool(x, batch)
+        
+#         # 分类
+#         x = F.relu(self.fc1(x))
+#         x = F.dropout(x, p=0.35, training=self.training)
+#         x = self.fc2(x)
+        
+#         return x
+
 
 # class GATv2_Classifier(torch.nn.Module):
 #     """使用 GATv2Conv：注意力机制   当前PYG版本过低""" 
@@ -464,47 +544,85 @@ class GINE_Deep_Attention_Pooling(torch.nn.Module):
 #         return F.log_softmax(x, dim=1)
 
 
-class Transformer_Mean_Pooling(torch.nn.Module):
-    """TransformerConv：类似 Transformer 的注意力机制"""
+class Transformer_Deep_Attention_Pooling(torch.nn.Module):
+    """三层 TransformerConv + 残差连接 + 注意力池化"""
     def __init__(self, node_features, edge_features, hidden_dim, num_classes):
         super().__init__()
         
         self.num_heads = 4
         
-        # TransformerConv 层
+        # 第1层
         self.conv1 = TransformerConv(
             node_features,
             hidden_dim // self.num_heads,
             heads=self.num_heads,
             edge_dim=edge_features,
-            dropout=0.3,
+            dropout=0.15,
             beta=True  # skip connection
         )
+        self.bn1 = torch.nn.LayerNorm(hidden_dim)
         
+        # 第2层
         self.conv2 = TransformerConv(
             hidden_dim,
             hidden_dim // self.num_heads,
             heads=self.num_heads,
             edge_dim=edge_features,
-            dropout=0.3,
+            dropout=0.15,
             beta=True
         )
+        self.bn2 = torch.nn.LayerNorm(hidden_dim)
+        
+        # 第3层
+        self.conv3 = TransformerConv(
+            hidden_dim,
+            hidden_dim // self.num_heads,
+            heads=self.num_heads,
+            edge_dim=edge_features,
+            dropout=0.15,
+            beta=True
+        )
+        self.bn3 = torch.nn.LayerNorm(hidden_dim)
+        
+        # 注意力池化
+        gate_nn = torch.nn.Sequential(
+            torch.nn.Linear(hidden_dim, hidden_dim // 2),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(0.25),
+            torch.nn.Linear(hidden_dim // 2, 1)
+        )
+        self.attention_pool = GlobalAttention(gate_nn)
         
         # 分类器
         self.fc1 = torch.nn.Linear(hidden_dim, hidden_dim // 2)
         self.fc2 = torch.nn.Linear(hidden_dim // 2, num_classes)
         
     def forward(self, x, edge_index, edge_attr, batch):
-        x = F.relu(self.conv1(x, edge_index, edge_attr))
-        x = F.relu(self.conv2(x, edge_index, edge_attr))
+        # 第1层
+        x = F.relu(self.bn1(self.conv1(x, edge_index, edge_attr)))
+        x = F.dropout(x, p=0.15, training=self.training)
         
-        x = global_mean_pool(x, batch)
+        # 第2层（带残差）
+        identity = x
+        x = F.relu(self.bn2(self.conv2(x, edge_index, edge_attr)))
+        x = F.dropout(x, p=0.15, training=self.training)
+        x = x + identity
         
+        # 第3层（带残差）
+        identity = x
+        x = F.relu(self.bn3(self.conv3(x, edge_index, edge_attr)))
+        x = F.dropout(x, p=0.15, training=self.training)
+        x = x + identity
+        
+        # 注意力池化
+        x = self.attention_pool(x, batch)
+        
+        # 分类
         x = F.relu(self.fc1(x))
-        x = F.dropout(x, p=0.5, training=self.training)
+        x = F.dropout(x, p=0.35, training=self.training)
         x = self.fc2(x)
         
-        return F.log_softmax(x, dim=1)
+        return x
 
 
 # ==================== 模型注册表 ====================
@@ -517,7 +635,8 @@ MODEL_REGISTRY = {
     "NNConv_Max_Pooling": NNConv_Max_Pooling,
     "GINE_Mean_Pooling": GINE_Mean_Pooling,
     "GINE_Deep_Attention_Pooling": GINE_Deep_Attention_Pooling,
-    "Transformer_Mean_Pooling": Transformer_Mean_Pooling
+    #"RGAT_Deep_Attention_Pooling": RGAT_Deep_Attention_Pooling,
+    "Transformer_Deep_Attention_Pooling": Transformer_Deep_Attention_Pooling
 }
 
 def get_model(model_name, **kwargs):

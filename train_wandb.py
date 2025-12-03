@@ -292,26 +292,26 @@ class Trainer:
         print(f"模型已初始化，使用设备: {self.device}")
         # print(f"模型参数数量: {sum(p.numel() for p in self.model.parameters())}")
 
-    def adjust_class_weights(self, epoch, class_f1_scores):
-        """根据每个类别的F1-Score动态调整权重"""
-        if epoch % self.weight_adjustment_interval != 0:
-            return
+    # def adjust_class_weights(self, epoch, class_f1_scores):
+    #     """根据每个类别的F1-Score动态调整权重"""
+    #     if epoch % self.weight_adjustment_interval != 0:
+    #         return
         
-        # 找出F1-Score低于平均值的类别
-        mean_f1 = np.mean(class_f1_scores)
+    #     # 找出F1-Score低于平均值的类别
+    #     mean_f1 = np.mean(class_f1_scores)
         
-        for cls_id, f1 in enumerate(class_f1_scores):
-            # 如果某类别F1持续低于平均值的60%，增加其权重
-            if f1 < mean_f1 * 0.6:
-                self.class_weights[cls_id] *= 1.2  # 温和增加20%
-                print(f"  [自适应] 类别 {cls_id} F1={f1:.2f}% 低于阈值，权重增加至 {self.class_weights[cls_id]:.4f}")
+    #     for cls_id, f1 in enumerate(class_f1_scores):
+    #         # 如果某类别F1持续低于平均值的60%，增加其权重
+    #         if f1 < mean_f1 * 0.6:
+    #             self.class_weights[cls_id] *= 1.2  # 温和增加20%
+    #             print(f"  [自适应] 类别 {cls_id} F1={f1:.2f}% 低于阈值，权重增加至 {self.class_weights[cls_id]:.4f}")
             
-            # 如果F1已经很高，可以略微降低权重
-            elif f1 > mean_f1 * 1.5:
-                self.class_weights[cls_id] *= 0.95
+    #         # 如果F1已经很高，可以略微降低权重
+    #         elif f1 > mean_f1 * 1.5:
+    #             self.class_weights[cls_id] *= 0.95
         
-        # 重新归一化，防止权重爆炸
-        self.class_weights = self.class_weights / self.class_weights.sum() * self.args.num_classes
+    #     # 重新归一化，防止权重爆炸
+    #     self.class_weights = self.class_weights / self.class_weights.sum() * self.args.num_classes
     
     def set_seed(self, seed):
         """设置随机种子以确保可重复性"""
@@ -428,13 +428,17 @@ class Trainer:
 
             ############################ 硬标签 + 交叉熵 ############################
             # 将性能值转为硬标签（选择最优方法）
-            class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
-            loss = F.cross_entropy(output, class_label, weight=self.class_weights)
+            # class_label = data.y.argmin().unsqueeze(0)  # shape: [1]
+            # loss = F.cross_entropy(output, class_label, weight=self.class_weights)
 
             # 如果要保留熵正则化（可选，建议先不加）
             # pred_probs = torch.exp(output)
             # entropy = -(pred_probs * output).sum(dim=1).mean()
             # loss = loss - entropy_weight * entropy
+
+            ############################## listMLE Loss ##############################
+            loss = self.criterion(output, data.y.unsqueeze(0))
+
             ############################ 分类/回归 标签转换 ############################
 
             # 记录原始损失值（在梯度累积之前）
@@ -480,7 +484,8 @@ class Trainer:
         grad_norm_std = np.std(batch_grad_norms_array)
 
         return avg_loss, loss_std, loss_min, loss_max, grad_norm_mean, grad_norm_std
-    
+
+
     def validate(self, epoch):
         """验证模型 - 计算完整的评估指标"""
         self.model.eval()
@@ -532,6 +537,7 @@ class Trainer:
                 class_label = data.y.argmin().unsqueeze(0)   # shape: [1]
                 loss = F.cross_entropy(output, class_label, weight=self.class_weights)
                 ############ 硬标签 ##############
+
                 total_loss += loss.item()
 
                 # 新增：记录每个batch的损失
@@ -546,11 +552,14 @@ class Trainer:
                 
                 # 收集预测和标签用于后续指标计算
                 all_preds.append(pred.cpu().numpy()[0])   # ！！！！！！！！！为什么要把pred搬回cpu
-                all_labels.append(data.y.argmin().item())
+                all_labels.append(true_label.item())
                 # 转换为概率
                 # probs = torch.exp(output).cpu().numpy()[0]
                 probs = F.softmax(output, dim=1).cpu().numpy()[0]  # 从logits转换
                 all_probs.append(probs)
+                # 新增：收集原始分数和性能值（用于排序指标）
+                all_pred_scores.append(output.cpu().numpy()[0])
+                all_true_performances.append(data.y.cpu().numpy())
 
                 ############################ 分类/回归 标签转换 ############################
 
@@ -572,6 +581,8 @@ class Trainer:
         all_preds = np.array(all_preds)
         all_labels = np.array(all_labels)
         all_probs = np.array(all_probs)
+        all_pred_scores = np.array(all_pred_scores)
+        all_true_performances = np.array(all_true_performances) 
         
         # 计算其他评估指标
         # 1. 宏平均 F1-Score - 指定labels确保考虑所有类别
@@ -631,38 +642,16 @@ class Trainer:
             print(f"  [调试] unique labels: {np.unique(all_labels, return_counts=True)}")
             roc_auc = 0.0
         
-        # 4. 混淆矩阵 - 指定labels参数确保始终生成3x3矩阵
+        # 4. 混淆矩阵
         conf_matrix = confusion_matrix(all_labels, all_preds, labels=list(range(self.args.num_classes)))
+        ranking_metrics = self.compute_ranking_metrics(all_pred_scores, all_true_performances)
 
-        # 【新增】计算每个类别的F1-Score
-        class_f1_scores = []
-        for cls_id in range(self.args.num_classes):
-            # 计算单个类别的F1
-            mask = (all_labels == cls_id)
-            if mask.sum() > 0:
-                cls_f1 = f1_score(
-                    all_labels[mask], 
-                    all_preds[mask], 
-                    labels=[cls_id], 
-                    average='micro', 
-                    zero_division=0
-                ) * 100
-            else:
-                cls_f1 = 0.0
-            class_f1_scores.append(cls_f1)
-        # 动态调整权重
-        self.adjust_class_weights(epoch, class_f1_scores)
-        if epoch % 5 == 0:
-            print(f"\n  各类别F1-Score:")
-            for i, (name, f1) in enumerate(zip(self.class_names, class_f1_scores)):
-                print(f"    {name}: {f1:.2f}%")
-        
         # 返回所有指标
         metrics = {
             'loss': avg_loss,
-            'loss_std': val_loss_std,      # 新增
-            'loss_min': val_loss_min,      # 新增
-            'loss_max': val_loss_max,      # 新增
+            'loss_std': val_loss_std,
+            'loss_min': val_loss_min,
+            'loss_max': val_loss_max,
             'accuracy': accuracy,
             'macro_f1': macro_f1,
             'weighted_f1': weighted_f1,
@@ -1162,7 +1151,6 @@ class Trainer:
             print(f"  训练损失: {train_loss:.4f}")
             print(f"  梯度范数: {grad_norm_mean:.4f} ± {grad_norm_std:.4f}")  # 【新增】
             print(f"  验证损失: {val_loss:.4f}")
-            print(f"  验证准确率: {val_accuracy:.2f}%")
             print(f"  宏平均 F1-Score: {val_macro_f1:.2f}%")
             print(f"  加权平均 F1-Score: {val_weighted_f1:.2f}%")
             print(f"  ROC-AUC (OvR): {val_roc_auc:.2f}%")

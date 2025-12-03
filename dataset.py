@@ -60,8 +60,20 @@ class Dataset(dataset.Dataset):
             #     ) + 1)
 
             # 目标makespan：优化掉样本较少的初始化方法 --- 5分类
-            g.y = torch.log(
-                torch.tensor(
+            # g.y = torch.log(
+            #     torch.tensor(
+            #         [
+            #             label_info["FIFO_SPT"]["makespan"]["values"][self.label_name], 
+            #             #label_info["FIFO_EET"]["makespan"]["values"][self.label_name], 
+            #             label_info["MOPNR_SPT"]["makespan"]["values"][self.label_name], 
+            #             label_info["MOPNR_EET"]["makespan"]["values"][self.label_name], 
+            #             #label_info["LWKR_SPT"]["makespan"]["values"][self.label_name], 
+            #             #label_info["LWKR_EET"]["makespan"]["values"][self.label_name], 
+            #             label_info["MWKR_SPT"]["makespan"]["values"][self.label_name], 
+            #             label_info["MWKR_EET"]["makespan"]["values"][self.label_name]
+            #         ]
+            #     ) + 1)
+            g.y = torch.tensor(
                     [
                         label_info["FIFO_SPT"]["makespan"]["values"][self.label_name], 
                         #label_info["FIFO_EET"]["makespan"]["values"][self.label_name], 
@@ -71,8 +83,10 @@ class Dataset(dataset.Dataset):
                         #label_info["LWKR_EET"]["makespan"]["values"][self.label_name], 
                         label_info["MWKR_SPT"]["makespan"]["values"][self.label_name], 
                         label_info["MWKR_EET"]["makespan"]["values"][self.label_name]
-                    ]
-                ) + 1)
+                    ],
+                    dtype=torch.float
+                )
+            
 
             if self.device is not None:
                 g.to(self.device)
@@ -185,7 +199,8 @@ class Dataset(dataset.Dataset):
         graph = Graph(
             x=torch.tensor(X, dtype=torch.float),
             edge_index=torch.tensor(edge_index, dtype=torch.long).t().contiguous(), 
-            edge_attr=torch.tensor(edge_attr, dtype=torch.float))
+            edge_attr=torch.tensor(edge_attr, dtype=torch.float)
+            )
 
         return graph
         

@@ -11,12 +11,13 @@ LABEL_ROOT_PATH="/workspace/Project_v3/init_validity_result_mksp_mean_balance"
 # MODEL_NAME="NNConv_Mean_Pooling"
 # MODEL_NAME="NNConv_Multi_Scale_Pooling"
 # MODEL_NAME="NNConv_Attention_Pooling"
-# MODEL_NAME="NNConv_Deep_Attention_Pooling"
+MODEL_NAME="NNConv_Deep_Attention_Pooling"
 # MODEL_NAME="NNConv_Set2Set_Pooling"
 # MODEL_NAME="NNConv_Max_Pooling"
 # MODEL_NAME="GINE_Mean_Pooling"
-MODEL_NAME="GINE_Deep_Attention_Pooling"
-# MODEL_NAME="Transformer_Mean_Pooling"
+# MODEL_NAME="GINE_Deep_Attention_Pooling"
+# MODEL_NAME="RGAT_Deep_Attention_Pooling"
+# MODEL_NAME="Transformer_Deep_Attention_Pooling"
 
 # wandb离线模型
 # export WANDB_MODE=offline
