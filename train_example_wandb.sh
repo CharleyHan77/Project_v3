@@ -10,22 +10,24 @@ LABEL_ROOT_PATH="/workspace/Project_v3/init_validity_result_mksp_mean_balance"
 # 选择模型（可手动指定模型名称）
 # MODEL_NAME="NNConv_Mean_Pooling"
 # MODEL_NAME="NNConv_Multi_Scale_Pooling"
-# MODEL_NAME="NNConv_Attention_Pooling"
-MODEL_NAME="NNConv_Deep_Attention_Pooling"
+MODEL_NAME="NNConv_Attention_Pooling"
+# MODEL_NAME="NNConv_Deep_Attention_Pooling"
 # MODEL_NAME="NNConv_Set2Set_Pooling"
 # MODEL_NAME="NNConv_Max_Pooling"
 # MODEL_NAME="GINE_Mean_Pooling"
 # MODEL_NAME="Transformer_Mean_Pooling"
+# MODEL_NAME="GAT_Mean_Pooling"
+# MODEL_NAME="NNConv_SAG_Pooling"
 
 # wandb离线模型
 # export WANDB_MODE=offline
 # wandb sync wandb/离线运行目录
 
 # 训练参数
-EPOCHS=100
-ACCUMULATION_STEPS=16  # 梯度累积步数，模拟batch_size=32的效果
+EPOCHS=80
+ACCUMULATION_STEPS=32  # 梯度累积步数，模拟batch_size=32的效果
 LEARNING_RATE=0.001
-HIDDEN_DIM=128
+HIDDEN_DIM=64
 
 # 运行训练
 # 注意：由于图大小不一致，每次只训练一个图，通过梯度累积模拟批处理

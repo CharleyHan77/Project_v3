@@ -1,8 +1,8 @@
 import torch
 import torch.nn.functional as F
 from torch_geometric.nn import global_mean_pool, global_add_pool, global_max_pool
-from torch_geometric.nn import GlobalAttention, Set2Set
-from torch_geometric.nn import NNConv, GINEConv, TransformerConv
+from torch_geometric.nn import GlobalAttention, Set2Set, SAGPooling
+from torch_geometric.nn import NNConv, GINEConv, TransformerConv, GATConv
 
 class NNConv_Mean_Pooling(torch.nn.Module):
     def __init__(self, node_features, edge_features, hidden_dim, num_classes):
@@ -129,8 +129,8 @@ class NNConv_Multi_Scale_Pooling(torch.nn.Module):
         return F.log_softmax(x, dim=1)
 
 
-class NNConv_Attention_Pooling(torch.nn.Module):
-    """注意力池化"""
+class NNConv_Attention_Pooling(torch.nn.Module):####################################
+    """注意力门控池化"""
     def __init__(self, node_features, edge_features, hidden_dim, num_classes):
         super().__init__()
         
@@ -252,6 +252,50 @@ class NNConv_Deep_Attention_Pooling(torch.nn.Module):
         return F.log_softmax(x, dim=1)
 
 
+class NNConv_SAG_Pooling(torch.nn.Module):
+    """使用 SAGPooling：自适应图池化"""
+    def __init__(self, node_features, edge_features, hidden_dim, num_classes):
+        super().__init__()
+        
+        # NNConv 层
+        nn1 = torch.nn.Sequential(
+            torch.nn.Linear(edge_features, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_dim, node_features * hidden_dim)
+        )
+        self.conv1 = NNConv(node_features, hidden_dim, nn1)
+        
+        nn2 = torch.nn.Sequential(
+            torch.nn.Linear(edge_features, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_dim, hidden_dim * hidden_dim)
+        )
+        self.conv2 = NNConv(hidden_dim, hidden_dim, nn2)
+        
+        # SAG 池化层 - 自适应选择重要节点
+        self.sag_pool = SAGPooling(hidden_dim, ratio=0.5)  # 保留50%的节点
+        
+        # 分类器
+        self.fc1 = torch.nn.Linear(hidden_dim, hidden_dim // 2)
+        self.fc2 = torch.nn.Linear(hidden_dim // 2, num_classes)
+        
+    def forward(self, x, edge_index, edge_attr, batch):
+        x = F.relu(self.conv1(x, edge_index, edge_attr))
+        x = F.relu(self.conv2(x, edge_index, edge_attr))
+        
+        # SAG池化
+        x, edge_index, _, batch, _, _ = self.sag_pool(x, edge_index, None, batch)
+        
+        # 全局池化
+        x = global_mean_pool(x, batch)
+        
+        x = F.relu(self.fc1(x))
+        x = F.dropout(x, p=0.5, training=self.training)
+        x = self.fc2(x)
+        
+        return F.log_softmax(x, dim=1)
+
+
 class NNConv_Set2Set_Pooling(torch.nn.Module):
     """基于LSTM的高级池化，适合需要多次读取图信息的任务"""
     def __init__(self, node_features, edge_features, hidden_dim, num_classes, processing_steps=3):
@@ -296,78 +340,35 @@ class NNConv_Set2Set_Pooling(torch.nn.Module):
         return F.log_softmax(x, dim=1)
 
 
-class GINE_Mean_Pooling(torch.nn.Module):
-    """使用 GINEConv：表达能力最强"""
-    def __init__(self, node_features, edge_features, hidden_dim, num_classes):
-        super().__init__()
-        
-        # GINE 层
-        nn1 = torch.nn.Sequential(
-            torch.nn.Linear(node_features, hidden_dim),
-            torch.nn.BatchNorm1d(hidden_dim),
-            torch.nn.ReLU(),
-            torch.nn.Linear(hidden_dim, hidden_dim)
-        )
-        self.conv1 = GINEConv(nn1, edge_dim=edge_features, train_eps=True)
-        
-        nn2 = torch.nn.Sequential(
-            torch.nn.Linear(hidden_dim, hidden_dim),
-            torch.nn.BatchNorm1d(hidden_dim),
-            torch.nn.ReLU(),
-            torch.nn.Linear(hidden_dim, hidden_dim)
-        )
-        self.conv2 = GINEConv(nn2, edge_dim=edge_features, train_eps=True)
-        
-        # 分类器
-        self.fc1 = torch.nn.Linear(hidden_dim, hidden_dim // 2)
-        self.fc2 = torch.nn.Linear(hidden_dim // 2, num_classes)
-        
-    def forward(self, x, edge_index, edge_attr, batch):
-        x = F.relu(self.conv1(x, edge_index, edge_attr))
-        x = F.relu(self.conv2(x, edge_index, edge_attr))
-        
-        x = global_mean_pool(x, batch)
-        
-        x = F.relu(self.fc1(x))
-        x = F.dropout(x, p=0.5, training=self.training)
-        x = self.fc2(x)
-        
-        return F.log_softmax(x, dim=1)
-
-
-# class GATv2_Classifier(torch.nn.Module):
-#     """使用 GATv2Conv：注意力机制   当前PYG版本过低""" 
+# class GINE_Mean_Pooling(torch.nn.Module):
+#     """使用 GINEConv：表达能力最强"""
 #     def __init__(self, node_features, edge_features, hidden_dim, num_classes):
 #         super().__init__()
         
-#         self.num_heads = 4
-        
-#         # GAT 层（多头注意力）
-#         self.conv1 = GATv2Conv(
-#             node_features, 
-#             hidden_dim // self.num_heads,
-#             heads=self.num_heads,
-#             edge_dim=edge_features,
-#             concat=True,
-#             dropout=0.3
+#         # GINE 层
+#         nn1 = torch.nn.Sequential(
+#             torch.nn.Linear(node_features, hidden_dim),
+#             torch.nn.BatchNorm1d(hidden_dim),
+#             torch.nn.ReLU(),
+#             torch.nn.Linear(hidden_dim, hidden_dim)
 #         )
+#         self.conv1 = GINEConv(nn1, edge_dim=edge_features, train_eps=True)
         
-#         self.conv2 = GATv2Conv(
-#             hidden_dim,
-#             hidden_dim // self.num_heads,
-#             heads=self.num_heads,
-#             edge_dim=edge_features,
-#             concat=True,
-#             dropout=0.3
+#         nn2 = torch.nn.Sequential(
+#             torch.nn.Linear(hidden_dim, hidden_dim),
+#             torch.nn.BatchNorm1d(hidden_dim),
+#             torch.nn.ReLU(),
+#             torch.nn.Linear(hidden_dim, hidden_dim)
 #         )
+#         self.conv2 = GINEConv(nn2, edge_dim=edge_features, train_eps=True)
         
 #         # 分类器
 #         self.fc1 = torch.nn.Linear(hidden_dim, hidden_dim // 2)
 #         self.fc2 = torch.nn.Linear(hidden_dim // 2, num_classes)
         
 #     def forward(self, x, edge_index, edge_attr, batch):
-#         x = F.elu(self.conv1(x, edge_index, edge_attr))
-#         x = F.elu(self.conv2(x, edge_index, edge_attr))
+#         x = F.relu(self.conv1(x, edge_index, edge_attr))
+#         x = F.relu(self.conv2(x, edge_index, edge_attr))
         
 #         x = global_mean_pool(x, batch)
         
@@ -376,6 +377,49 @@ class GINE_Mean_Pooling(torch.nn.Module):
 #         x = self.fc2(x)
         
 #         return F.log_softmax(x, dim=1)
+
+
+class GAT_Mean_Pooling(torch.nn.Module):
+    """使用 GATConv：注意力机制""" 
+    def __init__(self, node_features, edge_features, hidden_dim, num_classes):
+        super().__init__()
+        
+        self.num_heads = 4
+        
+        # GAT 层（多头注意力）
+        self.conv1 = GATConv(
+            node_features, 
+            hidden_dim // self.num_heads,
+            heads=self.num_heads,
+            edge_dim=edge_features,
+            concat=True,
+            dropout=0.3
+        )
+        
+        self.conv2 = GATConv(
+            hidden_dim,
+            hidden_dim // self.num_heads,
+            heads=self.num_heads,
+            edge_dim=edge_features,
+            concat=True,
+            dropout=0.3
+        )
+        
+        # 分类器
+        self.fc1 = torch.nn.Linear(hidden_dim, hidden_dim // 2)
+        self.fc2 = torch.nn.Linear(hidden_dim // 2, num_classes)
+        
+    def forward(self, x, edge_index, edge_attr, batch):
+        x = F.elu(self.conv1(x, edge_index, edge_attr))
+        x = F.elu(self.conv2(x, edge_index, edge_attr))
+        
+        x = global_mean_pool(x, batch)
+        
+        x = F.relu(self.fc1(x))
+        x = F.dropout(x, p=0.5, training=self.training)
+        x = self.fc2(x)
+        
+        return F.log_softmax(x, dim=1)
 
 
 class Transformer_Mean_Pooling(torch.nn.Module):
@@ -428,8 +472,10 @@ MODEL_REGISTRY = {
     'NNConv_Attention_Pooling': NNConv_Attention_Pooling,
     "NNConv_Deep_Attention_Pooling": NNConv_Deep_Attention_Pooling,
     'NNConv_Set2Set_Pooling': NNConv_Set2Set_Pooling,
+    "NNConv_SAG_Pooling": NNConv_SAG_Pooling,
     "NNConv_Max_Pooling": NNConv_Max_Pooling,
-    "GINE_Mean_Pooling": GINE_Mean_Pooling,
+    # "GINE_Mean_Pooling": GINE_Mean_Pooling,
+    "GAT_Mean_Pooling": GAT_Mean_Pooling,
     "Transformer_Mean_Pooling": Transformer_Mean_Pooling
 }
 

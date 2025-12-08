@@ -18,6 +18,7 @@ class Dataset(dataset.Dataset):
 
         labels = self._get_files(self.label_root_path)
         self.data = []
+        self.filenames = []
 
         for label_path in labels:
             with open(label_path, "r") as f:
@@ -77,7 +78,7 @@ class Dataset(dataset.Dataset):
             if self.device is not None:
                 g.to(self.device)
             self.data.append(g)
-
+            self.filenames.append(instance_name)
         # self._split_dataset()
 
     def __getitem__(self, i):

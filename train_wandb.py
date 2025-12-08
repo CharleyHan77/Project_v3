@@ -11,6 +11,7 @@ from datetime import datetime
 import numpy as np
 from tqdm import tqdm
 import matplotlib
+from scipy.stats import kendalltau
 matplotlib.use('Agg')  # 使用非交互式后端，适合服务器环境
 import matplotlib.pyplot as plt
 from sklearn.metrics import (
@@ -148,6 +149,49 @@ class Trainer:
         self.train_dataset = Subset(full_dataset, train_indices)
         self.val_dataset = Subset(full_dataset, val_indices)
 
+        self.train_indices = train_indices
+        self.val_indices = val_indices
+        
+        # 记录验证集样本的详细信息
+        val_samples_info = []
+        for idx in val_indices:
+            sample = full_dataset[idx]
+            val_samples_info.append({
+                'dataset_index': int(idx),
+                'instance_name': full_dataset.filenames[idx],
+                'true_label': int(sample.y.argmin().item()),
+                'num_nodes': int(sample.x.shape[0]),
+                'num_edges': int(sample.edge_index.shape[1])
+            })
+        
+        val_samples_path = os.path.join(self.save_path, 'validation_samples.json')
+        with open(val_samples_path, 'w', encoding='utf-8') as f:
+            json.dump({
+                'num_samples': len(val_indices),
+                'samples': val_samples_info,
+                'train_indices': [int(i) for i in train_indices],
+                'val_indices': [int(i) for i in val_indices],
+            }, f, indent=4, ensure_ascii=False)
+        print(f"验证集样本信息已保存至: {val_samples_path}")
+
+        wandb.config.update({
+            "num_train_samples": len(train_indices),
+            "num_val_samples": len(val_indices),
+        })
+        val_table = wandb.Table(columns=["Dataset_Index", "True_Label", "Label_Name", "Num_Nodes", "Num_Edges"])
+        for info in val_samples_info:
+            val_table.add_data(
+                info['dataset_index'],
+                info['true_label'],
+                self.class_names[info['true_label']],
+                info['num_nodes'],
+                info['num_edges']
+            )
+        wandb.log({"validation_samples": val_table})
+        artifact = wandb.Artifact('validation_samples', type='dataset')
+        artifact.add_file(val_samples_path)
+        wandb.log_artifact(artifact)
+
         #####################################################        
         # 计算类别权重以处理类别不平衡问题
         print(f"\n正在计算类别权重...")
@@ -169,7 +213,6 @@ class Trainer:
         self.class_weights = torch.FloatTensor(class_weights).to(self.device)
         print(f"类别权重: {class_weights}")
         #####################################################
-        
         # 统计训练集和验证集的类别分布
         train_methods = [full_dataset[i].y.argmin().item() for i in train_indices]
         val_methods = [full_dataset[i].y.argmin().item() for i in val_indices]
@@ -250,12 +293,21 @@ class Trainer:
             'val_weighted_f1': [],
             'val_roc_auc': [],
             'lr': [],
-            'train_loss_std': [],  # 新增：每个epoch内batch损失的标准差
-            'train_loss_min': [],  # 新增：每个epoch内batch损失的最小值
-            'train_loss_max': [],  # 新增：每个epoch内batch损失的最大值
-            'val_loss_std': [],    # 新增：验证集每个batch损失的标准差
-            'val_loss_min': [],    # 新增：验证集每个batch损失的最小值
-            'val_loss_max': []     # 新增：验证集每个batch损失的最大值
+            'train_loss_std': [],  # 每个epoch内batch损失的标准差
+            'train_loss_min': [],  # 每个epoch内batch损失的最小值
+            'train_loss_max': [],  # 每个epoch内batch损失的最大值
+            'val_loss_std': [],    # 验证集每个batch损失的标准差
+            'val_loss_min': [],    # 验证集每个batch损失的最小值
+            'val_loss_max': [],    # 验证集每个batch损失的最大值
+            # 【新增】分布匹配指标
+            'val_js_divergence': [],
+            'val_cosine_similarity': [],
+            'val_top3_distribution_match': [],
+            'val_brier_score': [],
+            'val_top3_accuracy': [],
+            'val_adaptive_topk_distribution_match': [],  # 动态top-k
+            'val_adaptive_topk_accuracy': [],  # 动态top-k
+            'val_avg_k_value': [],  # 平均k值
         }
 
         # 添加梯度和激活监测
@@ -289,6 +341,246 @@ class Trainer:
                 total_norm += param_norm ** 2
         total_norm = total_norm ** 0.5
         return total_norm, grad_norms
+
+    def save_best_probability_distribution(self, all_labels, all_probs, dist_metrics_list, epoch='final'):
+        """
+        保存用于下游任务的最优概率分布向量
+        
+        Args:
+            all_labels: 真实标签 [n_samples]
+            all_probs: 所有样本的预测概率 [n_samples, num_classes]
+            dist_metrics_list: 每个样本的分布匹配指标列表
+            epoch: 当前epoch或'final'
+        
+        Returns:
+            dict: 包含最优分布及相关信息
+        """
+        results = {}
+        
+        # 方案1: 简单平均分布（最稳定）
+        avg_distribution = np.mean(all_probs, axis=0)
+        avg_distribution = avg_distribution / np.sum(avg_distribution)  # 归一化确保和为1
+        results['average_distribution'] = avg_distribution.tolist()
+        
+        # 方案2: 选择分布匹配最好的单个样本
+        # 这里使用余弦相似度作为标准（值越大越好）
+        if len(dist_metrics_list) > 0:
+            cosine_similarities = [m['cosine_similarity'] for m in dist_metrics_list]
+            best_idx = np.argmax(cosine_similarities)
+            best_sample_distribution = all_probs[best_idx]
+            best_sample_distribution = best_sample_distribution / np.sum(best_sample_distribution)
+            results['best_sample_distribution'] = best_sample_distribution.tolist()
+            results['best_sample_metrics'] = dist_metrics_list[best_idx]
+            results['best_sample_index'] = int(best_idx)
+        
+        # 方案3: 加权平均分布（根据分布匹配质量加权）
+        if len(dist_metrics_list) > 0:
+            cosine_similarities = np.array([m['cosine_similarity'] for m in dist_metrics_list])
+            # 使用softmax将相似度转换为权重
+            weights = np.exp(cosine_similarities * 5)  # 放大差异
+            weights = weights / np.sum(weights)
+            weighted_distribution = np.sum(all_probs * weights[:, np.newaxis], axis=0)
+            weighted_distribution = weighted_distribution / np.sum(weighted_distribution)
+            results['weighted_distribution'] = weighted_distribution.tolist()
+            results['weights_stats'] = {
+                'mean': float(np.mean(weights)),
+                'std': float(np.std(weights)),
+                'max': float(np.max(weights)),
+                'min': float(np.min(weights))
+            }
+        
+        # 添加元数据
+        results['class_names'] = self.class_names
+        results['num_classes'] = self.args.num_classes
+        results['num_samples'] = len(all_probs)
+        
+        # 计算每个方案的熵（熵越高表示分布越均匀）
+        for key in ['average_distribution', 'best_sample_distribution', 'weighted_distribution']:
+            if key in results:
+                dist = np.array(results[key])
+                entropy = -np.sum(dist * np.log(dist + 1e-10))
+                results[f'{key}_entropy'] = float(entropy)
+        
+        # 保存到文件
+        if epoch == 'final':
+            output_path = os.path.join(self.save_path, 'best_probability_distribution.json')
+        else:
+            output_path = os.path.join(self.save_path, f'probability_distribution_epoch{epoch}.json')
+        
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(results, f, indent=4, ensure_ascii=False)
+        
+        print(f"\n  ✓ 最优概率分布已保存至: {output_path}")
+        
+        # 打印分布信息
+        print(f"\n  推荐使用的概率分布（用于下游任务权重分配）:")
+        print(f"  {'='*60}")
+        
+        for method_name in ['average_distribution', 'weighted_distribution', 'best_sample_distribution']:
+            if method_name in results:
+                dist = results[method_name]
+                print(f"\n  方法: {method_name}")
+                for i, (class_name, prob) in enumerate(zip(self.class_names, dist)):
+                    print(f"    {class_name}: {prob:.4f} ({prob*100:.2f}%)")
+                if f'{method_name}_entropy' in results:
+                    print(f"    熵值: {results[f'{method_name}_entropy']:.4f}")
+        
+        print(f"\n  {'='*60}")
+        print(f"  建议: 一般使用 'weighted_distribution' 作为下游任务权重")
+        
+        # 绘制可视化图表
+        self.plot_probability_distribution_comparison(results, epoch)
+        
+        # 记录到wandb
+        self.log_best_distribution_to_wandb(results, epoch)
+        
+        return results
+
+    def js_divergence(self, p, q):
+        """
+        计算JS散度（对称版本的KL散度）
+        p, q: [batch_size, num_classes] 概率分布（已softmax）
+        返回：JS散度值（越小越好，范围0-1）
+        """
+        m = 0.5 * (p + q)
+        kl_pm = F.kl_div(torch.log(p + 1e-10), m, reduction='batchmean')
+        kl_qm = F.kl_div(torch.log(q + 1e-10), m, reduction='batchmean')
+        return 0.5 * (kl_pm + kl_qm)
+
+    def adaptive_top_k_hybrid(self, probs, gap_threshold=0.15, cumulative_threshold=0.9, 
+                          min_k=1, max_k=5):
+        """
+        混合自适应k选择策略
+        
+        同时考虑：
+        1. 概率差距：相邻排名差距小于阈值时继续
+        2. 累积概率：累积概率未达到阈值时继续
+        3. 最小概率：单个类别概率大于阈值时继续
+        
+        Args:
+            probs: [batch_size, num_classes] 概率分布
+            gap_threshold: 概率差距阈值（默认0.15）
+            cumulative_threshold: 累积概率阈值（默认0.9）
+            min_k: 最小k值（默认1）
+            max_k: 最大k值（默认5）
+        
+        Returns:
+            k值列表（每个样本一个k）
+        """
+        sorted_probs, _ = torch.sort(probs, dim=1, descending=True)
+        k_values = []
+        
+        for i in range(probs.size(0)):
+            k = min_k
+            cumsum = sorted_probs[i, 0].item()
+            
+            for j in range(1, min(probs.size(1), max_k)):
+                # 条件1：累积概率是否已经足够高
+                if cumsum >= cumulative_threshold:
+                    break
+                
+                # 条件2：概率差距是否过大（说明后续类别不重要）
+                gap = sorted_probs[i, j-1] - sorted_probs[i, j]
+                if gap >= gap_threshold:
+                    break
+                
+                # 条件3：当前类别概率是否太小（不值得考虑）
+                if sorted_probs[i, j] < 0.05:  # 小于5%的概率忽略
+                    break
+                
+                k = j + 1
+                cumsum += sorted_probs[i, j].item()
+            
+            k_values.append(k)
+        
+        return k_values
+
+    def compute_distribution_metrics(self, pred_probs, true_probs):
+        """
+        计算一批样本的分布匹配指标
+        pred_probs: 预测的概率分布 [batch_size, num_classes]
+        true_probs: 真实的概率分布 [batch_size, num_classes]
+        
+        返回：包含所有分布匹配指标的字典
+        """
+        metrics = {}
+        
+        # 1. JS散度
+        js_div = self.js_divergence(pred_probs, true_probs)
+        metrics['js_divergence'] = js_div.item()
+        
+        # 2. 余弦相似度
+        cos_sim = F.cosine_similarity(pred_probs, true_probs, dim=1).mean()
+        metrics['cosine_similarity'] = cos_sim.item()
+        
+        # 3. Top-3分布匹配率
+        _, pred_top3 = pred_probs.topk(3, dim=1)
+        _, true_top3 = true_probs.topk(3, dim=1)
+        
+        top3_matches = []
+        for i in range(pred_probs.size(0)):
+            pred_set = set(pred_top3[i].cpu().numpy())
+            true_set = set(true_top3[i].cpu().numpy())
+            overlap = len(pred_set & true_set) / 3.0
+            top3_matches.append(overlap)
+        metrics['top3_distribution_match'] = np.mean(top3_matches)
+
+        
+        # 4. Brier Score（均方误差）
+        brier = torch.mean((pred_probs - true_probs) ** 2)
+        metrics['brier_score'] = brier.item()
+        
+        # 5. Top-3准确率
+        true_label = true_probs.argmax(dim=1)
+        _, topk_indices = pred_probs.topk(3, dim=1)
+        correct = topk_indices.eq(true_label.view(-1, 1).expand_as(topk_indices))
+        top3_acc = correct.any(dim=1).float().mean()
+        metrics['top3_accuracy'] = top3_acc.item()
+
+        # 6. 【改进】动态Top-k分布匹配率
+        # 分别计算预测和真实概率的自适应k
+        pred_k_values = self.adaptive_top_k_hybrid(pred_probs, 
+                                                    gap_threshold=0.15, 
+                                                    cumulative_threshold=0.85)
+        true_k_values = self.adaptive_top_k_hybrid(true_probs, 
+                                                    gap_threshold=0.15, 
+                                                    cumulative_threshold=0.85)
+        
+        adaptive_matches = []
+        k_distribution = []  # 记录k值分布，用于分析
+        
+        for i in range(pred_probs.size(0)):
+            # 使用两者中较大的k（更宽松的匹配）
+            k = max(pred_k_values[i], true_k_values[i])
+            k_distribution.append(k)
+            
+            # 获取top-k索引
+            _, pred_topk = pred_probs[i].topk(k)
+            _, true_topk = true_probs[i].topk(k)
+            
+            # 计算重叠率
+            pred_set = set(pred_topk.cpu().numpy())
+            true_set = set(true_topk.cpu().numpy())
+            overlap = len(pred_set & true_set) / k
+            adaptive_matches.append(overlap)
+        
+        metrics['adaptive_topk_distribution_match'] = np.mean(adaptive_matches)
+        metrics['avg_k_value'] = np.mean(k_distribution)  # 平均k值，用于监控
+        metrics['k_distribution'] = k_distribution  # 完整的k值分布
+
+        # 6.1 【改进】动态Top-k准确率
+        true_label = true_probs.argmax(dim=1)
+        adaptive_correct = []
+        
+        for i in range(pred_probs.size(0)):
+            k = pred_k_values[i]
+            _, topk_indices = pred_probs[i].topk(k)
+            correct = true_label[i] in topk_indices
+            adaptive_correct.append(correct)
+        
+        metrics['adaptive_topk_accuracy'] = np.mean(adaptive_correct)
+        
+        return metrics
     
     def get_layer_activations(self, data):
         """获取中间层的激活统计信息"""
@@ -335,6 +627,108 @@ class Trainer:
         with open(config_path, 'w') as f:
             json.dump(config, f, indent=4)
         print(f"配置已保存至: {config_path}")
+
+    def plot_probability_distribution_comparison(self, results, epoch='final'):
+        """
+        绘制不同方法得到的概率分布对比图
+        """
+        methods = []
+        distributions = []
+        
+        method_labels = {
+            'average_distribution': 'Average Distribution',
+            'weighted_distribution': 'Weighted Average Distribution',
+            'best_sample_distribution': 'Best Sample Distribution'
+        }
+        
+        for method_key, label in method_labels.items():
+            if method_key in results:
+                methods.append(label)
+                distributions.append(results[method_key])
+        
+        if len(methods) == 0:
+            return
+        
+        # 创建对比柱状图
+        fig, axes = plt.subplots(1, len(methods), figsize=(6*len(methods), 5))
+        if len(methods) == 1:
+            axes = [axes]
+        
+        colors = plt.cm.Set3(np.linspace(0, 1, self.args.num_classes))
+        
+        for idx, (method, dist) in enumerate(zip(methods, distributions)):
+            ax = axes[idx]
+            bars = ax.bar(range(self.args.num_classes), dist, color=colors, edgecolor='black', linewidth=1.5)
+            ax.set_xticks(range(self.args.num_classes))
+            ax.set_xticklabels(self.class_names, rotation=45, ha='right')
+            ax.set_ylabel('Probability', fontsize=12)
+            ax.set_title(method, fontsize=14, fontweight='bold')
+            ax.set_ylim(0, max(max(d) for d in distributions) * 1.1)
+            ax.grid(axis='y', alpha=0.3)
+            
+            # 在柱子上标注概率值
+            for bar, prob in zip(bars, dist):
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height,
+                       f'{prob:.3f}',
+                       ha='center', va='bottom', fontsize=9)
+        
+        plt.suptitle('Predicted Probability Distribution Comparison (for Downstream Task Weights)', fontsize=16, fontweight='bold', y=1.02)
+        plt.tight_layout()
+        
+        if epoch == 'final':
+            save_path = os.path.join(self.save_path, 'best_probability_distribution_comparison.png')
+        else:
+            save_path = os.path.join(self.save_path, f'probability_distribution_comparison_epoch{epoch}.png')
+        
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        print(f"  ✓ 概率分布对比图已保存至: {save_path}")
+
+    def log_best_distribution_to_wandb(self, results, epoch='final'):
+        """
+        将最优概率分布记录到wandb
+        """
+        prefix = "final/" if epoch == 'final' else f"epoch_{epoch}/"
+        
+        # 记录推荐的加权分布
+        if 'weighted_distribution' in results:
+            for class_name, prob in zip(self.class_names, results['weighted_distribution']):
+                wandb.log({
+                    f"{prefix}best_distribution/{class_name}": prob
+                })
+            
+            wandb.log({
+                f"{prefix}best_distribution/entropy": results.get('weighted_distribution_entropy', 0)
+            })
+        
+        # 创建表格对比
+        if epoch == 'final':
+            table_data = []
+            for i, class_name in enumerate(self.class_names):
+                row = [class_name]
+                for method in ['average_distribution', 'weighted_distribution', 'best_sample_distribution']:
+                    if method in results:
+                        row.append(results[method][i])
+                table_data.append(row)
+            
+            columns = ['类别']
+            if 'average_distribution' in results:
+                columns.append('平均分布')
+            if 'weighted_distribution' in results:
+                columns.append('加权分布')
+            if 'best_sample_distribution' in results:
+                columns.append('最佳样本')
+            
+            wandb.log({
+                f"{prefix}best_distribution/comparison_table": wandb.Table(
+                    columns=columns,
+                    data=table_data
+                )
+            })
+        
+        print(f"  ✓ 最优分布已记录到wandb")
     
     def train_epoch(self, epoch):
         """训练一个epoch - 每次处理一个图"""
@@ -419,19 +813,26 @@ class Trainer:
         all_labels = []
         all_probs = []  # 用于ROC-AUC计算
 
-        # 新增：记录每个batch的验证损失
+        # 记录每个batch的验证损失
         batch_val_losses = []
 
-        # 【新增】在第一个batch上收集激活统计（用于诊断）
-        first_batch_activations = None
-        
+        # 【新增】分布匹配指标的累积列表
+        js_divergences = []
+        cosine_similarities = []
+        top3_distribution_matches = []
+        brier_scores = []
+        top3_accuracies = []
+        adaptive_topk_distribution_matches = []
+        adaptive_topk_accuracies = []
+        avg_k_values = []
+        all_dist_metrics = []
+
+        # 记录验证集样本的详细信息
+        val_sample_predictions = []
+
         with torch.no_grad():
             pbar = tqdm(self.val_loader, desc=f'Epoch {epoch}/{self.args.epochs} [验证]')
             for idx, data in enumerate(pbar):
-                # 【新增】只在第一个batch收集激活统计
-                if idx == 0 and epoch % 5 == 0:  # 每5个epoch收集一次
-                    first_batch_activations = self.get_layer_activations(data)
-
                 # 前向传播
                 output = self.model(data.x, data.edge_index, data.edge_attr, data.batch)
 
@@ -443,20 +844,25 @@ class Trainer:
 
                 loss = F.kl_div(output, class_label, reduction='batchmean')
                 ############原有软标签############
-
-                ################Focal Loss###############
-                # class_label = data.y.argmin().unsqueeze(0)
-                # loss = self.criterion(output, class_label)
-                ################Focal Loss###############
-
-                ############ 硬标签 ##############  
-                # class_label = data.y.argmin().unsqueeze(0)   # shape: [1]
-                # loss = F.cross_entropy(output, class_label, weight=self.class_weights)
-                ############ 硬标签 ##############
                 total_loss += loss.item()
 
                 # 新增：记录每个batch的损失
                 batch_val_losses.append(loss.item())
+
+                # 【新增】计算分布匹配指标 从log_softmax转换为概率
+                pred_probs = torch.exp(output)  # [1, num_classes]
+                true_probs = class_label  # [1, num_classes]
+
+                dist_metrics = self.compute_distribution_metrics(pred_probs, true_probs)
+                all_dist_metrics.append(dist_metrics)
+                js_divergences.append(dist_metrics['js_divergence'])
+                cosine_similarities.append(dist_metrics['cosine_similarity'])
+                top3_distribution_matches.append(dist_metrics['top3_distribution_match'])
+                brier_scores.append(dist_metrics['brier_score'])
+                top3_accuracies.append(dist_metrics['top3_accuracy'])
+                adaptive_topk_distribution_matches.append(dist_metrics['adaptive_topk_distribution_match'])
+                adaptive_topk_accuracies.append(dist_metrics['adaptive_topk_accuracy'])
+                avg_k_values.append(dist_metrics['avg_k_value'])
 
                 # 计算准确率
                 pred = output.argmax(dim=1)  # 预测的最佳方法索引, shape: [1]
@@ -464,6 +870,8 @@ class Trainer:
                 # true_label = data.y.argmin()
                 correct += (pred == true_label).sum().item()
                 total += 1  # 每次处理一个图
+
+                ############################ 分类/回归 标签转换 ############################
                 
                 # 收集预测和标签用于后续指标计算
                 all_preds.append(pred.cpu().numpy()[0])   # ！！！！！！！！！为什么要把pred搬回cpu
@@ -472,8 +880,17 @@ class Trainer:
                 probs = F.softmax(output, dim=1).cpu().numpy()[0]  # 从logits转换
                 all_probs.append(probs)
 
-                ############################ 分类/回归 标签转换 ############################
-
+                val_sample_predictions.append({
+                    'dataset_index': int(self.val_indices[idx]),
+                    'true_label': int(data.y.argmin().item()),
+                    'predicted_label': int(pred.cpu().numpy()[0]),
+                    'true_label_name': self.class_names[data.y.argmin().item()],
+                    'predicted_label_name': self.class_names[pred.cpu().numpy()[0]],
+                    'is_correct': bool(pred.cpu().numpy()[0] == data.y.argmin().item()),
+                    'prediction_probs': probs.tolist(),
+                    'num_nodes': int(data.x.shape[0]),
+                    'num_edges': int(data.edge_index.shape[1]),
+                })
                 pbar.set_postfix({
                     'loss': f'{loss.item():.4f}',
                     'acc': f'{100. * correct / total:.2f}%'
@@ -482,7 +899,7 @@ class Trainer:
         avg_loss = total_loss / len(self.val_loader)
         accuracy = 100. * correct / total
 
-        # 新增：计算验证损失的统计信息
+        # 计算验证损失的统计信息
         batch_val_losses_array = np.array(batch_val_losses)
         val_loss_std = np.std(batch_val_losses_array)
         val_loss_min = np.min(batch_val_losses_array)
@@ -557,9 +974,9 @@ class Trainer:
         # 返回所有指标
         metrics = {
             'loss': avg_loss,
-            'loss_std': val_loss_std,      # 新增
-            'loss_min': val_loss_min,      # 新增
-            'loss_max': val_loss_max,      # 新增
+            'loss_std': val_loss_std,
+            'loss_min': val_loss_min,
+            'loss_max': val_loss_max,
             'accuracy': accuracy,
             'macro_f1': macro_f1,
             'weighted_f1': weighted_f1,
@@ -567,7 +984,17 @@ class Trainer:
             'confusion_matrix': conf_matrix,
             'all_preds': all_preds,
             'all_labels': all_labels,
-            'all_probs': all_probs
+            'all_probs': all_probs,
+            # 【新增】分布匹配指标
+            'js_divergence': np.mean(js_divergences),
+            'cosine_similarity': np.mean(cosine_similarities),
+            'top3_distribution_match': np.mean(top3_distribution_matches),
+            'brier_score': np.mean(brier_scores),
+            'top3_accuracy': np.mean(top3_accuracies),
+            'adaptive_topk_distribution_match': np.mean(adaptive_topk_distribution_matches), 
+            'adaptive_topk_accuracy': np.mean(adaptive_topk_accuracies),  # 新增
+            'avg_k_value': np.mean(avg_k_values),  # 新增：平均k值
+            'all_dist_metrics': all_dist_metrics,  # 【新增】
         }
         
         return metrics
@@ -749,263 +1176,6 @@ class Trainer:
         
         print(f"  分类报告已保存到: {report_path}")
     
-    def plot_training_history(self):
-        """绘制训练历史图表"""
-        # 配置matplotlib样式
-        plt.style.use('default')
-        plt.rcParams['font.size'] = 10
-        plt.rcParams['axes.unicode_minus'] = False
-        
-        epochs = range(1, len(self.train_history['train_loss']) + 1)
-        
-        # 创建3x2的子图布局（增加新指标）
-        fig, axes = plt.subplots(4, 2, figsize=(18, 24))
-        fig.suptitle('Training Process Monitor', fontsize=18, fontweight='bold')
-        
-        # 子图1: 训练损失和验证损失
-        # axes[0, 0].plot(epochs, self.train_history['train_loss'], 'b-', label='Train Loss', linewidth=2)
-        # axes[0, 0].plot(epochs, self.train_history['val_loss'], 'r-', label='Val Loss', linewidth=2)
-        epochs = range(1, len(self.train_history['train_loss']) + 1)
-        epoch_idx = np.arange(1, len(self.train_history['train_loss']) + 1)
-
-        # 转换为numpy数组以便计算置信区间
-        train_loss_array = np.array(self.train_history['train_loss'])
-        val_loss_array = np.array(self.train_history['val_loss'])
-
-        # 计算置信区间（±5%波动范围，可根据需要调整）
-        train_loss_lower = train_loss_array * 0.65
-        train_loss_upper = train_loss_array * 1.35
-        val_loss_lower = val_loss_array * 0.65
-        val_loss_upper = val_loss_array * 1.35
-        # 绘制曲线和阴影
-        axes[0, 0].plot(epoch_idx, train_loss_array, 'b-', label='Train Loss', linewidth=2)
-        axes[0, 0].fill_between(epoch_idx, train_loss_lower, train_loss_upper, color='blue', alpha=0.15)
-        
-        axes[0, 0].plot(epoch_idx, val_loss_array, 'r-', label='Val Loss', linewidth=2)
-        axes[0, 0].fill_between(epoch_idx, val_loss_lower, val_loss_upper, color='red', alpha=0.15)
-        
-        axes[0, 0].set_xlabel('Epoch', fontsize=12)
-        axes[0, 0].set_ylabel('Loss', fontsize=12)
-        axes[0, 0].set_title('Training Loss vs Validation Loss', fontsize=14, fontweight='bold')
-        axes[0, 0].legend(loc='upper right', fontsize=10)
-        axes[0, 0].grid(True, alpha=0.3)
-        
-        # 子图2: 验证准确率
-        axes[0, 1].plot(epochs, self.train_history['val_accuracy'], 'g-', linewidth=2, marker='o', markersize=4)
-        axes[0, 1].set_xlabel('Epoch', fontsize=12)
-        axes[0, 1].set_ylabel('Accuracy (%)', fontsize=12)
-        axes[0, 1].set_title('Validation Accuracy', fontsize=14, fontweight='bold')
-        axes[0, 1].grid(True, alpha=0.3)
-        axes[0, 1].set_ylim([0, 105])  # 设置y轴范围为0-105%
-        
-        # 添加最高准确率标注
-        max_acc = max(self.train_history['val_accuracy'])
-        max_acc_epoch = self.train_history['val_accuracy'].index(max_acc) + 1
-        axes[0, 1].axhline(y=max_acc, color='r', linestyle='--', alpha=0.5, label=f'Best: {max_acc:.2f}%')
-        axes[0, 1].legend(loc='lower right', fontsize=10)
-        
-        # 子图3: F1-Score（宏平均和加权平均）
-        axes[1, 0].plot(epochs, self.train_history['val_macro_f1'], 'b-', 
-                       label='Macro F1', linewidth=2, marker='s', markersize=4)
-        axes[1, 0].plot(epochs, self.train_history['val_weighted_f1'], 'r-', 
-                       label='Weighted F1', linewidth=2, marker='o', markersize=4)
-        axes[1, 0].set_xlabel('Epoch', fontsize=12)
-        axes[1, 0].set_ylabel('F1-Score (%)', fontsize=12)
-        axes[1, 0].set_title('F1-Score (Macro & Weighted)', fontsize=14, fontweight='bold')
-        axes[1, 0].legend(loc='lower right', fontsize=10)
-        axes[1, 0].grid(True, alpha=0.3)
-        axes[1, 0].set_ylim([0, 105])
-        
-        # 子图4: ROC-AUC
-        axes[1, 1].plot(epochs, self.train_history['val_roc_auc'], 'purple', 
-                       linewidth=2, marker='d', markersize=4)
-        axes[1, 1].set_xlabel('Epoch', fontsize=12)
-        axes[1, 1].set_ylabel('ROC-AUC (%)', fontsize=12)
-        axes[1, 1].set_title('ROC-AUC (One-vs-Rest, Macro Avg)', fontsize=14, fontweight='bold')
-        axes[1, 1].grid(True, alpha=0.3)
-        axes[1, 1].set_ylim([0, 105])
-        
-        # 添加最高ROC-AUC标注
-        if len(self.train_history['val_roc_auc']) > 0:
-            max_auc = max(self.train_history['val_roc_auc'])
-            max_auc_epoch = self.train_history['val_roc_auc'].index(max_auc) + 1
-            axes[1, 1].axhline(y=max_auc, color='r', linestyle='--', alpha=0.5, label=f'Best: {max_auc:.2f}%')
-            axes[1, 1].legend(loc='lower right', fontsize=10)
-        
-        # 子图5: 学习率变化
-        axes[2, 0].plot(epochs, self.train_history['lr'], 'm-', linewidth=2)
-        axes[2, 0].set_xlabel('Epoch', fontsize=12)
-        axes[2, 0].set_ylabel('Learning Rate', fontsize=12)
-        axes[2, 0].set_title('Learning Rate Schedule', fontsize=14, fontweight='bold')
-        axes[2, 0].set_yscale('log')  # 使用对数刻度
-        axes[2, 0].grid(True, alpha=0.3)
-        
-        # 子图6: 所有评估指标对比
-        axes[2, 1].plot(epochs, self.train_history['val_accuracy'], 'g-', 
-                       label='Accuracy', linewidth=2, marker='o', markersize=3)
-        axes[2, 1].plot(epochs, self.train_history['val_macro_f1'], 'b-', 
-                       label='Macro F1', linewidth=2, marker='s', markersize=3)
-        axes[2, 1].plot(epochs, self.train_history['val_weighted_f1'], 'r-', 
-                       label='Weighted F1', linewidth=2, marker='^', markersize=3)
-        axes[2, 1].plot(epochs, self.train_history['val_roc_auc'], 'purple', 
-                       label='ROC-AUC', linewidth=2, marker='d', markersize=3)
-        axes[2, 1].set_xlabel('Epoch', fontsize=12)
-        axes[2, 1].set_ylabel('Score (%)', fontsize=12)
-        axes[2, 1].set_title('All Evaluation Metrics Comparison', fontsize=14, fontweight='bold')
-        axes[2, 1].legend(loc='lower right', fontsize=9)
-        axes[2, 1].grid(True, alpha=0.3)
-        axes[2, 1].set_ylim([0, 105])
-
-         # 【新增】子图7: 梯度范数变化（诊断梯度消失/爆炸）
-        if 'grad_norm' in self.train_history and len(self.train_history['grad_norm']) > 0:
-            grad_norm_array = np.array(self.train_history['grad_norm'])
-            grad_norm_std_array = np.array(self.train_history['grad_norm_std'])
-            
-            axes[3, 0].plot(epochs, grad_norm_array, 'orange', linewidth=2.5, marker='o', markersize=4)
-            axes[3, 0].fill_between(epochs, 
-                                    grad_norm_array - grad_norm_std_array,
-                                    grad_norm_array + grad_norm_std_array,
-                                    color='orange', alpha=0.3)
-            axes[3, 0].set_xlabel('Epoch', fontsize=12)
-            axes[3, 0].set_ylabel('Gradient Norm', fontsize=12)
-            axes[3, 0].set_title('Gradient Norm (Vanishing/Exploding Detection)', fontsize=14, fontweight='bold')
-            axes[3, 0].set_yscale('log')  # 使用对数刻度
-            axes[3, 0].grid(True, alpha=0.3)
-            
-            # 添加参考线（正常范围：1e-3到1e3）
-            axes[3, 0].axhline(y=1e-3, color='r', linestyle='--', alpha=0.5, label='Vanishing threshold')
-            axes[3, 0].axhline(y=1e3, color='r', linestyle='--', alpha=0.5, label='Exploding threshold')
-            axes[3, 0].legend(fontsize=9)
-        
-        # 调整子图之间的间距
-        plt.tight_layout()
-        
-        # 保存图表
-        plot_path = os.path.join(self.save_path, 'training_history.png')
-        plt.savefig(plot_path, dpi=300, bbox_inches='tight')
-        print(f"\n✓ 训练历史图表已保存至: {plot_path}")
-        plt.close()
-        
-        # 额外生成一个单独的损失曲线图（更大更清晰）
-        # fig2, ax = plt.subplots(figsize=(12, 6))
-        # ax.plot(epochs, self.train_history['train_loss'], 'b-', label='Train Loss', linewidth=2.5, alpha=0.8)
-        # ax.plot(epochs, self.train_history['val_loss'], 'r-', label='Val Loss', linewidth=2.5, alpha=0.8)
-        # ax.set_xlabel('Epoch', fontsize=14)
-        # ax.set_ylabel('Loss', fontsize=14)
-        # ax.set_title('Training and Validation Loss Curve', fontsize=16, fontweight='bold')
-        # ax.legend(loc='upper right', fontsize=12)
-        # ax.grid(True, alpha=0.3)
-        
-        # # 标注最低验证损失
-        # min_val_loss = min(self.train_history['val_loss'])
-        # min_val_loss_epoch = self.train_history['val_loss'].index(min_val_loss) + 1
-        # ax.plot(min_val_loss_epoch, min_val_loss, 'r*', markersize=15, 
-        #         label=f'Best Val Loss: {min_val_loss:.4f} (Epoch {min_val_loss_epoch})')
-        # ax.legend(loc='upper right', fontsize=12)
-        
-        # loss_plot_path = os.path.join(self.save_path, 'loss_curve.png')
-        # plt.savefig(loss_plot_path, dpi=300, bbox_inches='tight')
-        # 增加阴影
-        # 额外生成一个单独的损失曲线图（更大更清晰）
-        fig2, ax = plt.subplots(figsize=(12, 6))              
-        
-        # 转换为numpy数组
-        train_loss_array = np.array(self.train_history['train_loss'])
-        train_loss_std = np.array(self.train_history['train_loss_std'])
-        val_loss_array = np.array(self.train_history['val_loss'])
-        val_loss_std = np.array(self.train_history['val_loss_std'])  # 新增
-        
-        # 使用实际的标准差作为阴影范围
-        train_loss_lower = train_loss_array - train_loss_std
-        train_loss_upper = train_loss_array + train_loss_std
-        val_loss_lower = val_loss_array - val_loss_std      # 新增
-        val_loss_upper = val_loss_array + val_loss_std      # 新增
-        
-        # 绘制训练损失曲线和阴影
-        ax.plot(epoch_idx, train_loss_array, 'b-', label='Train Loss', linewidth=2.5, alpha=0.9)
-        ax.fill_between(epoch_idx, train_loss_lower, train_loss_upper, 
-                        color='blue', alpha=0.3, label='Train ±1σ')
-        
-        # 绘制验证损失曲线和阴影
-        ax.plot(epoch_idx, val_loss_array, 'r-', label='Val Loss', linewidth=2.5, alpha=0.9)
-        ax.fill_between(epoch_idx, val_loss_lower, val_loss_upper, 
-                color='red', alpha=0.3, label='Val ±1σ')
-        
-        ax.set_xlabel('Epoch', fontsize=14)
-        ax.set_ylabel('Loss', fontsize=14)
-        ax.set_title('Training and Validation Loss Curve with Batch Variance', fontsize=16, fontweight='bold')
-        ax.legend(loc='upper right', fontsize=12)
-        ax.grid(True, alpha=0.3)
-        
-        # 标注最低验证损失
-        min_val_loss = min(val_loss_array)
-        min_val_loss_epoch = np.argmin(val_loss_array) + 1
-        ax.plot(min_val_loss_epoch, min_val_loss, 'r*', markersize=15, 
-                label=f'Best Val Loss: {min_val_loss:.4f} (Epoch {min_val_loss_epoch})')
-        ax.legend(loc='upper right', fontsize=12)
-        
-        loss_plot_path = os.path.join(self.save_path, 'loss_curve.png')
-        plt.savefig(loss_plot_path, dpi=300, bbox_inches='tight')
-        print(f"✓ 损失曲线图已保存至: {loss_plot_path}")
-        plt.close()
-        
-        # 生成一个单独的准确率曲线图
-        fig3, ax = plt.subplots(figsize=(12, 6))
-        ax.plot(epochs, self.train_history['val_accuracy'], 'g-', linewidth=2.5, marker='o', 
-                markersize=5, alpha=0.8)
-        ax.set_xlabel('Epoch', fontsize=14)
-        ax.set_ylabel('Accuracy (%)', fontsize=14)
-        ax.set_title('Validation Accuracy Curve', fontsize=16, fontweight='bold')
-        ax.grid(True, alpha=0.3)
-        ax.set_ylim([0, 105])
-        
-        # 标注最高准确率
-        ax.plot(max_acc_epoch, max_acc, 'r*', markersize=15,
-                label=f'Best Accuracy: {max_acc:.2f}% (Epoch {max_acc_epoch})')
-        ax.legend(loc='lower right', fontsize=12)
-        
-        acc_plot_path = os.path.join(self.save_path, 'accuracy_curve.png')
-        plt.savefig(acc_plot_path, dpi=300, bbox_inches='tight')
-        print(f"✓ 准确率曲线图已保存至: {acc_plot_path}")
-        plt.close()
-        
-        # 生成F1-Score对比图
-        fig4, ax = plt.subplots(figsize=(12, 6))
-        ax.plot(epochs, self.train_history['val_macro_f1'], 'b-', label='Macro F1', 
-                linewidth=2.5, marker='s', markersize=5, alpha=0.8)
-        ax.plot(epochs, self.train_history['val_weighted_f1'], 'r-', label='Weighted F1', 
-                linewidth=2.5, marker='o', markersize=5, alpha=0.8)
-        ax.set_xlabel('Epoch', fontsize=14)
-        ax.set_ylabel('F1-Score (%)', fontsize=14)
-        ax.set_title('F1-Score Comparison (Macro vs Weighted)', fontsize=16, fontweight='bold')
-        ax.legend(loc='lower right', fontsize=12)
-        ax.grid(True, alpha=0.3)
-        ax.set_ylim([0, 105])
-        
-        f1_plot_path = os.path.join(self.save_path, 'f1_score_curve.png')
-        plt.savefig(f1_plot_path, dpi=300, bbox_inches='tight')
-        print(f"✓ F1-Score曲线图已保存至: {f1_plot_path}")
-        plt.close()
-        
-        # 生成ROC-AUC曲线图
-        fig5, ax = plt.subplots(figsize=(12, 6))
-        ax.plot(epochs, self.train_history['val_roc_auc'], 'purple', 
-                linewidth=2.5, marker='d', markersize=5, alpha=0.8)
-        ax.set_xlabel('Epoch', fontsize=14)
-        ax.set_ylabel('ROC-AUC (%)', fontsize=14)
-        ax.set_title('ROC-AUC Curve (One-vs-Rest)', fontsize=16, fontweight='bold')
-        ax.grid(True, alpha=0.3)
-        ax.set_ylim([0, 105])
-        
-        if len(self.train_history['val_roc_auc']) > 0:
-            ax.plot(max_auc_epoch, max_auc, 'r*', markersize=15,
-                    label=f'Best ROC-AUC: {max_auc:.2f}% (Epoch {max_auc_epoch})')
-            ax.legend(loc='lower right', fontsize=12)
-        
-        auc_plot_path = os.path.join(self.save_path, 'roc_auc_curve.png')
-        plt.savefig(auc_plot_path, dpi=300, bbox_inches='tight')
-        print(f"✓ ROC-AUC曲线图已保存至: {auc_plot_path}")
-        plt.close()
     
     def train(self):
         """完整训练流程"""
@@ -1024,14 +1194,23 @@ class Trainer:
             
             # 提取指标
             val_loss = metrics['loss']
-            val_loss_std = metrics['loss_std']      # 新增
-            val_loss_min = metrics['loss_min']      # 新增
-            val_loss_max = metrics['loss_max']      # 新增
+            val_loss_std = metrics['loss_std']     
+            val_loss_min = metrics['loss_min']     
+            val_loss_max = metrics['loss_max']     
             val_accuracy = metrics['accuracy']
             val_macro_f1 = metrics['macro_f1']
             val_weighted_f1 = metrics['weighted_f1']
             val_roc_auc = metrics['roc_auc']
             conf_matrix = metrics['confusion_matrix']
+            # 【新增】提取分布匹配指标
+            val_js_divergence = metrics['js_divergence']
+            val_cosine_similarity = metrics['cosine_similarity']
+            val_top3_distribution_match = metrics['top3_distribution_match']
+            val_brier_score = metrics['brier_score']
+            val_top3_accuracy = metrics['top3_accuracy']
+            val_adaptive_topk_distribution_match = metrics['adaptive_topk_distribution_match']
+            val_adaptive_topk_accuracy = metrics['adaptive_topk_accuracy']
+            val_avg_k_value = metrics['avg_k_value']
             
             # 学习率调整
             self.scheduler.step(val_loss)
@@ -1042,19 +1221,27 @@ class Trainer:
             self.train_history['train_loss_std'].append(train_loss_std)
             self.train_history['train_loss_min'].append(train_loss_min)
             self.train_history['train_loss_max'].append(train_loss_max)
-            self.train_history['grad_norm'].append(grad_norm_mean)        # 【新增】
-            self.train_history['grad_norm_std'].append(grad_norm_std)     # 【新增】
+            self.train_history['grad_norm'].append(grad_norm_mean)    
+            self.train_history['grad_norm_std'].append(grad_norm_std) 
             self.train_history['val_loss'].append(val_loss)
-            self.train_history['val_loss_std'].append(val_loss_std)      # 新增
-            self.train_history['val_loss_min'].append(val_loss_min)      # 新增
-            self.train_history['val_loss_max'].append(val_loss_max)      # 新增
+            self.train_history['val_loss_std'].append(val_loss_std)   
+            self.train_history['val_loss_min'].append(val_loss_min)   
+            self.train_history['val_loss_max'].append(val_loss_max)   
             self.train_history['val_accuracy'].append(val_accuracy)
             self.train_history['val_macro_f1'].append(val_macro_f1)
             self.train_history['val_weighted_f1'].append(val_weighted_f1)
             self.train_history['val_roc_auc'].append(val_roc_auc)
             self.train_history['lr'].append(current_lr)
+            # 【新增】记录分布匹配指标
+            self.train_history['val_js_divergence'].append(val_js_divergence)
+            self.train_history['val_cosine_similarity'].append(val_cosine_similarity)
+            self.train_history['val_top3_distribution_match'].append(val_top3_distribution_match)
+            self.train_history['val_brier_score'].append(val_brier_score)
+            self.train_history['val_top3_accuracy'].append(val_top3_accuracy)
+            self.train_history['val_adaptive_topk_distribution_match'].append(val_adaptive_topk_distribution_match)
+            self.train_history['val_adaptive_topk_accuracy'].append(val_adaptive_topk_accuracy)
+            self.train_history['val_avg_k_value'].append(val_avg_k_value)
             
-            # 打印统计信息
             print(f"\nEpoch {epoch}/{self.args.epochs} 总结:")
             print(f"  训练损失: {train_loss:.4f}")
             print(f"  梯度范数: {grad_norm_mean:.4f} ± {grad_norm_std:.4f}")  # 【新增】
@@ -1063,9 +1250,18 @@ class Trainer:
             print(f"  宏平均 F1-Score: {val_macro_f1:.2f}%")
             print(f"  加权平均 F1-Score: {val_weighted_f1:.2f}%")
             print(f"  ROC-AUC (OvR): {val_roc_auc:.2f}%")
+            # 【新增】打印分布匹配指标
+            print(f"  ---")
+            print(f"  ***分布匹配指标***")
+            print(f"  JS散度: {val_js_divergence:.4f} (越小越好)")
+            print(f"  余弦相似度: {val_cosine_similarity:.2f}% (越大越好)")
+            print(f"  Top-3分布匹配率: {val_top3_distribution_match:.2f}%")
+            print(f"  Brier Score: {val_brier_score:.4f} (越小越好)")
+            print(f"  Top-3准确率: {val_top3_accuracy:.2f}%")
+            print(f"  *自适应Top-k分布匹配率: {val_adaptive_topk_distribution_match:.2f}% (平均k={val_avg_k_value:.1f})")
+            print(f"  *自适应Top-k准确率: {val_adaptive_topk_accuracy:.2f}%")
+            print(f"  ---")
             print(f"  学习率: {current_lr:.6f}")
-
-            # 记录到 wandb
             wandb.log({
                 "epoch": epoch,
                 "train/loss": train_loss,
@@ -1076,46 +1272,56 @@ class Trainer:
                 "val/loss_std": val_loss_std,
                 "val/loss_min": val_loss_min,
                 "val/loss_max": val_loss_max, 
-                "train/grad_norm_mean": grad_norm_mean,      # 【新增】
-                "train/grad_norm_std": grad_norm_std,        # 【新增】
+                "train/grad_norm_mean": grad_norm_mean, 
+                "train/grad_norm_std": grad_norm_std,   
                 "val/accuracy": val_accuracy,
                 "val/macro_f1": val_macro_f1,
                 "val/weighted_f1": val_weighted_f1,
                 "val/roc_auc": val_roc_auc,
                 "learning_rate": current_lr,
+                # 【新增】分布匹配指标
+                "distribution/js_divergence": val_js_divergence,
+                "distribution/cosine_similarity": val_cosine_similarity,
+                "distribution/top3_match": val_top3_distribution_match,
+                "distribution/brier_score": val_brier_score,
+                "distribution/top3_accuracy": val_top3_accuracy,
+                "distribution/adaptive_topk_distribution_match": val_adaptive_topk_distribution_match,
+                "distribution/adaptive_topk_accuracy": val_adaptive_topk_accuracy,
+                "distribution/avg_k_value": val_avg_k_value,
             }, step=epoch)
 
             
-            # 额外记录混淆矩阵到 wandb（可选）
-            wandb.log({
-                "confusion_matrix": wandb.plot.confusion_matrix(
-                    probs=None,
-                    y_true=metrics['all_labels'],
-                    preds=metrics['all_preds'],
-                    class_names=self.class_names
-                )
-            }, step=epoch)
+            # # 额外记录混淆矩阵到 wandb（可选）
+            # wandb.log({
+            #     "confusion_matrix": wandb.plot.confusion_matrix(
+            #         probs=None,
+            #         y_true=metrics['all_labels'],
+            #         preds=metrics['all_preds'],
+            #         class_names=self.class_names
+            #     )
+            # }, step=epoch)
             
-            # 打印混淆矩阵
-            print(f"\n  混淆矩阵:")
-            # 修改：使用实例变量并动态调整格式
-            class_names = self.class_names
-            n_classes = min(len(class_names), conf_matrix.shape[0])
+            # # 打印混淆矩阵
+            # print(f"\n  混淆矩阵:")
+            # # 修改：使用实例变量并动态调整格式
+            # class_names = self.class_names
+            # n_classes = min(len(class_names), conf_matrix.shape[0])
             
-            # 计算最大类别名称长度，用于对齐
-            max_name_len = max(len(name) for name in class_names[:n_classes])
-            padding = max(max_name_len, 12)
+            # # 计算最大类别名称长度，用于对齐
+            # max_name_len = max(len(name) for name in class_names[:n_classes])
+            # padding = max(max_name_len, 12)
             
-            # 打印表头
-            header_names = [name[:9].ljust(9) for name in class_names[:n_classes]]
-            header = " " * (padding + 10) + "预测: " + "  ".join(header_names)
-            print(header)
+            # # 打印表头
+            # header_names = [name[:9].ljust(9) for name in class_names[:n_classes]]
+            # header = " " * (padding + 10) + "预测: " + "  ".join(header_names)
+            # print(header)
             
-            # 打印每一行
-            for i in range(n_classes):
-                row_label = f"真实: {class_names[i]}".ljust(padding + 10)
-                row_values = "  ".join([f"{conf_matrix[i, j]:6d}" for j in range(n_classes)])
-                print(row_label + row_values)
+            # # 打印每一行
+            # for i in range(n_classes):
+            #     row_label = f"真实: {class_names[i]}".ljust(padding + 10)
+            #     row_values = "  ".join([f"{conf_matrix[i, j]:6d}" for j in range(n_classes)])
+            #     print(row_label + row_values)
+            
             
             # 保存检查点
             is_best = val_loss < self.best_val_loss
@@ -1137,13 +1343,19 @@ class Trainer:
         print(f"最高宏平均F1: {max(self.train_history['val_macro_f1']):.2f}%")
         print(f"最高加权F1: {max(self.train_history['val_weighted_f1']):.2f}%")
         print(f"最高ROC-AUC: {max(self.train_history['val_roc_auc']):.2f}%")
+        print(f"---")
+        print(f"*****分布匹配指标最佳值*****")
+        print(f"最低JS散度: {min(self.train_history['val_js_divergence']):.4f}")
+        print(f"最高余弦相似度: {max(self.train_history['val_cosine_similarity']):.2f}%")
+        print(f"最高Top-3分布匹配率: {max(self.train_history['val_top3_distribution_match']):.2f}%")
+        print(f"最低Brier Score: {min(self.train_history['val_brier_score']):.4f}")
+        print(f"最高Top-3准确率: {max(self.train_history['val_top3_accuracy']):.2f}%")
+        print(f"最高自适应Top-k分布匹配率: {max(self.train_history['val_adaptive_topk_distribution_match']):.2f}% (平均k={max(self.train_history['val_avg_k_value']):.1f})")
+        print(f"最高自适应Top-k准确率: {max(self.train_history['val_adaptive_topk_accuracy']):.2f}%")
+        print(f"---")
+        
         print(f"模型保存路径: {self.save_path}")
         print("="*60 + "\n")
-        
-        # 生成训练历史图表
-        print("正在生成训练历史图表...")
-        self.plot_training_history()
-        print("图表生成完成！")
         
         # 基于最佳模型生成最终评估图表
         print("\n" + "="*60)
@@ -1187,13 +1399,79 @@ class Trainer:
             self.save_classification_report(final_metrics['all_labels'], 
                                            final_metrics['all_preds'])
             print("✓ 分类报告已保存！")
+
+            print("\n正在保存最优概率分布（用于下游任务）...")
+            best_dist_results = self.save_best_probability_distribution(
+                final_metrics['all_labels'],
+                final_metrics['all_probs'],
+                final_metrics['all_dist_metrics'],
+                epoch='final'
+            )
+            if 'weighted_distribution' in best_dist_results:
+                for i, (class_name, prob) in enumerate(zip(self.class_names, best_dist_results['weighted_distribution'])):
+                    wandb.summary[f"best_distribution/{class_name}"] = prob
+
+            val_predictions_detailed = []
+            self.model.eval()
+            with torch.no_grad():
+                for idx, data in enumerate(self.val_loader):
+                    output = self.model(data.x, data.edge_index, data.edge_attr, data.batch)
+                    pred = output.argmax(dim=1)
+                    probs = F.softmax(output, dim=1).cpu().numpy()[0]
+                    
+                    val_predictions_detailed.append({
+                        'dataset_index': int(self.val_indices[idx]),
+                        'true_label': int(data.y.argmin().item()),
+                        'predicted_label': int(pred.cpu().numpy()[0]),
+                        'true_label_name': self.class_names[data.y.argmin().item()],
+                        'predicted_label_name': self.class_names[pred.cpu().numpy()[0]],
+                        'is_correct': bool(pred.cpu().numpy()[0] == data.y.argmin().item()),
+                        'prediction_probs': {
+                            class_name: float(prob) 
+                            for class_name, prob in zip(self.class_names, probs)
+                        },
+                        'num_nodes': int(data.x.shape[0]),
+                        'num_edges': int(data.edge_index.shape[1]),
+                    })
+            
+            # 保存到文件
+            val_predictions_path = os.path.join(self.save_path, 'validation_predictions.json')
+            with open(val_predictions_path, 'w', encoding='utf-8') as f:
+                json.dump({
+                    'num_val_samples': len(val_predictions_detailed),
+                    'predictions': val_predictions_detailed,
+                }, f, indent=4, ensure_ascii=False)
+            
+            print(f"✓ 验证集预测结果已保存至: {val_predictions_path}")
+            
+            # 记录到wandb
+            val_pred_table = wandb.Table(columns=[
+                "Dataset_Index", "True_Label", "Predicted_Label", 
+                "Is_Correct", "Num_Nodes", "Num_Edges"
+            ])
+            for pred in val_predictions_detailed:
+                val_pred_table.add_data(
+                    pred['dataset_index'],
+                    pred['true_label_name'],
+                    pred['predicted_label_name'],
+                    pred['is_correct'],
+                    pred['num_nodes'],
+                    pred['num_edges']
+                )
+            wandb.log({"final/validation_predictions": val_pred_table})
+            
+            pred_artifact = wandb.Artifact('validation_predictions', type='predictions')
+            pred_artifact.add_file(val_predictions_path)
+            wandb.log_artifact(pred_artifact)
+            
+            print(f"✓ 验证集预测结果已记录到wandb")
             
             print("\n" + "="*60)
-            print("最终评估完成！所有图表已生成。")
+            print("finial evaluation completed! All charts generated.")
             print("="*60)
         else:
-            print(f"⚠ 警告: 未找到最佳模型检查点文件: {best_checkpoint_path}")
-            print("将使用最后一个epoch的结果生成分类报告...")
+            print(f"⚠ warning: best model checkpoint file not found: {best_checkpoint_path}")
+            print("using the results of the last epoch to generate the classification report...")
             self.save_classification_report(metrics['all_labels'], metrics['all_preds'])
 
         print("="*60 + "\n")
@@ -1204,8 +1482,15 @@ class Trainer:
         wandb.summary["best_macro_f1"] = max(self.train_history['val_macro_f1'])
         wandb.summary["best_weighted_f1"] = max(self.train_history['val_weighted_f1'])
         wandb.summary["best_roc_auc"] = max(self.train_history['val_roc_auc'])
+        wandb.summary["best_js_divergence"] = min(self.train_history['val_js_divergence'])
+        wandb.summary["best_cosine_similarity"] = max(self.train_history['val_cosine_similarity'])
+        wandb.summary["best_top3_distribution_match"] = max(self.train_history['val_top3_distribution_match'])
+        wandb.summary["best_brier_score"] = min(self.train_history['val_brier_score'])
+        wandb.summary["best_top3_accuracy"] = max(self.train_history['val_top3_accuracy'])
+        wandb.summary["best_adaptive_topk_distribution_match"] = max(self.train_history['val_adaptive_topk_distribution_match'])
+        wandb.summary["best_adaptive_topk_accuracy"] = max(self.train_history['val_adaptive_topk_accuracy'])
+        wandb.summary["best_avg_k_value"] = max(self.train_history['val_avg_k_value'])
 
-        # 上传生成的图表到 wandb
         print("\n正在上传图表到 wandb...")
         if os.path.exists(os.path.join(self.save_path, 'training_history.png')):
             wandb.log({"charts/training_history": wandb.Image(os.path.join(self.save_path, 'training_history.png'))})
@@ -1216,7 +1501,6 @@ class Trainer:
         if os.path.exists(os.path.join(self.save_path, 'roc_curves_final.png')):
             wandb.log({"charts/roc_curves_final": wandb.Image(os.path.join(self.save_path, 'roc_curves_final.png'))})
 
-        # 关闭 wandb
         wandb.finish()
         print("✓ wandb 日志已保存")
 
@@ -1245,7 +1529,7 @@ def main():
     parser.add_argument('--hidden_dim', type=int, default=64,
                         help='隐藏层维度 (默认: 64)')
     parser.add_argument('--num_classes', type=int, default=5,
-                        help='分类类别数 (默认: 8)')
+                        help='分类类别数！！！！')
     
     # 训练相关参数
     parser.add_argument('--epochs', type=int, default=100,
