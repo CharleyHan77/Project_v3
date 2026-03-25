@@ -157,7 +157,7 @@ class NNConv_Attention_Pooling(torch.nn.Module):################################
         )
         self.attention_pool = GlobalAttention(gate_nn)
         
-        # 分类
+        # 分类（fc：fully connected" 全连接）
         self.fc1 = torch.nn.Linear(hidden_dim, hidden_dim // 2)
         self.fc2 = torch.nn.Linear(hidden_dim // 2, num_classes)
         
@@ -469,7 +469,7 @@ class Transformer_Mean_Pooling(torch.nn.Module):
 MODEL_REGISTRY = {
     'NNConv_Mean_Pooling': NNConv_Mean_Pooling,
     'NNConv_Multi_Scale_Pooling': NNConv_Multi_Scale_Pooling,
-    'NNConv_Attention_Pooling': NNConv_Attention_Pooling,
+    'NNConv_Attention_Pooling': NNConv_Attention_Pooling,############
     "NNConv_Deep_Attention_Pooling": NNConv_Deep_Attention_Pooling,
     'NNConv_Set2Set_Pooling': NNConv_Set2Set_Pooling,
     "NNConv_SAG_Pooling": NNConv_SAG_Pooling,

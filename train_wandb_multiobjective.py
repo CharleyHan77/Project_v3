@@ -25,9 +25,9 @@ import seaborn as sns
 import wandb
 
 from model import get_model, MODEL_REGISTRY # 支持模型注册选择
-from dataset import Dataset
+from dataset_multiobjective import Dataset
 
-
+####################################################多目标
 """
 训练说明：
 - 任务类型：分类任务（选择最佳的初始化方法）
@@ -37,48 +37,48 @@ from dataset import Dataset
 - 评估指标：分类准确率
 """
 
-class FocalLoss(nn.Module):
-    """
-    Focal Loss: 专门设计用于处理类别极度不平衡的问题
-    论文: https://arxiv.org/abs/1708.02002
-    """
-    def __init__(self, alpha=None, gamma=2.0, reduction='mean'):
-        super(FocalLoss, self).__init__()
-        self.alpha = alpha  # 类别权重
-        self.gamma = gamma  # 聚焦参数（2-5之间，越大越关注难分类样本）
-        self.reduction = reduction
+# class FocalLoss(nn.Module):
+#     """
+#     Focal Loss: 专门设计用于处理类别极度不平衡的问题
+#     论文: https://arxiv.org/abs/1708.02002
+#     """
+#     def __init__(self, alpha=None, gamma=2.0, reduction='mean'):
+#         super(FocalLoss, self).__init__()
+#         self.alpha = alpha  # 类别权重
+#         self.gamma = gamma  # 聚焦参数（2-5之间，越大越关注难分类样本）
+#         self.reduction = reduction
     
-    def forward(self, log_probs, targets):
-        """
-        Args:
-            log_probs: [batch_size, num_classes] log概率（log_softmax输出）
-            targets: [batch_size] 类别索引
-        """
-        # 转换为概率
-        probs = torch.exp(log_probs)
+#     def forward(self, log_probs, targets):
+#         """
+#         Args:
+#             log_probs: [batch_size, num_classes] log概率（log_softmax输出）
+#             targets: [batch_size] 类别索引
+#         """
+#         # 转换为概率
+#         probs = torch.exp(log_probs)
         
-        # 获取目标类别的概率和log概率
-        targets = targets.view(-1)
-        pt = probs.gather(1, targets.view(-1, 1)).view(-1)  # 正确类别的概率
-        log_pt = log_probs.gather(1, targets.view(-1, 1)).view(-1)
+#         # 获取目标类别的概率和log概率
+#         targets = targets.view(-1)
+#         pt = probs.gather(1, targets.view(-1, 1)).view(-1)  # 正确类别的概率
+#         log_pt = log_probs.gather(1, targets.view(-1, 1)).view(-1)
         
-        # Focal weight: (1-pt)^gamma
-        # 难分类样本的pt小，focal_weight大，权重高
-        focal_weight = (1 - pt) ** self.gamma
+#         # Focal weight: (1-pt)^gamma
+#         # 难分类样本的pt小，focal_weight大，权重高
+#         focal_weight = (1 - pt) ** self.gamma
         
-        # 应用类别权重
-        if self.alpha is not None:
-            alpha_t = self.alpha.gather(0, targets)
-            focal_weight = alpha_t * focal_weight
+#         # 应用类别权重
+#         if self.alpha is not None:
+#             alpha_t = self.alpha.gather(0, targets)
+#             focal_weight = alpha_t * focal_weight
         
-        loss = -focal_weight * log_pt
+#         loss = -focal_weight * log_pt
         
-        if self.reduction == 'mean':
-            return loss.mean()
-        elif self.reduction == 'sum':
-            return loss.sum()
-        else:
-            return loss
+#         if self.reduction == 'mean':
+#             return loss.mean()
+#         elif self.reduction == 'sum':
+#             return loss.sum()
+#         else:
+#             return loss
 
 
 class Trainer:
@@ -96,7 +96,7 @@ class Trainer:
 
         # 初始化 wandb
         wandb.init(
-            project="Project_v3.1",  # 项目名称，可以自定义
+            project="Project_v3.1_multiobjective",  # 项目名称，可以自定义
             name=f"{args.model_name}_{timestamp}",  # 运行名称
             config={
                 "model_name": args.model_name,
@@ -123,9 +123,16 @@ class Trainer:
         # else:
         #     # 对于其他类别数，使用通用名称
         #     self.class_names = [f'class_{i}' for i in range(args.num_classes)]
-        
-        self.class_names = ['FIFO_SPT', 'MOPNR_SPT', 'MOPNR_EET', 'MWKR_SPT', 'MWKR_EET']
-
+        self.class_names = [
+            'FIFO_SPT', 
+            'FIFO_EET', 
+            'MOPNR_SPT', 
+            'MOPNR_EET', 
+            'LWKR_SPT', 
+            #'LWKR_EET', 
+            'MWKR_SPT',
+            #'MWKR_EET'
+            ]
         
         # 加载数据集
         print(f"正在加载数据集...")
@@ -752,7 +759,6 @@ class Trainer:
 
             temperature = 0.02  # 温度参数（使得分布更平滑）
             class_label = F.softmax(-data.y / temperature, dim=0).unsqueeze(0)
-            # class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
             loss = F.kl_div(output, class_label, reduction='batchmean')
 
             ############################ 分类/回归 标签转换 ############################
@@ -842,7 +848,6 @@ class Trainer:
                 ############原有软标签############
                 temperature = 0.02  # 温度参数（使得分布更平滑）
                 class_label = F.softmax(-data.y / temperature, dim=0).unsqueeze(0)
-                # class_label = F.softmax(-data.y, dim=0).unsqueeze(0)
 
                 loss = F.kl_div(output, class_label, reduction='batchmean')
                 ############原有软标签############
@@ -1530,7 +1535,7 @@ def main():
                         help='边特征维度 (默认: 2)')
     parser.add_argument('--hidden_dim', type=int, default=64,
                         help='隐藏层维度 (默认: 64)')
-    parser.add_argument('--num_classes', type=int, default=5,
+    parser.add_argument('--num_classes', type=int, default=6,
                         help='分类类别数！！！！')
     
     # 训练相关参数
